@@ -1,47 +1,55 @@
 package sse.Vectors;
+
 import java.io.Serializable;
 
 public class EdgePosition implements Comparable<EdgePosition>, Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1460328906527139022L;
-	private int position;
-	private int movedPosition;
-	
-	public EdgePosition(int pos) {
-		this.position = pos;
-		this.movedPosition = pos;
-	}
+    
+    private static final long serialVersionUID = 1460328906527139022L;
+    private long position;
+    private long movedPosition;
+    private long blockPosition;
 
-	public void setPosition(int position) {
-		this.position = position;
-		this.movedPosition = position;
-	}
+    public EdgePosition(int pos) {
+        this.position = pos;
+        this.movedPosition = pos;
+    }
 
-	public int getPosition() {
-		return position;
-	}
+    public void setPosition(int position) {
+        this.position = position;
+        this.movedPosition = position;
+    }
 
-	@Override
-	public int compareTo(EdgePosition o) {
-		if (o == null) {
-			throw new NullPointerException();
-		}
-		if (this.getPosition() == o.getPosition()) {
-			return 0;
-		} else if (this.getPosition() < o.getPosition()) {
-			return -1;
-		} else {
-			return 1;
-		}
-	}
+    public long getPosition() {
+        return position;
+    }
 
-	public void setMovedPosition(int movedPosition) {
-		this.movedPosition = movedPosition;
-	}
+    @Override
+    public int compareTo(EdgePosition o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        if (this.getPosition() == o.getPosition()) {
+            return 0;
+        } else if (this.getPosition() < o.getPosition()) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
 
-	public int getMovedPosition() {
-		return movedPosition;
-	}
+    public void setMovedPosition(long movedPosition) {
+        this.movedPosition = movedPosition;
+    }
+
+    public long getMovedPosition() {
+        return movedPosition;
+    }
+
+    public void setBlockPosition(long blockPosition) {
+        this.blockPosition = blockPosition;
+    }
+
+    public long getBlockPosition() {
+        return blockPosition;
+    }
 }

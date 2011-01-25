@@ -24,9 +24,12 @@ public class Main {
 
     public static void main(String[] args) {
         Options options = new Options();
-        options.addOption("i", true, "Defines the input file. Define either an input file or a string.");
-        options.addOption("o", true, "Defines the output file. \"default.vc\" if no file is given.");
-        options.addOption("s", true, "Defines the String used for input. Define either a string or an input file.");
+        options.addOption("i", true,
+                "Defines the input file. Define either an input file or a string.");
+        options.addOption("o", true,
+                "Defines the output file. \"default.vc\" if no file is given.");
+        options.addOption("s", true,
+                "Defines the String used for input. Define either a string or an input file.");
         options.addOption("e", false,
                 "Runs an evaluation of the generated file");
         options.addOption("m", false, "Generates the SuffixVectors in memory");
@@ -34,7 +37,6 @@ public class Main {
         options.addOption("help", false, "Prints this help message");
         options.addOption("v", false, "Verbose");
         CommandLineParser parser = new GnuParser();
-       
         // Define a series of variables to check command line options
         String outputFile = null;
         boolean evaluate = false;
@@ -104,7 +106,6 @@ public class Main {
             try {
                 ObjectInputStream o = new ObjectInputStream(
                         new FileInputStream("_vector.tmp"));
-                System.out.println(o.available());
                 Object obj = null;
                 while (!((obj = o.readObject()) instanceof String)) {
                     list.add((SuffixVector) obj);

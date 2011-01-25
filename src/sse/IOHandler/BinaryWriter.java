@@ -45,6 +45,10 @@ public class BinaryWriter {
                 case 1:
                     w.write((char) v.getDepth());
                     break;
+                default:
+                    throw new UnsupportedOperationException(
+                            Constants.VECTOR_DEPTH_BYTES
+                                    + " is not a valid number for vector depth");
             }
             for (Character c : v.getMap().keySet()) {
                 // write first char of edge
@@ -63,8 +67,11 @@ public class BinaryWriter {
                     case 1:
                         w.write((char) v.getMap().get(c).getMovedPosition());
                         break;
+                    default:
+                        throw new UnsupportedOperationException(
+                                Constants.EDGE_REFERENCE_BYTES
+                                        + " is not a valid number for edge reference");
                 }
-                
             }
             w.write(Constants.VECTOR_MARKER);
         }

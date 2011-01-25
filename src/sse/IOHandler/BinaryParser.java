@@ -48,6 +48,10 @@ public class BinaryParser {
                         case 1:
                             depthValue = (long) stream.readChar();
                             break;
+                        default:
+                            throw new UnsupportedOperationException(
+                                    Constants.VECTOR_DEPTH_BYTES
+                                            + " is not a valid number for vector depth");
                     }
                     b.append(depthValue);
                     // read char representing edge
@@ -69,6 +73,10 @@ public class BinaryParser {
                             case 1:
                                 edgeValue = (long) stream.readChar();
                                 break;
+                            default:
+                                throw new UnsupportedOperationException(
+                                        Constants.EDGE_REFERENCE_BYTES
+                                                + " is not a valid number for edge reference");
                         }
                         long curPos = stream.getFilePointer();
                         stream.seek(edgeValue);
