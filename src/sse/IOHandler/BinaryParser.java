@@ -34,14 +34,42 @@ public class BinaryParser {
                 if (foo == Constants.VECTOR_MARKER) {
                     b.append(foo);
                     // read depth of the node
-                    long depthValue = stream.readLong();
+                    long depthValue = 0;
+                    switch (Constants.VECTOR_DEPTH_BYTES) {
+                        case 8:
+                            depthValue = stream.readLong();
+                            break;
+                        case 4:
+                            depthValue = (long) stream.readInt();
+                            break;
+                        case 2:
+                            depthValue = (long) stream.readShort();
+                            break;
+                        case 1:
+                            depthValue = (long) stream.readChar();
+                            break;
+                    }
                     b.append(depthValue);
                     // read char representing edge
                     foo = (char) stream.readByte();
                     b.append(foo);
                     while (foo != Constants.VECTOR_MARKER) {
                         // read reference to position in text
-                        long edgeValue = stream.readLong();
+                        long edgeValue = 0;
+                        switch (Constants.EDGE_REFERENCE_BYTES) {
+                            case 8:
+                                edgeValue = stream.readLong();
+                                break;
+                            case 4:
+                                edgeValue = (long) stream.readInt();
+                                break;
+                            case 2:
+                                edgeValue = (long) stream.readShort();
+                                break;
+                            case 1:
+                                edgeValue = (long) stream.readChar();
+                                break;
+                        }
                         long curPos = stream.getFilePointer();
                         stream.seek(edgeValue);
                         System.out

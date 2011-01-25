@@ -25,7 +25,7 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
         // 8 bytes for depth keySet().size bytes for each character, each edge
         // has 8 bytes for the reference number
         // two bytes for each '#'
-        return Constants.VECTOR_DEPTH_BYTES  + map.keySet().size() + map.keySet().size() * Constants.VECTOR_DEPTH_BYTES + 2;
+        return Constants.VECTOR_DEPTH_BYTES  + map.keySet().size() + map.keySet().size() * Constants.EDGE_REFERENCE_BYTES + 2;
     }
 
  
