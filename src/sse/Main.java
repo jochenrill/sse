@@ -37,10 +37,12 @@ public class Main {
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
+		options.addOption("b", false, "Split in blocks. Default turned off");
 		CommandLineParser parser = new GnuParser();
 		// Define a series of variables to check command line options
 		String outputFile = null;
 		boolean evaluate = false;
+		boolean blocks = false;
 		String input = null;
 		boolean inMemory = false;
 		boolean verbose = false;
@@ -60,6 +62,9 @@ public class Main {
 				outputFile = cmd.getOptionValue("o");
 			} else {
 				outputFile = "default.vc";
+			}
+			if (cmd.hasOption("b")) {
+				blocks = true;
 			}
 			if (cmd.hasOption("e")) {
 				evaluate = true;
@@ -162,7 +167,11 @@ public class Main {
 		}
 		time = System.currentTimeMillis();
 		BinaryWriter out = new BinaryWriter(outputFile, input);
-		out.writeAll(list, ep);
+		if (!blocks) {
+			out.writeAll(list, ep);
+		} else {
+			out.writeBlocks(list, ep);
+		}
 		if (verbose) {
 			System.out.println("Excecution time for output: "
 					+ ((System.currentTimeMillis() - time) / 1000));
@@ -173,7 +182,11 @@ public class Main {
 		}
 		if (evaluate) {
 			BinaryParser p = new BinaryParser(outputFile);
-			p.getText();
+			if (!blocks) {
+				System.out.println(p.getText());
+			} else {
+				System.out.println(p.getTextWithBlocks());
+			}
 		}
 	}
 }

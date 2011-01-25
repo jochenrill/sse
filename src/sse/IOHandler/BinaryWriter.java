@@ -106,6 +106,11 @@ public class BinaryWriter {
 			w.write(input.charAt(pos));
 		}
 		w.close();
+		
+		
+		// Encrypt
+		SecurityEngine.encrypt(fileName,"key");
+		SecurityEngine.decrypt(fileName, "key");
 	}
 
 	private void updateBlockPosition(ArrayList<SuffixVector> list,
@@ -205,7 +210,7 @@ public class BinaryWriter {
 				* Constants.EDGE_REFERENCE_BYTES + alphabetSize
 				* Constants.BLOCK_REFERENCE_BYTES
 				+ Constants.VECTOR_DEPTH_BYTES;
-		long blockSize = maximumVectorSize * 2;
+		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 
 		updateBlockPosition(list, ep, blockSize);
 		// Start printing the blocks
@@ -347,7 +352,7 @@ public class BinaryWriter {
 
 		// open writer for meta information file
 		try {
-			w = new BinaryOut(fileName);
+			w = new BinaryOut(fileName, true);
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
@@ -368,7 +373,7 @@ public class BinaryWriter {
 
 	private void fillWithData(long bytesInBlock, long blockSize) {
 		while (bytesInBlock < blockSize) {
-			w.write((byte) 0);
+			w.write((byte) Constants.PADDING_BYTE);
 			bytesInBlock++;
 		}
 	}

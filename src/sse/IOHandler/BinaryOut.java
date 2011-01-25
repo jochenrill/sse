@@ -61,6 +61,11 @@ public final class BinaryOut {
             out = new BufferedOutputStream(os);
        
     }
+    
+    public BinaryOut(String s, boolean append) throws IOException {
+    	 OutputStream os = new FileOutputStream(s, append);
+         out = new BufferedOutputStream(os);
+    }
 
    /**
      * Create a binary output stream from a Socket.
