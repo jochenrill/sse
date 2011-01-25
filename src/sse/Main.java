@@ -165,7 +165,7 @@ public class Main {
                     + ((System.currentTimeMillis() - generalTime) / 1000));
         }
         if (evaluate) {
-            BinaryParser p = new BinaryParser("test.vc");
+            BinaryParser p = new BinaryParser(outputFile);
             p.getText();
         }
     }

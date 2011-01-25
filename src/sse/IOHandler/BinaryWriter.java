@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import sse.Vectors.Constants;
 import sse.Vectors.EdgePosition;
 import sse.Vectors.SuffixVector;
 
@@ -33,16 +34,16 @@ public class BinaryWriter {
 				}
 			}
 			// write vector itself
-			w.write('#');
+			w.write(Constants.VECTOR_MARKER);
 			w.write((long) v.getDepth());
-			w.write(',');
+			
 			for (Character c : v.getMap().keySet()) {
 				// write first char of edge
 				w.write(c);
 				// write bytesequence for representing the edge
 				w.write((long) v.getMap().get(c).getMovedPosition());
 			}
-			w.write('#');
+			w.write(Constants.VECTOR_MARKER);
 		}
 		// write the rest
 		for (; pos < input.length(); pos++) {
