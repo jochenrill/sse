@@ -2,7 +2,7 @@ package sse.Vectors;
 
 
 /**
- * Utility class to manage the diffrent representations of the vector and its components.
+ * Utility class to manage the different representations of the vector and its components.
  * @author Jochen Rill
  *
  */
