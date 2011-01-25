@@ -30,4 +30,8 @@ public class Constants {
      * Must be either 8, 4, 2 or 1.
      */
     public static final short BLOCK_REFERENCE_BYTES = 8;
+    /**
+     * Represents the number of times the maximum vector size will be taken to get the block size
+     */
+    public static final short VECTOR_SIZE_MULTI = 2;
 }

@@ -3,17 +3,12 @@ import java.util.Collection;
 import java.util.Hashtable;
 
 public class Node {
-    // private LinkedList<Edge> edges;
     private Hashtable<Character, Edge> edges;
-    // private LinkedList<Node> parents;
     private Node suffixLink;
     private int length;
-    // private int depth;
     private long id;
-    // private LinkedList<Integer> locations;
     private int location = -1;
     public boolean visited = false;
-   // private SuffixVector vector;
     private boolean hasVector = false;
 
     public int getLocation() {
@@ -53,7 +48,8 @@ public class Node {
         // locations = new LinkedList<Integer>();
     }
 
-    public Node duplicateLazy(long nodeCount) {
+    @SuppressWarnings("unchecked")
+	public Node duplicateLazy(long nodeCount) {
         Node d = new Node(nodeCount);
         d.edges = (Hashtable<Character, Edge>) this.edges.clone();
         d.suffixLink = this.suffixLink;

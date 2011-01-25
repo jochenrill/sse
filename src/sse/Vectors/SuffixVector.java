@@ -1,6 +1,5 @@
 package sse.Vectors;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 public class SuffixVector implements Comparable<SuffixVector>, Serializable {
@@ -11,6 +10,7 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 	private int location;
     private int depth;
     private Hashtable<Character, EdgePosition> map;
+    private long blockPosition = 0;
 
     public SuffixVector(int loc) {
         this.location = loc;
@@ -25,9 +25,10 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
         // 8 bytes for depth keySet().size bytes for each character, each edge
         // has 8 bytes for the reference number
         // two bytes for each '#'
-        return Constants.VECTOR_DEPTH_BYTES  + map.keySet().size() + map.keySet().size() * Constants.EDGE_REFERENCE_BYTES + 2;
+        return Constants.VECTOR_DEPTH_BYTES  + map.keySet().size() + map.keySet().size() * Constants.EDGE_REFERENCE_BYTES + 2 + map.keySet().size() * Constants.BLOCK_REFERENCE_BYTES;
     }
 
+    
  
 
     public void setLocation(int location) {
@@ -67,4 +68,12 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
             return 1;
         }
     }
+
+	public void setBlockPosition(long blockPosition) {
+		this.blockPosition = blockPosition;
+	}
+
+	public long getBlockPosition() {
+		return blockPosition;
+	}
 }
