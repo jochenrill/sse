@@ -110,7 +110,9 @@ public class Main {
             InMemoryVG generator = new InMemoryVG(t);
             list = generator.getListOfVectors();
             ep = generator.getListOfEdges();
+            generator = null;
             t = null;
+            System.gc();
         } else {
             OutOfMemoryVG generator = new OutOfMemoryVG(t);
             File vectorFile = new File("_vector.tmp");
@@ -120,6 +122,9 @@ public class Main {
                 e.printStackTrace();
             }
             t = null;
+            
+            generator = null;
+            System.gc();
             try {
                 ObjectInputStream o = new ObjectInputStream(
                         new FileInputStream("_vector.tmp"));
