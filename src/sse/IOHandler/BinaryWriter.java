@@ -1,5 +1,6 @@
 package sse.IOHandler;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -124,18 +125,15 @@ public class BinaryWriter {
 
 					if ((bytesInCurrentBlock + 1) > blockSize) {
 
-						
-							while (e != null && e.getPosition() < pos) {
-								e.setBlockPosition(currentBlock);
-								e.setMovedPosition(e.getMovedPosition()
-										+ padding);
-								if (iterator.hasNext()) {
-									e = iterator.next();
-								} else {
-									e = null;
-								}
+						while (e != null && e.getPosition() < pos) {
+							e.setBlockPosition(currentBlock);
+							e.setMovedPosition(e.getMovedPosition() + padding);
+							if (iterator.hasNext()) {
+								e = iterator.next();
+							} else {
+								e = null;
 							}
-						
+						}
 
 						padding += blockSize - bytesInCurrentBlock;
 						currentBlock++;
@@ -350,6 +348,8 @@ public class BinaryWriter {
 		// encrypt the last block
 		if (encrypt) {
 			secEngine.encrypt(fileName + (currentBlock));
+			// remove the unencryted file
+			new File(fileName + (currentBlock)).delete();
 		}
 		secEngine.printKey("key");
 		w.write(currentBlock);
@@ -361,6 +361,9 @@ public class BinaryWriter {
 		// Encrypt the last block if needed
 		if (encrypt) {
 			secEngine.encrypt(fileName + (currentBlock - 1));
+			// remove the unencryted file
+			new File(fileName + (currentBlock - 1)).delete();
+
 		}
 		try {
 			w = new BinaryOut(fileName + currentBlock);

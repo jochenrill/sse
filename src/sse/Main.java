@@ -37,12 +37,10 @@ public class Main {
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
-		options.addOption(
-				"b",
-				false,
-				"Use when you want to use blocks. Used in evaluation and create mode. Default off.");
+		options.addOption("b", false,
+				"Turns off block usage. Used in evaluation and create mode. Default on.");
 		options.addOption("enc", false,
-				"Turns on block encryption. Default off.");
+				"Turns off block encryption. Default on.");
 		options.addOption("search", false, "Turns on search mode");
 		options.addOption("key", true, "Path to the key file for encryption");
 		options.addOption("create", false, "Turns on creation mode");
@@ -64,8 +62,7 @@ public class Main {
 									cmd.getOptionValue("i"), true));
 						} else {
 							SearchEngine sEn = new SearchEngine(
-									cmd.getOptionValue("text"),
-									cmd.getOptionValue("key"));
+									cmd.getOptionValue("text"));
 							System.out.println(sEn.find(
 									cmd.getOptionValue("i"), false));
 						}
@@ -79,7 +76,7 @@ public class Main {
 
 				if (cmd.hasOption("i")) {
 					BinaryParser p = new BinaryParser(cmd.getOptionValue("i"));
-					if (!cmd.hasOption("b")) {
+					if (cmd.hasOption("b")) {
 						System.out.println(p.getText());
 					} else {
 						System.out.println(p.getTextWithBlocks());
@@ -196,10 +193,10 @@ public class Main {
 				}
 				time = System.currentTimeMillis();
 				BinaryWriter out = new BinaryWriter(outputFile, input);
-				if (!cmd.hasOption("b")) {
+				if (cmd.hasOption("b")) {
 					out.writeAll(list, ep);
 				} else {
-					out.writeBlocks(list, ep, cmd.hasOption("enc"));
+					out.writeBlocks(list, ep, !cmd.hasOption("enc"));
 				}
 				if (cmd.hasOption("v")) {
 					System.out.println("Excecution time for output: "

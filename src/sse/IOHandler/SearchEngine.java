@@ -33,10 +33,15 @@ public class SearchEngine {
 
 	}
 
-	private void openNextFile(long block, String fileName, long position)
-			throws IOException {
+	private void openNextFile(long block, String fileName, long position,
+			long oldBlock) throws IOException {
 		stream.close();
+
 		if (decrypt) {
+			File delete = new File(fileName + oldBlock + ".dec");
+			if (delete.exists()) {
+				delete.delete();
+			}
 			sEn.decrypt(fileName + block);
 			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
 					"r");
@@ -46,6 +51,10 @@ public class SearchEngine {
 			stream.seek(position);
 		}
 
+	}
+
+	private void deleteCurrentFile(long block, String fileName) {
+		new File(fileName + block + ".dec").delete();
 	}
 
 	public boolean find(String startFile, boolean decrypt) {
@@ -64,7 +73,7 @@ public class SearchEngine {
 		}
 
 		try {
-			openNextFile(++currentBlock, startFile, 0);
+			openNextFile(++currentBlock, startFile, 0, currentBlock - 1);
 			// while (currentBlock < numberOfBlocks && word.length() != 0) {
 			long lastDepth = 0;
 
@@ -156,7 +165,9 @@ public class SearchEngine {
 							 * openNextFile(blockValue, startFile, edgeValue -
 							 * (currentBlock - 1) * blockSize);
 							 */
-							openNextFile(blockToOpen, startFile, position);
+
+							openNextFile(blockToOpen, startFile, position,
+									currentBlock);
 
 							/*
 							 * } else { openNextFile(blockValue, startFile,
@@ -181,7 +192,7 @@ public class SearchEngine {
 					// Ignore padding bytes
 					if (value == Constants.PADDING_BYTE) {
 						// Block done, move to next block
-						openNextFile(++currentBlock, startFile, 0);
+						openNextFile(++currentBlock, startFile, 0, currentBlock);
 
 					} else if (foo == word.charAt(0)) {
 						word = word.substring(1, word.length());
