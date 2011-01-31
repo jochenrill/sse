@@ -121,16 +121,22 @@ public class BinaryWriter {
 			// write sequence before the vector
 			if (v.getLocation() != 0) {
 				for (; pos < v.getLocation(); pos++) {
+
 					if ((bytesInCurrentBlock + 1) > blockSize) {
-						while (e != null && e.getPosition() <= pos) {
-							e.setBlockPosition(currentBlock);
-							e.setMovedPosition(e.getMovedPosition() + padding);
-							if (iterator.hasNext()) {
-								e = iterator.next();
-							} else {
-								e = null;
+
+						
+							while (e != null && e.getPosition() < pos) {
+								e.setBlockPosition(currentBlock);
+								e.setMovedPosition(e.getMovedPosition()
+										+ padding);
+								if (iterator.hasNext()) {
+									e = iterator.next();
+								} else {
+									e = null;
+								}
 							}
-						}
+						
+
 						padding += blockSize - bytesInCurrentBlock;
 						currentBlock++;
 						bytesInCurrentBlock = 0;
@@ -140,7 +146,7 @@ public class BinaryWriter {
 			}
 			// make sure that the vector fits in the blocksize
 			if ((bytesInCurrentBlock + v.getSize()) > blockSize) {
-				while (e != null && e.getPosition() <= pos) {
+				while (e != null && e.getPosition() < pos) {
 					e.setBlockPosition(currentBlock);
 					e.setMovedPosition(e.getMovedPosition() + padding);
 					if (iterator.hasNext()) {
@@ -160,7 +166,7 @@ public class BinaryWriter {
 		// write the rest (from end of last suffix vector to end of string)
 		for (; pos < input.length(); pos++) {
 			if ((bytesInCurrentBlock + 1) > blockSize) {
-				while (e != null && e.getPosition() <= pos) {
+				while (e != null && e.getPosition() < pos) {
 					e.setBlockPosition(currentBlock);
 					e.setMovedPosition(e.getMovedPosition() + padding);
 					if (iterator.hasNext()) {

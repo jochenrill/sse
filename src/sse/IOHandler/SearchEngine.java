@@ -65,117 +65,139 @@ public class SearchEngine {
 
 		try {
 			openNextFile(++currentBlock, startFile, 0);
-			while (currentBlock < numberOfBlocks || word.length() != 0) {
-				long lastDepth = 0;
+			// while (currentBlock < numberOfBlocks && word.length() != 0) {
+			long lastDepth = 0;
 
-				long bytesInBlock = 0;
+			while (stream.getFilePointer() < stream.length()
+					&& word.length() != 0) {
+				int value = stream.readByte();
 
-				while (stream.getFilePointer() < stream.length()) {
-					int value = stream.readByte();
-					bytesInBlock++;
-					char foo = (char) value;
-					// parse suffix vector
-					if (foo == Constants.VECTOR_MARKER) {
+				char foo = (char) value;
+				// parse suffix vector
+				if (foo == Constants.VECTOR_MARKER) {
 
-						// read depth of the node
-						long depthValue = 0;
-						switch (Constants.VECTOR_DEPTH_BYTES) {
+					// read depth of the node
+					long depthValue = 0;
+					switch (Constants.VECTOR_DEPTH_BYTES) {
+					case 8:
+						depthValue = stream.readLong();
+
+						break;
+					case 4:
+						depthValue = (long) stream.readInt();
+						break;
+					case 2:
+						depthValue = (long) stream.readShort();
+						break;
+					case 1:
+						depthValue = (long) stream.readChar();
+						break;
+					default:
+						throw new UnsupportedOperationException(
+								Constants.VECTOR_DEPTH_BYTES
+										+ " is not a valid number for vector depth");
+					}
+					lastDepth = depthValue;
+
+					// read char representing edge
+					foo = (char) stream.readByte();
+
+					while (foo != Constants.VECTOR_MARKER) {
+						// read reference to position in text
+						long edgeValue = 0;
+						switch (Constants.EDGE_REFERENCE_BYTES) {
 						case 8:
-							depthValue = stream.readLong();
-
+							edgeValue = stream.readLong();
 							break;
 						case 4:
-							depthValue = (long) stream.readInt();
+							edgeValue = (long) stream.readInt();
 							break;
 						case 2:
-							depthValue = (long) stream.readShort();
+							edgeValue = (long) stream.readShort();
 							break;
 						case 1:
-							depthValue = (long) stream.readChar();
+							edgeValue = (long) stream.readChar();
 							break;
 						default:
 							throw new UnsupportedOperationException(
-									Constants.VECTOR_DEPTH_BYTES
-											+ " is not a valid number for vector depth");
+									Constants.EDGE_REFERENCE_BYTES
+											+ " is not a valid number for edge reference");
 						}
-						lastDepth = depthValue;
 
-						// read char representing edge
+						// Save the block we want to jump to
+						long blockValue = 0;
+						switch (Constants.BLOCK_REFERENCE_BYTES) {
+						case 8:
+							blockValue = stream.readLong();
+							break;
+						case 4:
+							blockValue = (long) stream.readInt();
+							break;
+						case 2:
+							blockValue = (long) stream.readShort();
+							break;
+						case 1:
+							blockValue = (long) stream.readChar();
+							break;
+						default:
+							throw new UnsupportedOperationException(
+									Constants.EDGE_REFERENCE_BYTES
+											+ " is not a valid number for edge reference");
+						}
+						if (foo == word.charAt(0)) {
+
+							// Jump to the block at the given position
+							// if (blockValue - currentBlock == 0) {
+							// we are staying in the current block
+							long blockToOpen = (edgeValue / blockSize) + 1;
+							long position = edgeValue
+									% ((blockToOpen - 1) * blockSize);
+							/*
+							 * openNextFile(blockValue, startFile, edgeValue -
+							 * (currentBlock - 1) * blockSize);
+							 */
+							openNextFile(blockToOpen, startFile, position);
+
+							/*
+							 * } else { openNextFile(blockValue, startFile,
+							 * edgeValue - (blockValue - currentBlock)
+							 * blockSize);
+							 * 
+							 * }
+							 */
+							// currentBlock = blockValue;
+							currentBlock = blockToOpen;
+
+							break;
+
+						}
+						// read next char representing edge
 						foo = (char) stream.readByte();
 
-						while (foo != Constants.VECTOR_MARKER) {
-							// read reference to position in text
-							long edgeValue = 0;
-							switch (Constants.EDGE_REFERENCE_BYTES) {
-							case 8:
-								edgeValue = stream.readLong();
-								break;
-							case 4:
-								edgeValue = (long) stream.readInt();
-								break;
-							case 2:
-								edgeValue = (long) stream.readShort();
-								break;
-							case 1:
-								edgeValue = (long) stream.readChar();
-								break;
-							default:
-								throw new UnsupportedOperationException(
-										Constants.EDGE_REFERENCE_BYTES
-												+ " is not a valid number for edge reference");
-							}
-							long curPos = stream.getFilePointer();
-							// Save the block we want to jump to
-							long blockValue = 0;
-							switch (Constants.BLOCK_REFERENCE_BYTES) {
-							case 8:
-								blockValue = stream.readLong();
-								break;
-							case 4:
-								blockValue = (long) stream.readInt();
-								break;
-							case 2:
-								blockValue = (long) stream.readShort();
-								break;
-							case 1:
-								blockValue = (long) stream.readChar();
-								break;
-							default:
-								throw new UnsupportedOperationException(
-										Constants.EDGE_REFERENCE_BYTES
-												+ " is not a valid number for edge reference");
-							}
-							if (foo == word.charAt(0)) {
-
-								// Jump to the block at the given position
-								currentBlock = blockValue;
-
-								openNextFile(blockValue, startFile, edgeValue
-										- (blockValue - currentBlock)
-										* blockSize);
-
-								break;
-							}
-							// read next char representing edge
-							foo = (char) stream.readByte();
-
-						}
-
-					} else {
-
-						// Ignore padding bytes
-						if (value != Constants.PADDING_BYTE
-								&& foo == word.charAt(0)) {
-							word = word.substring(1, word.length() - 1);
-						}
 					}
 
+				} else {
+
+					// Ignore padding bytes
+					if (value == Constants.PADDING_BYTE) {
+						// Block done, move to next block
+						openNextFile(++currentBlock, startFile, 0);
+
+					} else if (foo == word.charAt(0)) {
+						word = word.substring(1, word.length());
+					} else {
+						return false;
+					}
 				}
+
+				// }
+
 			}
 
 		} catch (IOException e) {
 			System.out.println("Error while parsing block " + currentBlock);
 		}
-		return false;
+
+		return (word.length() == 0);
 	}
 }
