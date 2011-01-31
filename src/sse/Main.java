@@ -14,6 +14,7 @@ import org.apache.commons.cli.*;
 import sse.Graph.CDWAG;
 import sse.IOHandler.BinaryParser;
 import sse.IOHandler.BinaryWriter;
+import sse.IOHandler.SearchEngine;
 import sse.Vectors.Constants;
 import sse.Vectors.EdgePosition;
 import sse.Vectors.InMemoryVG;
@@ -199,5 +200,7 @@ public class Main {
                 System.out.println(p.getTextWithBlocks());
             }
         }
+        SearchEngine search = new SearchEngine("san","key");
+        search.find("default.vc", true);
     }
 }
