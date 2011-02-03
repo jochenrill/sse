@@ -2,6 +2,7 @@ package sse.IOHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -203,11 +204,13 @@ public class BinaryWriter {
 		short alphabetSize = 0;
 		boolean[] included = new boolean[255];
 		for (int i = 0; i < input.length(); i++) {
+			//System.out.println(input.charAt(i)+": " +(int)input.charAt(i));
 			if (!included[(char) input.charAt(i)]) {
 				included[(char) input.charAt(i)] = true;
 				alphabetSize++;
 			}
 		}
+		
 		// maximum vector size in bytes
 		long maximumVectorSize = 2 + alphabetSize + alphabetSize
 				* Constants.EDGE_REFERENCE_BYTES + alphabetSize

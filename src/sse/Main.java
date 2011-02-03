@@ -87,13 +87,22 @@ public class Main {
 
 			} else if (cmd.hasOption("create")) {
 
-				String input = null;
+				String input = "";
 				String outputFile = null;
 				if (cmd.hasOption("i")) {
 					File inputFile = new File(cmd.getOptionValue("i"));
+					FileReader fr = new FileReader(inputFile);
+
 					BufferedReader r = new BufferedReader(new FileReader(
 							inputFile));
-					input = r.readLine();
+					int tmp = 0;
+					
+					while ((tmp = r.read()) != -1) {
+						if(tmp > 128){
+							throw new UnsupportedOperationException("Only ASCII characters are supported");
+						}
+						input += (char)tmp;
+					}
 
 				} else if (cmd.hasOption("s")) {
 					input = cmd.getOptionValue("s");
@@ -110,6 +119,7 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				CDWAG t = new CDWAG(input);
+
 				if (cmd.hasOption("v")) {
 					System.out
 							.println("Excecution time for generating the graph: "

@@ -14,6 +14,8 @@ public class SearchEngine {
 	private long currentBlock;
 	private SecurityEngine sEn;
 	private boolean decrypt;
+	private long lastEdgeValue = 0;
+	private long lastDepthValue = 0;
 
 	public SearchEngine(String word) {
 
@@ -53,10 +55,6 @@ public class SearchEngine {
 
 	}
 
-	private void deleteCurrentFile(long block, String fileName) {
-		new File(fileName + block + ".dec").delete();
-	}
-
 	public boolean find(String startFile, boolean decrypt) {
 
 		long blockSize = 0;
@@ -75,12 +73,12 @@ public class SearchEngine {
 		try {
 			openNextFile(++currentBlock, startFile, 0, currentBlock - 1);
 			// while (currentBlock < numberOfBlocks && word.length() != 0) {
-			long lastDepth = 0;
+			
 
 			while (stream.getFilePointer() < stream.length()
 					&& word.length() != 0) {
 				int value = stream.readByte();
-
+				boolean jumpOver = false;
 				char foo = (char) value;
 				// parse suffix vector
 				if (foo == Constants.VECTOR_MARKER) {
@@ -106,8 +104,15 @@ public class SearchEngine {
 								Constants.VECTOR_DEPTH_BYTES
 										+ " is not a valid number for vector depth");
 					}
-					lastDepth = depthValue;
-
+				
+				/*	if(lastDepthValue != 0 || lastEdgeValue != 0){
+						if(lastEdgeValue - lastDepthValue <= (currentBlock -1) *blockSize + stream.getFilePointer() - depthValue){
+							jumpOver = true;
+						} else {
+							jumpOver= false;
+						}
+					}*/
+					lastDepthValue = depthValue;
 					// read char representing edge
 					foo = (char) stream.readByte();
 
@@ -153,7 +158,7 @@ public class SearchEngine {
 									Constants.EDGE_REFERENCE_BYTES
 											+ " is not a valid number for edge reference");
 						}
-						if (foo == word.charAt(0)) {
+						if (!jumpOver && foo == word.charAt(0)) {
 
 							// Jump to the block at the given position
 							// if (blockValue - currentBlock == 0) {
@@ -161,6 +166,7 @@ public class SearchEngine {
 							long blockToOpen = (edgeValue / blockSize) + 1;
 							long position = edgeValue
 									% ((blockToOpen - 1) * blockSize);
+							lastEdgeValue = edgeValue;
 							/*
 							 * openNextFile(blockValue, startFile, edgeValue -
 							 * (currentBlock - 1) * blockSize);
