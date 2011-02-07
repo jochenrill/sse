@@ -71,9 +71,8 @@ public class SearchEngine {
 		}
 
 		try {
-			openNextFile(++currentBlock, startFile, 0, currentBlock - 1);
-			// while (currentBlock < numberOfBlocks && word.length() != 0) {
-			
+			long toDelete = currentBlock;
+			openNextFile(++currentBlock, startFile, 0, toDelete);
 
 			while (stream.getFilePointer() < stream.length()
 					&& word.length() != 0) {
@@ -104,14 +103,34 @@ public class SearchEngine {
 								Constants.VECTOR_DEPTH_BYTES
 										+ " is not a valid number for vector depth");
 					}
-				
-				/*	if(lastDepthValue != 0 || lastEdgeValue != 0){
-						if(lastEdgeValue - lastDepthValue <= (currentBlock -1) *blockSize + stream.getFilePointer() - depthValue){
+					long originalVectorPosition = 0;
+					switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
+					case 8:
+						originalVectorPosition = stream.readLong();
+						break;
+					case 4:
+						originalVectorPosition = (long) stream.readInt();
+						break;
+					case 2:
+						originalVectorPosition = (long) stream.readShort();
+						break;
+					case 1:
+						originalVectorPosition = (long) stream.readChar();
+						break;
+					default:
+						throw new UnsupportedOperationException(
+								Constants.EDGE_REFERENCE_BYTES
+										+ " is not a valid number for edge reference");
+					}
+
+					if (lastDepthValue != 0 || lastEdgeValue != 0) {
+						if (lastEdgeValue - lastDepthValue < originalVectorPosition
+								- depthValue) {
 							jumpOver = true;
 						} else {
-							jumpOver= false;
+							jumpOver = false;
 						}
-					}*/
+					}
 					lastDepthValue = depthValue;
 					// read char representing edge
 					foo = (char) stream.readByte();
@@ -139,19 +158,19 @@ public class SearchEngine {
 						}
 
 						// Save the block we want to jump to
-						long blockValue = 0;
-						switch (Constants.BLOCK_REFERENCE_BYTES) {
+						long originalEdgePosition = 0;
+						switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
 						case 8:
-							blockValue = stream.readLong();
+							originalEdgePosition = stream.readLong();
 							break;
 						case 4:
-							blockValue = (long) stream.readInt();
+							originalEdgePosition = (long) stream.readInt();
 							break;
 						case 2:
-							blockValue = (long) stream.readShort();
+							originalEdgePosition = (long) stream.readShort();
 							break;
 						case 1:
-							blockValue = (long) stream.readChar();
+							originalEdgePosition = (long) stream.readChar();
 							break;
 						default:
 							throw new UnsupportedOperationException(
@@ -166,23 +185,11 @@ public class SearchEngine {
 							long blockToOpen = (edgeValue / blockSize) + 1;
 							long position = edgeValue
 									% ((blockToOpen - 1) * blockSize);
-							lastEdgeValue = edgeValue;
-							/*
-							 * openNextFile(blockValue, startFile, edgeValue -
-							 * (currentBlock - 1) * blockSize);
-							 */
+							lastEdgeValue = originalEdgePosition;
 
 							openNextFile(blockToOpen, startFile, position,
 									currentBlock);
 
-							/*
-							 * } else { openNextFile(blockValue, startFile,
-							 * edgeValue - (blockValue - currentBlock)
-							 * blockSize);
-							 * 
-							 * }
-							 */
-							// currentBlock = blockValue;
 							currentBlock = blockToOpen;
 
 							break;
@@ -198,7 +205,8 @@ public class SearchEngine {
 					// Ignore padding bytes
 					if (value == Constants.PADDING_BYTE) {
 						// Block done, move to next block
-						openNextFile(++currentBlock, startFile, 0, currentBlock);
+						toDelete = currentBlock;
+						openNextFile(++currentBlock, startFile, 0, toDelete);
 
 					} else if (foo == word.charAt(0)) {
 						word = word.substring(1, word.length());
@@ -207,7 +215,13 @@ public class SearchEngine {
 					}
 				}
 
-				// }
+				// Make sure that we open the next block if the last byte in a
+				// block is indeed a character
+				if (!(stream.getFilePointer() < stream.length())
+						&& currentBlock < numberOfBlocks) {
+					toDelete = currentBlock;
+					openNextFile(++currentBlock, startFile, 0, toDelete);
+				}
 
 			}
 
@@ -215,6 +229,11 @@ public class SearchEngine {
 			System.out.println("Error while parsing block " + currentBlock);
 		}
 
+		// Make sure to delete the last opened block
+		File delete = new File(startFile + currentBlock + ".dec");
+		if (delete.exists()) {
+			delete.delete();
+		}
 		return (word.length() == 0);
 	}
 }

@@ -56,6 +56,24 @@ public class BinaryWriter {
 						Constants.VECTOR_DEPTH_BYTES
 								+ " is not a valid number for vector depth");
 			}
+			switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
+			case 8:
+				w.write((long) v.getLocation());
+				break;
+			case 4:
+				w.write((int) v.getLocation());
+				break;
+			case 2:
+				w.write((short) v.getLocation());
+				break;
+			case 1:
+				w.write((char) v.getLocation());
+				break;
+			default:
+				throw new UnsupportedOperationException(
+						Constants.VECTOR_DEPTH_BYTES
+								+ " is not a valid number for vector depth");
+			}
 			for (Character c : v.getMap().keySet()) {
 				// write first char of edge
 				w.write(c);
@@ -80,7 +98,7 @@ public class BinaryWriter {
 				}
 				// write bytesequence for representing the block the edge is
 				// leading to. We dont use blocks, so just write zero bytes
-				switch (Constants.BLOCK_REFERENCE_BYTES) {
+				switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
 				case 8:
 					w.write((long) 0);
 					break;
@@ -95,7 +113,7 @@ public class BinaryWriter {
 					break;
 				default:
 					throw new UnsupportedOperationException(
-							Constants.BLOCK_REFERENCE_BYTES
+							Constants.ORIGINAL_EDGE_POSITION_BYTES
 									+ " is not a valid number for edge reference");
 				}
 			}
@@ -214,8 +232,8 @@ public class BinaryWriter {
 		// maximum vector size in bytes
 		long maximumVectorSize = 2 + alphabetSize + alphabetSize
 				* Constants.EDGE_REFERENCE_BYTES + alphabetSize
-				* Constants.BLOCK_REFERENCE_BYTES
-				+ Constants.VECTOR_DEPTH_BYTES;
+				* Constants.ORIGINAL_EDGE_POSITION_BYTES
+				+ Constants.VECTOR_DEPTH_BYTES + Constants.ORIGINAL_VECTOR_POSITION_BYTES;
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 		updateBlockPosition(list, ep, blockSize);
 		// Start printing the blocks
@@ -284,6 +302,24 @@ public class BinaryWriter {
 						Constants.VECTOR_DEPTH_BYTES
 								+ " is not a valid number for vector depth");
 			}
+			switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
+			case 8:
+				w.write((long) v.getLocation());
+				break;
+			case 4:
+				w.write((int) v.getLocation());
+				break;
+			case 2:
+				w.write((short) v.getLocation());
+				break;
+			case 1:
+				w.write((char) v.getLocation());
+				break;
+			default:
+				throw new UnsupportedOperationException(
+						Constants.VECTOR_DEPTH_BYTES
+								+ " is not a valid number for vector depth");
+			}
 			for (Character c : v.getMap().keySet()) {
 				// write first char of edge
 				w.write(c);
@@ -308,22 +344,22 @@ public class BinaryWriter {
 				}
 				// write bytesequence for representing the block the edge is
 				// leading to
-				switch (Constants.BLOCK_REFERENCE_BYTES) {
+				switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
 				case 8:
-					w.write((long) v.getMap().get(c).getBlockPosition());
+					w.write((long) v.getMap().get(c).getPosition());
 					break;
 				case 4:
-					w.write((int) v.getMap().get(c).getBlockPosition());
+					w.write((int) v.getMap().get(c).getPosition());
 					break;
 				case 2:
-					w.write((short) v.getMap().get(c).getBlockPosition());
+					w.write((short) v.getMap().get(c).getPosition());
 					break;
 				case 1:
-					w.write((char) v.getMap().get(c).getBlockPosition());
+					w.write((char) v.getMap().get(c).getPosition());
 					break;
 				default:
 					throw new UnsupportedOperationException(
-							Constants.BLOCK_REFERENCE_BYTES
+							Constants.ORIGINAL_EDGE_POSITION_BYTES
 									+ " is not a valid number for edge reference");
 				}
 			}

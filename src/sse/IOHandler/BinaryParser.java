@@ -95,7 +95,7 @@ public class BinaryParser {
 							b.append(edgeValue);
 							// we do use block, but we dont use block
 							// references, so ignore them anyway
-							switch (Constants.BLOCK_REFERENCE_BYTES) {
+							switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
 							case 8:
 								stream.readLong();
 								break;
@@ -217,7 +217,7 @@ public class BinaryParser {
 						stream.seek(curPos);
 						b.append(edgeValue);
 						// we dont use blocks so skip over the block reference
-						switch (Constants.BLOCK_REFERENCE_BYTES) {
+						switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
 						case 8:
 							stream.readLong();
 							break;
