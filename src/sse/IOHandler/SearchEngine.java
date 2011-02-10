@@ -20,6 +20,7 @@ public class SearchEngine {
 	public SearchEngine(String word) {
 
 		this.word = word;
+		
 		this.currentBlock = 0;
 		this.decrypt = false;
 
@@ -27,7 +28,6 @@ public class SearchEngine {
 
 	public SearchEngine(String word, String keyFile) {
 		this.decrypt = true;
-
 		this.sEn = new SecurityEngine();
 		this.sEn.readKey(keyFile);
 		this.word = word;

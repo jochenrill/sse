@@ -2,7 +2,6 @@ package sse.IOHandler;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
