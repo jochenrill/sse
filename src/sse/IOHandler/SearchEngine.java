@@ -123,7 +123,8 @@ public class SearchEngine {
 										+ " is not a valid number for edge reference");
 					}
 
-					if (lastDepthValue != 0 || lastEdgeValue != 0) {
+					//if (lastDepthValue != 0 || lastEdgeValue != 0) {
+					if(depthValue != 0){
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
 							jumpOver = true;
