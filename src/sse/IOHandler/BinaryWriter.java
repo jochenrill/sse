@@ -55,6 +55,24 @@ public class BinaryWriter {
 						Constants.VECTOR_DEPTH_BYTES
 								+ " is not a valid number for vector depth");
 			}
+			switch (Constants.NUMOCCURS_BYTE) {
+			case 8:
+				w.write((long) v.getNumOccurs());
+				break;
+			case 4:
+				w.write((int) v.getNumOccurs());
+				break;
+			case 2:
+				w.write((short) v.getNumOccurs());
+				break;
+			case 1:
+				w.write((char) v.getNumOccurs());
+				break;
+			default:
+				throw new UnsupportedOperationException(
+						Constants.NUMOCCURS_BYTE
+								+ " is not a valid number for number of occurences");
+			}
 			switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
 			case 8:
 				w.write((long) v.getLocation());
@@ -300,6 +318,24 @@ public class BinaryWriter {
 				throw new UnsupportedOperationException(
 						Constants.VECTOR_DEPTH_BYTES
 								+ " is not a valid number for vector depth");
+			}
+			switch (Constants.NUMOCCURS_BYTE) {
+			case 8:
+				w.write((long) v.getNumOccurs());
+				break;
+			case 4:
+				w.write((int) v.getNumOccurs());
+				break;
+			case 2:
+				w.write((short) v.getNumOccurs());
+				break;
+			case 1:
+				w.write((char) v.getNumOccurs());
+				break;
+			default:
+				throw new UnsupportedOperationException(
+						Constants.NUMOCCURS_BYTE
+								+ " is not a valid number for number of occurences");
 			}
 			switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
 			case 8:

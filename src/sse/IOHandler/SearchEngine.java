@@ -16,11 +16,13 @@ public class SearchEngine {
 	private boolean decrypt;
 	private long lastEdgeValue = 0;
 	private long lastDepthValue = 0;
+	private long numOccurs;
+	private boolean inEdge = false;
 
 	public SearchEngine(String word) {
 
 		this.word = word;
-		
+
 		this.currentBlock = 0;
 		this.decrypt = false;
 
@@ -74,14 +76,13 @@ public class SearchEngine {
 			long toDelete = currentBlock;
 			openNextFile(++currentBlock, startFile, 0, toDelete);
 
-			while (stream.getFilePointer() < stream.length()
-					&& word.length() != 0) {
+			while (stream.getFilePointer() < stream.length()) {
 				int value = stream.readByte();
 				boolean jumpOver = false;
 				char foo = (char) value;
 				// parse suffix vector
 				if (foo == Constants.VECTOR_MARKER) {
-
+					
 					// read depth of the node
 					long depthValue = 0;
 					switch (Constants.VECTOR_DEPTH_BYTES) {
@@ -103,6 +104,29 @@ public class SearchEngine {
 								Constants.VECTOR_DEPTH_BYTES
 										+ " is not a valid number for vector depth");
 					}
+					switch (Constants.NUMOCCURS_BYTE) {
+					case 8:
+						numOccurs = stream.readLong();
+
+						break;
+					case 4:
+						numOccurs = (long) stream.readInt();
+						break;
+					case 2:
+						numOccurs = (long) stream.readShort();
+						break;
+					case 1:
+						numOccurs = (long) stream.readChar();
+						break;
+					default:
+						throw new UnsupportedOperationException(
+								Constants.NUMOCCURS_BYTE
+										+ " is not a valid number for number of occurences");
+					}
+					// we matched the string, but we have to look at the
+					// following suffix vector to determine the number of
+					// occurrences
+					
 					long originalVectorPosition = 0;
 					switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
 					case 8:
@@ -123,14 +147,18 @@ public class SearchEngine {
 										+ " is not a valid number for edge reference");
 					}
 
-					//if (lastDepthValue != 0 || lastEdgeValue != 0) {
-					if(depthValue != 0){
+					// if (lastDepthValue != 0 || lastEdgeValue != 0) {
+					if (depthValue != 0) {
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
 							jumpOver = true;
 						} else {
 							jumpOver = false;
 						}
+					}
+					if(word.length() == 0 && !jumpOver){
+						inEdge = false;
+						break;
 					}
 					lastDepthValue = depthValue;
 					// read char representing edge
@@ -180,6 +208,7 @@ public class SearchEngine {
 						}
 						if (!jumpOver && foo == word.charAt(0)) {
 
+							inEdge = false;
 							// Jump to the block at the given position
 							// if (blockValue - currentBlock == 0) {
 							// we are staying in the current block
@@ -203,16 +232,23 @@ public class SearchEngine {
 
 				} else {
 
+					if(word.length() == 0){
+						inEdge = true;
+						break;
+					}
 					// Ignore padding bytes
 					if (value == Constants.PADDING_BYTE) {
 						// Block done, move to next block
 						toDelete = currentBlock;
 						openNextFile(++currentBlock, startFile, 0, toDelete);
 
-					} else if (foo == word.charAt(0)) {
+					} else if (word.length() != 0 && foo == word.charAt(0)) {
 						word = word.substring(1, word.length());
-					} else {
+						inEdge = true;
+					} else if (word.length() != 0) {
+
 						return false;
+
 					}
 				}
 
@@ -235,6 +271,15 @@ public class SearchEngine {
 		if (delete.exists()) {
 			delete.delete();
 		}
-		return (word.length() == 0);
+		if (word.length() == 0) {
+			if (inEdge) {
+				System.out.println("1");
+			} else {
+				System.out.println(numOccurs);
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

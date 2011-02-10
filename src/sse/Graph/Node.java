@@ -10,6 +10,7 @@ public class Node {
     private int location = -1;
     public boolean visited = false;
     private boolean hasVector = false;
+    private int numOccurs = 1 ;
 
     public int getLocation() {
         return this.location;
@@ -82,6 +83,14 @@ public class Node {
     public long getId() {
         return id;
     }
+
+	public void setNumOccurs(int numOccurs) {
+		this.numOccurs = numOccurs;
+	}
+
+	public int getNumOccurs() {
+		return numOccurs;
+	}
 
   
 }

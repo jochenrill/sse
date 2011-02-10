@@ -1,2 +1,2 @@
 #!/bin/bash
-java -cp lib/commons-cli-1.2.jar:build/ sse/Main -create -i $1
+java -cp lib/commons-cli-1.2.jar:build/ sse/Main -create -i `echo -n $1` 

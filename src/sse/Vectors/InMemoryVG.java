@@ -45,6 +45,7 @@ public class InMemoryVG {
         ArrayList<Integer> places = new ArrayList<Integer>();
         findPlace(n, 0, places);
         Collections.sort(places);
+        n.setNumOccurs(places.size());
         int size = 0;
         for (int i = 0; i < places.size(); i++) {
             if (!graph.isOccPosition[places.get(i) + size]) {
@@ -91,6 +92,7 @@ public class InMemoryVG {
             n.setLocation(findPlace(n));
         }
         SuffixVector tmp = new SuffixVector(n.getLocation());
+        tmp.setNumOccurs(n.getNumOccurs());
         tmp.setDepth(n.getLength());
         for (Edge e : n.getEdges()) {
             if (e.getEnd().getLocation() == -1) {

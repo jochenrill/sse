@@ -91,8 +91,7 @@ public class Main {
 				String outputFile = null;
 				if (cmd.hasOption("i")) {
 					File inputFile = new File(cmd.getOptionValue("i"));
-					FileReader fr = new FileReader(inputFile);
-
+					
 					BufferedReader r = new BufferedReader(new FileReader(
 							inputFile));
 					int tmp = 0;
@@ -119,7 +118,7 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				CDWAG t = new CDWAG(input);
-
+				t.printToFile("graph");
 				if (cmd.hasOption("v")) {
 					System.out
 							.println("Excecution time for generating the graph: "

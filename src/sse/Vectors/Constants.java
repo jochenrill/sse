@@ -48,4 +48,6 @@ public class Constants {
 	 * Represents the byte which is used to fill the datablocks
 	 */
 	public static final char PADDING_BYTE = (byte) 0;
+	
+	public static final short NUMOCCURS_BYTE = 4;
 }
