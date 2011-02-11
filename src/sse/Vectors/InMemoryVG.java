@@ -44,7 +44,7 @@ public class InMemoryVG {
     private int findPlace(Node n) {
         ArrayList<Integer> places = new ArrayList<Integer>();
         findPlace(n, 0, places);
-        Collections.sort(places);
+        //Collections.sort(places);
         n.setNumOccurs(places.size());
         int size = 0;
         for (int i = 0; i < places.size(); i++) {
@@ -53,7 +53,7 @@ public class InMemoryVG {
                 return places.get(i) + size;
             }
         }
-        return -1;
+        throw new IllegalStateException("No place for node " + n.getId() + " found");
     }
 
     private void findPlace(Node n, int pathLength, ArrayList<Integer> places) {
