@@ -11,6 +11,7 @@ import java.util.Stack;
 import sse.Graph.CDWAG;
 import sse.Graph.Edge;
 import sse.Graph.Node;
+import sse.Matching.Graph;
 
 public class OutOfMemoryVG {
 	private CDWAG graph;
@@ -25,6 +26,8 @@ public class OutOfMemoryVG {
 		graph.sink.setLocation(graph.text.length());
 		Stack<Node> s = new Stack<Node>();
 		s.push(graph.source);
+		calculatePlaces();
+		bipartiteMatching();
 		while (!s.isEmpty()) {
 			Node n = s.pop();
 			n.visited = true;
@@ -50,21 +53,53 @@ public class OutOfMemoryVG {
 		o.close();
 	}
 
-	private int findPlace(Node n) {
-		ArrayList<Integer> places = new ArrayList<Integer>();
-		findPlace(n, 0, places);
-		//Collections.sort(places);
-		n.setNumOccurs(places.size());
-		int size = 0;
+	private void bipartiteMatching() {
+		Graph<Node, Integer> g = new Graph<Node, Integer>();
+		g.constructFromCDWAG(graph);
+		g.calculateMatching();
 		
-		for (int i = 0; i < places.size(); i++) {
-			if (!graph.isOccPosition[places.get(i) -1 + size]) {
-				graph.isOccPosition[places.get(i) -1 + size] = true;
-				return places.get(i) + size;
+		// Adapt matching
+		for(sse.Matching.Edge<Node, Integer> e : g.matching){
+			e.getLeft().getData().setLocation(e.getRight().getData().intValue());
+			e.getLeft().getData().setPlaces(null);
+		}
+	}
+
+	private void calculatePlaces() {
+		Stack<Node> s = new Stack<Node>();
+		s.push(graph.source);
+		while (!s.isEmpty()) {
+			Node n = s.pop();
+			for (Edge e : n.getEdges()) {
+				if (e.getEnd() != graph.sink) {
+					if (e.getEnd().getPlaces() == null) {
+						e.getEnd().setPlaces(findPlace(e.getEnd()));
+					}
+					s.push(e.getEnd());
+					
+				}
 			}
 		}
-		
-		throw new IllegalStateException("No place for node " + n.getId() + " found");
+	}
+
+	private ArrayList<Integer> findPlace(Node n) {
+		ArrayList<Integer> places = new ArrayList<Integer>();
+		findPlace(n, 0, places);
+		Collections.sort(places);
+		n.setNumOccurs(places.size());
+		// n.setPlaces(places);
+		return places;
+		/*
+		 * int size = 0;
+		 * 
+		 * for (int i = 0; i < places.size(); i++) { if
+		 * (!graph.isOccPosition[places.get(i) -1 + size]) {
+		 * graph.isOccPosition[places.get(i) -1 + size] = true; return
+		 * places.get(i) + size; } }
+		 * 
+		 * throw new IllegalStateException("No place for node " + n.getId() +
+		 * " found");
+		 */
 	}
 
 	private void findPlace(Node n, int pathLength, ArrayList<Integer> places) {
@@ -86,9 +121,9 @@ public class OutOfMemoryVG {
 		SuffixVector r = new SuffixVector(0);
 		r.setDepth(0);
 		for (Edge e : graph.source.getEdges()) {
-			if (e.getEnd().getLocation() == -1) {
+			/*if (e.getEnd().getLocation() == -1) {
 				e.getEnd().setLocation(findPlace(e.getEnd()));
-			}
+			}*/
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));
@@ -98,16 +133,16 @@ public class OutOfMemoryVG {
 	}
 
 	private SuffixVector printSuffixToFile(Node n) throws IOException {
-		if (n.getLocation() == -1) {
+	/*	if (n.getLocation() == -1) {
 			n.setLocation(findPlace(n));
-		}
+		}*/
 		SuffixVector tmp = new SuffixVector(n.getLocation());
 		tmp.setNumOccurs(n.getNumOccurs());
 		tmp.setDepth(n.getLength());
 		for (Edge e : n.getEdges()) {
-			if (e.getEnd().getLocation() == -1) {
+			/*if (e.getEnd().getLocation() == -1) {
 				e.getEnd().setLocation(findPlace(e.getEnd()));
-			}
+			}*/
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));

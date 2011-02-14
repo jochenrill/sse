@@ -46,14 +46,15 @@ public class InMemoryVG {
         findPlace(n, 0, places);
         //Collections.sort(places);
         n.setNumOccurs(places.size());
-        int size = 0;
+     /*   int size = 0;
         for (int i = 0; i < places.size(); i++) {
             if (!graph.isOccPosition[places.get(i) + size]) {
                 graph.isOccPosition[places.get(i) + size] = true;
                 return places.get(i) + size;
             }
         }
-        throw new IllegalStateException("No place for node " + n.getId() + " found");
+        throw new IllegalStateException("No place for node " + n.getId() + " found");*/
+        return 0;
     }
 
     private void findPlace(Node n, int pathLength, ArrayList<Integer> places) {

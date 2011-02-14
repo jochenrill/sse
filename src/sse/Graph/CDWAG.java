@@ -37,7 +37,7 @@ public class CDWAG {
      * on.
      */
     public ArrayList<EdgePosition> listOfEdges = new ArrayList<EdgePosition>();
-    public boolean[] isOccPosition;
+  //  public boolean[] isOccPosition;
 
     /**
      * Initializes and constructs the graph for a given text.
@@ -57,7 +57,7 @@ public class CDWAG {
             Edge newEdge = new Edge(i, i, bottom, source);
             bottom.addEdge(text.charAt(i), newEdge);
         }
-        isOccPosition = new boolean[text.length()];
+       // isOccPosition = new boolean[text.length()];
         source.setLength(0);
         bottom.setLength(-1);
         source.setSuffixLink(bottom);

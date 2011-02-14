@@ -91,16 +91,14 @@ public class Main {
 				String outputFile = null;
 				if (cmd.hasOption("i")) {
 					File inputFile = new File(cmd.getOptionValue("i"));
-					
+
 					BufferedReader r = new BufferedReader(new FileReader(
 							inputFile));
-					int tmp = 0;
-					
-					while ((tmp = r.read()) != -1) {
-						if(tmp > 128){
-							throw new UnsupportedOperationException("Only ASCII characters are supported");
-						}
-						input += (char)tmp;
+					String tmp = null;
+
+					while ((tmp = r.readLine()) != null) {
+
+						input += tmp;
 					}
 
 				} else if (cmd.hasOption("s")) {

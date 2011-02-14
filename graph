@@ -1,176 +1,24 @@
 /* this is a generated dot file: www.graphviz.org */
 digraph suffixtree {
 	rankdir=LR
-node[shape=box]0->1
-[label=".$[74,75]"];
+node[shape=box]0->4
+[label="a[0,0]"];
+4->1
+[label="san$[5,8]"];
+4->5
+[label="n[1,1]"];
+5->3
+[label="a[2,2]"];
+3->1
+[label="san$[5,8]"];
+3->1
+[label="nasan$[3,8]"];
+5->1
+[label="$[8,8]"];
 0->1
-[label="$[75,75]"];
+[label="san$[5,8]"];
+0->1
+[label="$[8,8]"];
 0->5
-[label=" [3,3]"];
-5->1
-[label="ueber den Dorfdreck.$[55,75]"];
-5->1
-[label="traegt den duennen dummen doofen ueber den Dorfdreck.$[22,75]"];
-5->25
-[label="D[4,4]"];
-25->1
-[label="icke dumme doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[5,75]"];
-25->1
-[label="orfdreck.$[66,75]"];
-5->12
-[label="d[29,29]"];
-12->13
-[label="u[11,11]"];
-13->17
-[label="mme[12,14]"];
-17->1
-[label=" doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[15,75]"];
-17->1
-[label="n doofen ueber den Dorfdreck.$[46,75]"];
-13->1
-[label="ennen dummen doofen ueber den Dorfdreck.$[35,75]"];
-12->24
-[label="en [30,32]"];
-24->1
-[label="Dorfdreck.$[65,75]"];
-24->1
-[label="duennen dummen doofen ueber den Dorfdreck.$[33,75]"];
-12->19
-[label="oofe[17,20]"];
-19->1
-[label=" traegt den duennen dummen doofen ueber den Dorfdreck.$[21,75]"];
-19->1
-[label="n ueber den Dorfdreck.$[53,75]"];
-0->21
-[label="u[55,55]"];
-21->17
-[label="mme[12,14]"];
-21->22
-[label="e[35,35]"];
-22->1
-[label="ber den Dorfdreck.$[57,75]"];
-22->1
-[label="nnen dummen doofen ueber den Dorfdreck.$[36,75]"];
-0->11
-[label="t[22,22]"];
-11->1
-[label=" den duennen dummen doofen ueber den Dorfdreck.$[28,75]"];
-11->1
-[label="raegt den duennen dummen doofen ueber den Dorfdreck.$[23,75]"];
-0->3
-[label="D[0,0]"];
-3->1
-[label="icke dumme doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[5,75]"];
-3->1
-[label="er Dicke dumme doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[1,75]"];
-3->1
-[label="orfdreck.$[66,75]"];
-0->10
-[label="r[2,2]"];
-10->23
-[label=" [3,3]"];
-23->1
-[label="Dicke dumme doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[4,75]"];
-23->1
-[label="den Dorfdreck.$[61,75]"];
-10->1
-[label="aegt den duennen dummen doofen ueber den Dorfdreck.$[24,75]"];
-10->1
-[label="fdreck.$[68,75]"];
-10->1
-[label="eck.$[71,75]"];
-0->8
-[label="o[17,17]"];
-8->1
-[label="rfdreck.$[67,75]"];
-8->19
-[label="fe[19,20]"];
-8->19
-[label="ofe[18,20]"];
-0->15
-[label="n[37,37]"];
-15->20
-[label=" [32,32]"];
-20->1
-[label="ueber den Dorfdreck.$[55,75]"];
-20->1
-[label="Dorfdreck.$[65,75]"];
-20->18
-[label="d[33,33]"];
-18->16
-[label="u[34,34]"];
-16->1
-[label="mmen doofen ueber den Dorfdreck.$[43,75]"];
-16->1
-[label="ennen dummen doofen ueber den Dorfdreck.$[35,75]"];
-18->1
-[label="oofen ueber den Dorfdreck.$[49,75]"];
-15->1
-[label="en dummen doofen ueber den Dorfdreck.$[38,75]"];
-15->1
-[label="nen dummen doofen ueber den Dorfdreck.$[37,75]"];
-0->6
-[label="m[12,12]"];
-6->17
-[label="me[13,14]"];
-6->17
-[label="e[14,14]"];
-0->28
-[label="k[7,7]"];
-28->1
-[label=".$[74,75]"];
-28->1
-[label="e dumme doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[8,75]"];
-0->1
-[label="icke dumme doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[5,75]"];
-0->1
-[label="gt den duennen dummen doofen ueber den Dorfdreck.$[26,75]"];
-0->26
-[label="f[19,19]"];
-26->19
-[label="e[20,20]"];
-26->1
-[label="dreck.$[69,75]"];
-0->4
-[label="e[1,1]"];
-4->1
-[label="ber den Dorfdreck.$[57,75]"];
-4->9
-[label=" [9,9]"];
-9->1
-[label="traegt den duennen dummen doofen ueber den Dorfdreck.$[22,75]"];
-9->7
-[label="d[10,10]"];
-7->1
-[label="umme doofe traegt den duennen dummen doofen ueber den Dorfdreck.$[11,75]"];
-7->1
-[label="oofe traegt den duennen dummen doofen ueber den Dorfdreck.$[17,75]"];
-4->1
-[label="gt den duennen dummen doofen ueber den Dorfdreck.$[26,75]"];
-4->23
-[label="r [2,3]"];
-4->1
-[label="ck.$[72,75]"];
-4->14
-[label="n[31,31]"];
-14->20
-[label=" [32,32]"];
-14->1
-[label="nen dummen doofen ueber den Dorfdreck.$[37,75]"];
-0->27
-[label="d[69,69]"];
-27->13
-[label="u[11,11]"];
-27->1
-[label="reck.$[70,75]"];
-27->24
-[label="en [30,32]"];
-27->19
-[label="oofe[17,20]"];
-0->28
-[label="ck[6,7]"];
-0->1
-[label="ber den Dorfdreck.$[57,75]"];
-0->1
-[label="aegt den duennen dummen doofen ueber den Dorfdreck.$[24,75]"];
+[label="n[1,1]"];
 }
