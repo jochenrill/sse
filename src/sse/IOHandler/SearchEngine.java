@@ -90,6 +90,7 @@ public class SearchEngine {
 								Constants.VECTOR_DEPTH_BYTES
 										+ " is not a valid number for vector depth");
 					}
+					long lastNumOccurs = numOccurs;
 					switch (Constants.NUMOCCURS_BYTE) {
 					case 8:
 						numOccurs = stream.readLong();
@@ -135,6 +136,7 @@ public class SearchEngine {
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
 							jumpOver = true;
+							numOccurs = lastNumOccurs;
 						} else {
 							jumpOver = false;
 						}
@@ -143,7 +145,9 @@ public class SearchEngine {
 						inEdge = true;
 						break;
 					}
-					lastDepthValue = depthValue;
+					if (!jumpOver) {
+						lastDepthValue = depthValue;
+					}
 					// read char representing edge
 					foo = (char) stream.readByte();
 					while (foo != Constants.VECTOR_MARKER) {
@@ -192,8 +196,13 @@ public class SearchEngine {
 							// if (blockValue - currentBlock == 0) {
 							// we are staying in the current block
 							long blockToOpen = (edgeValue / blockSize) + 1;
-							long position = edgeValue
-									% ((blockToOpen - 1) * blockSize);
+							long position = 0;
+							if (blockToOpen == 1) {
+								position = edgeValue;
+							} else {
+								position = edgeValue
+										% ((blockToOpen - 1) * blockSize);
+							}
 							lastEdgeValue = originalEdgePosition;
 							openNextFile(blockToOpen, startFile, position,
 									currentBlock);
