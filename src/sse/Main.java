@@ -9,6 +9,8 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Scanner;
+
 import org.apache.commons.cli.*;
 
 import sse.Graph.CDWAG;
@@ -94,12 +96,14 @@ public class Main {
 
 					BufferedReader r = new BufferedReader(new FileReader(
 							inputFile));
-					String tmp = null;
+					Scanner scanner = new Scanner(r);
 
-					while ((tmp = r.readLine()) != null) {
+					while (scanner.hasNextLine()) {
 
-						input += tmp;
+						input += scanner.nextLine();
 					}
+					scanner.close();
+					r.close();
 
 				} else if (cmd.hasOption("s")) {
 					input = cmd.getOptionValue("s");
