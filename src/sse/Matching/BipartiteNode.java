@@ -23,7 +23,19 @@ public class BipartiteNode<T> {
 	public ArrayList<Edge> getEdges() {
 		return edges;
 	}
-
+	
+	public boolean isMatched(){
+		for(Edge e : edges){
+			if(e.matched){
+				return true;
+			}
+		}
+		return false;
+	}
+	@Override
+	public String toString(){
+		return data.toString();
+	}
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof BipartiteNode) {

@@ -20,14 +20,9 @@ public class Edge<T, K> {
 	public BipartiteNode<K> getRight() {
 		return right;
 	}
-
 	@Override
-	public boolean equals(Object o) {
-		if (o instanceof Edge) {
-			Edge tmp = (Edge) o;
-			return (tmp.left == left && tmp.right == right);
-		} else {
-			return false;
-		}
+	public String toString(){
+		return left.toString() + " -> " + right.toString();
 	}
+	
 }

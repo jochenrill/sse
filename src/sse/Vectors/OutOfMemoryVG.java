@@ -57,10 +57,21 @@ public class OutOfMemoryVG {
 		Graph<Node, Integer> g = new Graph<Node, Integer>();
 		g.constructFromCDWAG(graph);
 		g.calculateMatching();
-		
+		ArrayList<Integer> places = new ArrayList<Integer>();
 		// Adapt matching
-		for(sse.Matching.Edge<Node, Integer> e : g.matching){
-			e.getLeft().getData().setLocation(e.getRight().getData().intValue());
+//		System.out.println("Adapt matching and collision detection");
+		for (sse.Matching.Edge<Node, Integer> e : g.matching) {
+			
+//			// TODO: temporary collision detection, remove when fixed
+//			if (places.contains(e.getRight().getData())) {
+//				System.out.println("Collision on place "
+//						+ e.getRight().getData());
+//			} else {
+//				places.add(e.getRight().getData());
+//			}
+			e.getLeft().getData()
+					.setLocation(e.getRight().getData().intValue());
+
 			e.getLeft().getData().setPlaces(null);
 		}
 	}
@@ -76,7 +87,7 @@ public class OutOfMemoryVG {
 						e.getEnd().setPlaces(findPlace(e.getEnd()));
 					}
 					s.push(e.getEnd());
-					
+
 				}
 			}
 		}
@@ -87,6 +98,7 @@ public class OutOfMemoryVG {
 		findPlace(n, 0, places);
 		Collections.sort(places);
 		n.setNumOccurs(places.size());
+//		System.out.println("Node " + n +": "+places);
 		// n.setPlaces(places);
 		return places;
 		/*
@@ -121,9 +133,10 @@ public class OutOfMemoryVG {
 		SuffixVector r = new SuffixVector(0);
 		r.setDepth(0);
 		for (Edge e : graph.source.getEdges()) {
-			/*if (e.getEnd().getLocation() == -1) {
-				e.getEnd().setLocation(findPlace(e.getEnd()));
-			}*/
+			/*
+			 * if (e.getEnd().getLocation() == -1) {
+			 * e.getEnd().setLocation(findPlace(e.getEnd())); }
+			 */
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));
@@ -133,16 +146,17 @@ public class OutOfMemoryVG {
 	}
 
 	private SuffixVector printSuffixToFile(Node n) throws IOException {
-	/*	if (n.getLocation() == -1) {
-			n.setLocation(findPlace(n));
-		}*/
+		/*
+		 * if (n.getLocation() == -1) { n.setLocation(findPlace(n)); }
+		 */
 		SuffixVector tmp = new SuffixVector(n.getLocation());
 		tmp.setNumOccurs(n.getNumOccurs());
 		tmp.setDepth(n.getLength());
 		for (Edge e : n.getEdges()) {
-			/*if (e.getEnd().getLocation() == -1) {
-				e.getEnd().setLocation(findPlace(e.getEnd()));
-			}*/
+			/*
+			 * if (e.getEnd().getLocation() == -1) {
+			 * e.getEnd().setLocation(findPlace(e.getEnd())); }
+			 */
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));

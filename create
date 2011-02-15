@@ -1,2 +1,2 @@
 #!/bin/bash
-java -Xms2g -Xmx2g -verbose:gc -cp lib/commons-cli-1.2.jar:build/ sse/Main -create -v -i `echo -n $1` 
+java -Xss200m -Xms2g -Xmx2g -verbose:gc -cp lib/commons-cli-1.2.jar:build/ sse/Main -create -v -i `echo -n $1` 
