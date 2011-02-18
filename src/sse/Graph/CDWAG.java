@@ -31,7 +31,7 @@ public class CDWAG {
      */
     public Node sink;
     private Node bottom;
-    private long nodeCount = 0;
+    public long nodeCount = 0;
     /**
      * Contains the list of EdgePositions for obtaining the SuffixVectors later
      * on.

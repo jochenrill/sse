@@ -7,10 +7,37 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+
+import javax.swing.JFrame;
+import javax.swing.plaf.basic.BasicDirectoryModel;
+
+import org.apache.commons.collections15.Factory;
+import org.apache.commons.collections15.Transformer;
+
+import EDU.oswego.cs.dl.util.concurrent.misc.Fraction;
+
+import com.google.common.collect.Sets;
+
+import edu.uci.ics.jung.algorithms.flows.EdmondsKarpMaxFlow;
+import edu.uci.ics.jung.algorithms.layout.DAGLayout;
+import edu.uci.ics.jung.algorithms.layout.SpringLayout;
+import edu.uci.ics.jung.algorithms.layout.SpringLayout2;
+import edu.uci.ics.jung.algorithms.layout.StaticLayout;
+import edu.uci.ics.jung.algorithms.layout.TreeLayout;
+import edu.uci.ics.jung.graph.DelegateForest;
+import edu.uci.ics.jung.graph.DelegateTree;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.Forest;
+import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 import sse.Graph.CDWAG;
 import sse.Graph.Node;
+import sse.Graph.Pair;
 
 public class Graph<T, K> {
 
@@ -26,21 +53,97 @@ public class Graph<T, K> {
 		rightMap = new HashMap<Integer, BipartiteNode<K>>();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public void constructFromCDWAG(CDWAG c) {
 		source = c.source;
 		sink = c.sink;
+		HashMap<Node, Boolean> visited = new HashMap<Node, Boolean>();
 		for (sse.Graph.Edge e : c.source.getEdges()) {
-			if (!e.getEnd().usedInMatching) {
-				constructFromCDWAG(e.getEnd());
+			if (visited.get(e.getEnd()) == null) {
+				constructFromCDWAG(e.getEnd(), visited);
 			}
-		}
 
+		}
+		System.out.println("Bipartite Nodes: " + leftSet.size());
+		System.out.println("Places: " + rightMap.keySet().size());
+
+//		DirectedSparseMultigraph<BipartiteNode, Edge> tree = new DirectedSparseMultigraph<BipartiteNode, Edge>();
+//		BipartiteNode source = new BipartiteNode(new Node(-1));
+//		BipartiteNode sink = new BipartiteNode(new Node(-2));
+//
+//		tree.addVertex(source);
+//
+//		for (BipartiteNode n : leftSet) {
+//			Edge sourceEdge = new Edge();
+//			sourceEdge.setLeft(source);
+//			sourceEdge.setRight(n);
+//			sourceEdge.capacity = 1;
+//
+//			tree.addEdge(sourceEdge, source, n);
+//
+//		}
+//
+//		for (BipartiteNode n : leftSet) {
+//			for (int i = 0; i < n.getEdges().size(); i++) {
+//				Edge e = (Edge) n.getEdges().get(i);
+//
+//				tree.addEdge(e, e.getLeft(), e.getRight());
+//
+//			}
+//		}
+//		for (BipartiteNode n : rightMap.values()) {
+//			Edge sinkEdge = new Edge();
+//			sinkEdge.setLeft(n);
+//			sinkEdge.setRight(sink);
+//			sinkEdge.capacity = 1;
+//			tree.addEdge(sinkEdge, n, sink);
+//
+//		}
+//		Transformer<Edge, Number> trans = new Transformer<Edge, Number>() {
+//
+//			@Override
+//			public Number transform(Edge arg0) {
+//				return arg0.capacity;
+//			}
+//		};
+//		Map<Edge, Number> map = new HashMap<Edge, Number>();
+//		Factory<Edge> factory = new Factory<Edge>() {
+//
+//			@Override
+//			public Edge create() {
+//				
+//			//	return new Edge(new BipartiteNode(new Node(10)),new BipartiteNode(new Node(11)));
+//				return new Edge();
+//			}
+//		};
+//
+////		BasicVisualizationServer<BipartiteNode, Edge> vis = new BasicVisualizationServer<BipartiteNode, Edge>(new DAGLayout<BipartiteNode, Edge>(tree));
+////		vis.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<BipartiteNode>());
+////		JFrame frame = new JFrame();
+////		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+////		frame.getContentPane().add(vis);
+////		frame.pack();
+////		frame.setVisible(true);
+//		EdmondsKarpMaxFlow<BipartiteNode, Edge> flow = new EdmondsKarpMaxFlow<BipartiteNode, Edge>(
+//				tree, source, sink, trans, map, factory);
+//		flow.evaluate();
+//		
+//		for(Edge e : tree.getEdges()){
+//			if( !((e.getRight().getData()) instanceof Node) && map.get(e).intValue() != 0  ){
+//				matching.add(e);
+//				System.out.println(e);
+//			}
+//		}
+//		
+		
+		
+		
 		// try {
 		// BufferedWriter w = new BufferedWriter(new FileWriter("bitpartite"));
 		// w.write("/* this is a generated dot file: www.graphviz.org */\n"
 		// + "digraph suffixtree {\n"
 		// + "\trankdir=LR\nnode[shape=box]\n");
-		// for (BipartiteNode<T> root : rightSet) {
+		// for (BipartiteNode<T> root : leftSet) {
 		// for (Edge e : root.getEdges()) {
 		// String string = e.getLeft().getData() + "->"
 		// + e.getRight().getData()+"100" + ";\n";
@@ -56,14 +159,15 @@ public class Graph<T, K> {
 
 	}
 
-	private void constructFromCDWAG(sse.Graph.Node n) {
+	private void constructFromCDWAG(Node n, HashMap<Node, Boolean> visited) {
 
 		if (n == sink) {
 			return;
 		}
+		visited.put(n, true);
 		BipartiteNode<T> newNode = new BipartiteNode<T>((T) n);
 		leftSet.add(newNode);
-		n.usedInMatching = true;
+		// n.usedInMatching = true;
 		for (Integer i : n.getPlaces()) {
 			BipartiteNode<K> rightNode = null;
 			if (rightMap.get(i) == null) {
@@ -80,14 +184,36 @@ public class Graph<T, K> {
 		}
 
 		for (sse.Graph.Edge e : n.getEdges()) {
-			if (!e.getEnd().usedInMatching) {
-				constructFromCDWAG(e.getEnd());
+			if (visited.get(e.getEnd()) == null) {
+				constructFromCDWAG(e.getEnd(), visited);
 			}
 		}
 
 	}
 
 	public void calculateMatching() {
+		// System.out.println("Start testing for marriage theorem");
+		// HashSet<BipartiteNode<T>> set = new HashSet<BipartiteNode<T>>();
+		// for (BipartiteNode<T> p : leftSet) {
+		// set.add(p);
+		// }
+		// Set<Set<BipartiteNode<T>>> allSubset = Sets.powerSet(set);
+		// for (Set<BipartiteNode<T>> s : allSubset) {
+		// HashMap<BipartiteNode<?>, Boolean> map = new
+		// HashMap<BipartiteNode<?>, Boolean>();
+		// for (BipartiteNode<T> n : s) {
+		// for (Edge<T, K> e : n.getEdges()) {
+		// if (map.get(e.getRight()) == null) {
+		// map.put(e.getRight(), true);
+		// }
+		// }
+		// }
+		// if (s.size() > map.keySet().size()) {
+		// System.out.println("Marriage theorem failed");
+		// }
+		// }
+		// System.out.println("Done testing for marriage theorem");
+
 		ArrayList<Edge<T, K>> path;
 		path = augmentingPath();
 		// HashSet<Edge<T,K>> matching = new HashSet<Edge<T,K>>();
@@ -110,6 +236,14 @@ public class Graph<T, K> {
 
 			path = augmentingPath();
 		}
+
+		for (BipartiteNode<T> n : leftSet) {
+			if (!n.matched) {
+				System.out.println("Node " + n + " unmatched");
+				System.out.println("Places: "
+						+ ((Node) n.getData()).getPlaces());
+			}
+		}
 		// test print matching
 
 		// for (Edge<T, K> e : matching) {
@@ -124,8 +258,8 @@ public class Graph<T, K> {
 		ArrayList<Edge<T, K>> path = new ArrayList<Edge<T, K>>();
 		for (BipartiteNode<T> node : leftSet) {
 			if (!node.matched) {
-				sse.Graph.Node n = (sse.Graph.Node) node.getData();
-				String s = n.toString();
+				// sse.Graph.Node n = (sse.Graph.Node) node.getData();
+				// String s = n.toString();
 				ArrayList<BipartiteNode<?>> visited = new ArrayList<BipartiteNode<?>>();
 				if (augmentingPath(path, node, true, visited)) {
 
@@ -141,39 +275,6 @@ public class Graph<T, K> {
 			BipartiteNode<?> n, boolean left,
 			ArrayList<BipartiteNode<?>> visited) {
 
-		// boolean stop = false;
-		// boolean b = true;
-		// while (!stop || b) {
-		//
-		// b = false;
-		// for (Edge<T, K> e : n.getEdges()) {
-		// if (left) {
-		// if (!e.matched) {
-		// path.add(e);
-		// left = !left;
-		// n = e.getRight();
-		// b = true;
-		// break;
-		// // return augmentingPath(path, e.getRight(), false);
-		//
-		// }
-		// } else if (!left) {
-		// if (!n.isMatched()) {
-		// return true;
-		// } else if (e.matched) {
-		// path.add(e);
-		// left = true;
-		// n = e.getLeft();
-		// b = true;
-		// break;
-		// //return augmentingPath(path, e.getLeft(), true);
-		// }
-		// }
-		// }
-		// stop = true;
-		//
-		// }
-		// return false;
 		visited.add(n);
 		for (Edge<T, K> e : n.getEdges()) {
 			if (left) {

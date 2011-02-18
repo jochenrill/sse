@@ -36,13 +36,5 @@ public class BipartiteNode<T> {
 	public String toString(){
 		return data.toString();
 	}
-	@Override
-	public boolean equals(Object o) {
-		if (o instanceof BipartiteNode) {
-			BipartiteNode tmp = (BipartiteNode) o;
-			return ((BipartiteNode) o).getData().equals(this.getData());
-		} else {
-			return false;
-		}
-	}
+
 }

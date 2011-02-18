@@ -1,0 +1,14 @@
+#!/bin/bash
+i=`./search "$1"`
+occurs=`echo $i | wc -w`
+if [ $occurs -eq 1 ]; then
+	echo "Not found"
+else 
+	numoccurs=`echo $i | awk '{print $1}'`
+	realnumoccurs=`grep -o "$1" $2 | wc -l`
+	if [ $numoccurs -eq $realnumoccurs ]; then
+		echo "Valid"
+	else
+		echo "Failed"
+	fi
+fi

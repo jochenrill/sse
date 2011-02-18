@@ -6,11 +6,16 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Stack;
+
+import edu.uci.ics.jung.algorithms.flows.EdmondsKarpMaxFlow;
+import edu.uci.ics.jung.graph.DelegateTree;
 
 import sse.Graph.CDWAG;
 import sse.Graph.Edge;
 import sse.Graph.Node;
+import sse.Matching.BipartiteNode;
 import sse.Matching.Graph;
 
 public class OutOfMemoryVG {
@@ -26,7 +31,9 @@ public class OutOfMemoryVG {
 		graph.sink.setLocation(graph.text.length());
 		Stack<Node> s = new Stack<Node>();
 		s.push(graph.source);
+		System.out.println("Calculating places");
 		calculatePlaces();
+		System.out.println("Calculating matching");
 		bipartiteMatching();
 		while (!s.isEmpty()) {
 			Node n = s.pop();
@@ -59,16 +66,20 @@ public class OutOfMemoryVG {
 		g.calculateMatching();
 		ArrayList<Integer> places = new ArrayList<Integer>();
 		// Adapt matching
-//		System.out.println("Adapt matching and collision detection");
+		System.out.println("Adapt matching and collision detection");
+		System.out.println(g.matching.size());
+		System.out.println(graph.nodeCount);
 		for (sse.Matching.Edge<Node, Integer> e : g.matching) {
+
+			// TODO: temporary collision detection, remove when fixed
+			if (places.contains(e.getRight().getData())) {
+				System.out.println("Collision on place "
+						+ e.getRight().getData());
+
 			
-//			// TODO: temporary collision detection, remove when fixed
-//			if (places.contains(e.getRight().getData())) {
-//				System.out.println("Collision on place "
-//						+ e.getRight().getData());
-//			} else {
-//				places.add(e.getRight().getData());
-//			}
+			} else {
+				places.add(e.getRight().getData());
+			}
 			e.getLeft().getData()
 					.setLocation(e.getRight().getData().intValue());
 
@@ -77,18 +88,25 @@ public class OutOfMemoryVG {
 	}
 
 	private void calculatePlaces() {
-		Stack<Node> s = new Stack<Node>();
-		s.push(graph.source);
-		while (!s.isEmpty()) {
-			Node n = s.pop();
-			for (Edge e : n.getEdges()) {
-				if (e.getEnd() != graph.sink) {
-					if (e.getEnd().getPlaces() == null) {
-						e.getEnd().setPlaces(findPlace(e.getEnd()));
-					}
-					s.push(e.getEnd());
 
-				}
+		HashMap<Node, Boolean> visited = new HashMap<Node, Boolean>();
+		Node n = graph.source;
+		for (Edge e : n.getEdges()) {
+			if (e.getEnd() != graph.sink) {
+				calculatePlaces(visited, e.getEnd());
+
+			}
+		}
+	}
+
+	private void calculatePlaces(HashMap<Node, Boolean> visited, Node n) {
+
+		n.setPlaces(findPlace(n));
+		visited.put(n, true);
+		for (Edge e : n.getEdges()) {
+
+			if (visited.get(e.getEnd()) == null && e.getEnd() != graph.sink) {
+				calculatePlaces(visited, e.getEnd());
 			}
 		}
 	}
@@ -97,8 +115,11 @@ public class OutOfMemoryVG {
 		ArrayList<Integer> places = new ArrayList<Integer>();
 		findPlace(n, 0, places);
 		Collections.sort(places);
+		if (places.size() == 0) {
+			throw new IllegalStateException("FUCK UP IN findPlace");
+		}
 		n.setNumOccurs(places.size());
-//		System.out.println("Node " + n +": "+places);
+		// System.out.println("Node " + n +": "+places);
 		// n.setPlaces(places);
 		return places;
 		/*
