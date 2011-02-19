@@ -1,5 +1,6 @@
 package sse.Matching;
 
+import java.awt.Dimension;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,9 +18,10 @@ import javax.swing.plaf.basic.BasicDirectoryModel;
 import org.apache.commons.collections15.Factory;
 import org.apache.commons.collections15.Transformer;
 
+import com.google.common.collect.Sets;
+
 import EDU.oswego.cs.dl.util.concurrent.misc.Fraction;
 
-import com.google.common.collect.Sets;
 
 import edu.uci.ics.jung.algorithms.flows.EdmondsKarpMaxFlow;
 import edu.uci.ics.jung.algorithms.layout.DAGLayout;
@@ -116,14 +118,17 @@ public class Graph<T, K> {
 //				return new Edge();
 //			}
 //		};
-//
-////		BasicVisualizationServer<BipartiteNode, Edge> vis = new BasicVisualizationServer<BipartiteNode, Edge>(new DAGLayout<BipartiteNode, Edge>(tree));
-////		vis.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<BipartiteNode>());
-////		JFrame frame = new JFrame();
-////		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-////		frame.getContentPane().add(vis);
-////		frame.pack();
-////		frame.setVisible(true);
+//		DAGLayout<BipartiteNode, Edge> l = new DAGLayout<BipartiteNode, Edge>(tree);
+//		l.setStretch(10);
+//		l.setSize(new Dimension(500, 500));
+//		l.setForceMultiplier(10);
+//		BasicVisualizationServer<BipartiteNode, Edge> vis = new BasicVisualizationServer<BipartiteNode, Edge>(l);
+//		vis.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<BipartiteNode>());
+//		JFrame frame = new JFrame();
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		frame.getContentPane().add(vis);
+//		frame.pack();
+//		frame.setVisible(true);
 //		EdmondsKarpMaxFlow<BipartiteNode, Edge> flow = new EdmondsKarpMaxFlow<BipartiteNode, Edge>(
 //				tree, source, sink, trans, map, factory);
 //		flow.evaluate();
@@ -138,24 +143,24 @@ public class Graph<T, K> {
 		
 		
 		
-		// try {
-		// BufferedWriter w = new BufferedWriter(new FileWriter("bitpartite"));
-		// w.write("/* this is a generated dot file: www.graphviz.org */\n"
-		// + "digraph suffixtree {\n"
-		// + "\trankdir=LR\nnode[shape=box]\n");
-		// for (BipartiteNode<T> root : leftSet) {
-		// for (Edge e : root.getEdges()) {
-		// String string = e.getLeft().getData() + "->"
-		// + e.getRight().getData()+"100" + ";\n";
-		// w.write(string);
-		//
-		// }
-		// }
-		// w.write("}");
-		// w.close();
-		// } catch (IOException e) {
-		// System.out.println("File not found");
-		// }
+		 try {
+		 BufferedWriter w = new BufferedWriter(new FileWriter("bitpartite"));
+		 w.write("/* this is a generated dot file: www.graphviz.org */\n"
+		 + "digraph suffixtree {\n"
+		 + "\trankdir=LR\nnode[shape=box]\n");
+		 for (BipartiteNode<T> root : leftSet) {
+		 for (Edge e : root.getEdges()) {
+		 String string = e.getLeft().getData() + "->"
+		 + e.getRight().getData()+"100" + ";\n";
+		 w.write(string);
+		
+		 }
+		 }
+		 w.write("}");
+		 w.close();
+		 } catch (IOException e) {
+		 System.out.println("File not found");
+		 }
 
 	}
 
@@ -192,27 +197,27 @@ public class Graph<T, K> {
 	}
 
 	public void calculateMatching() {
-		// System.out.println("Start testing for marriage theorem");
-		// HashSet<BipartiteNode<T>> set = new HashSet<BipartiteNode<T>>();
-		// for (BipartiteNode<T> p : leftSet) {
-		// set.add(p);
-		// }
-		// Set<Set<BipartiteNode<T>>> allSubset = Sets.powerSet(set);
-		// for (Set<BipartiteNode<T>> s : allSubset) {
-		// HashMap<BipartiteNode<?>, Boolean> map = new
-		// HashMap<BipartiteNode<?>, Boolean>();
-		// for (BipartiteNode<T> n : s) {
-		// for (Edge<T, K> e : n.getEdges()) {
-		// if (map.get(e.getRight()) == null) {
-		// map.put(e.getRight(), true);
-		// }
-		// }
-		// }
-		// if (s.size() > map.keySet().size()) {
-		// System.out.println("Marriage theorem failed");
-		// }
-		// }
-		// System.out.println("Done testing for marriage theorem");
+//		 System.out.println("Start testing for marriage theorem");
+//		 HashSet<BipartiteNode<T>> set = new HashSet<BipartiteNode<T>>();
+//		 for (BipartiteNode<T> p : leftSet) {
+//		 set.add(p);
+//		 }
+//		 Set<Set<BipartiteNode<T>>> allSubset = Sets.powerSet(set);
+//		 for (Set<BipartiteNode<T>> s : allSubset) {
+//		 HashMap<BipartiteNode<?>, Boolean> map = new
+//		 HashMap<BipartiteNode<?>, Boolean>();
+//		 for (BipartiteNode<T> n : s) {
+//		 for (Edge<T, K> e : n.getEdges()) {
+//		 if (map.get(e.getRight()) == null) {
+//		 map.put(e.getRight(), true);
+//		 }
+//		 }
+//		 }
+//		 if (s.size() > map.keySet().size()) {
+//		 System.out.println("Marriage theorem failed");
+//		 }
+//		 }
+//		 System.out.println("Done testing for marriage theorem");
 
 		ArrayList<Edge<T, K>> path;
 		path = augmentingPath();
@@ -258,10 +263,10 @@ public class Graph<T, K> {
 		ArrayList<Edge<T, K>> path = new ArrayList<Edge<T, K>>();
 		for (BipartiteNode<T> node : leftSet) {
 			if (!node.matched) {
-				// sse.Graph.Node n = (sse.Graph.Node) node.getData();
-				// String s = n.toString();
-				ArrayList<BipartiteNode<?>> visited = new ArrayList<BipartiteNode<?>>();
-				if (augmentingPath(path, node, true, visited)) {
+				 sse.Graph.Node n = (sse.Graph.Node) node.getData();
+				 String s = n.toString();
+			//	ArrayList<BipartiteNode<?>> visited = new ArrayList<BipartiteNode<?>>();
+				if (augmentingPath(path, node, true)) {
 
 					return path;
 				}
@@ -272,23 +277,30 @@ public class Graph<T, K> {
 	}
 
 	private boolean augmentingPath(ArrayList<Edge<T, K>> path,
-			BipartiteNode<?> n, boolean left,
-			ArrayList<BipartiteNode<?>> visited) {
+			BipartiteNode<?> n, boolean left) {
 
-		visited.add(n);
+		//visited.add(n);
 		for (Edge<T, K> e : n.getEdges()) {
 			if (left) {
-				if (!e.matched && !visited.contains(e.getRight())) {
+				if (!e.matched && !path.contains(e)) {
 					path.add(e);
-					return augmentingPath(path, e.getRight(), false, visited);
+					if(augmentingPath(path, e.getRight(), false)){
+						return true;
+ 					} else {
+ 						path.remove(e);
+ 					}
 
 				}
 			} else if (!left) {
 				if (!n.matched) {
 					return true;
-				} else if (e.matched && !visited.contains(e.getLeft())) {
+				} else if (e.matched && !path.contains(e)) {
 					path.add(e);
-					return augmentingPath(path, e.getLeft(), true, visited);
+					if( augmentingPath(path, e.getLeft(), true)){
+						return true;
+					} else {
+						path.remove(e);
+					}
 				}
 			}
 		}

@@ -100,7 +100,7 @@ public class Main {
 
 					while (scanner.hasNextLine()) {
 
-						input += scanner.nextLine();
+						input +="\n"+ scanner.nextLine();
 					}
 					scanner.close();
 					r.close();
@@ -120,7 +120,7 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				CDWAG t = new CDWAG(input);
-				//t.printToFile("graph");
+			//	t.printToFile("graph");
 				if (cmd.hasOption("v")) {
 					System.out
 							.println("Excecution time for generating the graph: "

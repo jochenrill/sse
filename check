@@ -2,13 +2,15 @@
 i=`./search "$1"`
 occurs=`echo $i | wc -w`
 if [ $occurs -eq 1 ]; then
-	echo "Not found"
+	numoccurs=0	
 else 
 	numoccurs=`echo $i | awk '{print $1}'`
-	realnumoccurs=`grep -o "$1" $2 | wc -l`
-	if [ $numoccurs -eq $realnumoccurs ]; then
-		echo "Valid"
-	else
-		echo "Failed"
-	fi
 fi
+
+realnumoccurs=`grep -o "$1" $2 | wc -l`
+if [ $numoccurs -eq $realnumoccurs ]; then
+	echo "Check for $1 Valid"
+else
+	echo "Check for $1 Failed. Got $numoccurs expected $realnumoccurs"
+fi
+

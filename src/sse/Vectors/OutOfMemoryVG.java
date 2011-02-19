@@ -34,6 +34,7 @@ public class OutOfMemoryVG {
 		System.out.println("Calculating places");
 		calculatePlaces();
 		System.out.println("Calculating matching");
+	//	graph.find(graph.source, "seven");
 		bipartiteMatching();
 		while (!s.isEmpty()) {
 			Node n = s.pop();
@@ -119,7 +120,7 @@ public class OutOfMemoryVG {
 			throw new IllegalStateException("FUCK UP IN findPlace");
 		}
 		n.setNumOccurs(places.size());
-		// System.out.println("Node " + n +": "+places);
+	//	 System.out.println("Node " + n +": "+places);
 		// n.setPlaces(places);
 		return places;
 		/*

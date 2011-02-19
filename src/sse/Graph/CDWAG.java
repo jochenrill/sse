@@ -249,4 +249,19 @@ public class CDWAG {
             return endEdge != null;
         }
     }
+    
+    public boolean find(Node n,String s){
+    	if(s.length() == 0){
+    		return true;
+    	}
+    	char c = s.charAt(0);
+    	Edge e = n.getEdge(c);
+    	if(e == null){
+    		return false;
+    	} else {
+    		s = s.substring(e.getEdgeLabelEnd()-e.getEdgeLabelStart()+1);
+    		find(e.getEnd(),s);
+    	}
+    	return false;
+    }
 }
