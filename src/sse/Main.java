@@ -44,6 +44,7 @@ public class Main {
 				"Turns off block usage. Used in evaluation and create mode. Default on.");
 		options.addOption("enc", false,
 				"Turns off block encryption. Default on.");
+		options.addOption("blocksize",true,"Sets the blocksize multiplier");
 		options.addOption("search", false, "Turns on search mode");
 		options.addOption("key", true, "Path to the key file for encryption");
 		options.addOption("create", false, "Turns on creation mode");
@@ -120,6 +121,9 @@ public class Main {
 					outputFile = cmd.getOptionValue("o");
 				} else {
 					outputFile = "default.vc";
+				}
+				if(cmd.hasOption("blocksize")){
+					Constants.VECTOR_SIZE_MULTI = Short.valueOf(cmd.getOptionValue("blocksize"));
 				}
 
 				double generalTime = System.currentTimeMillis();

@@ -46,7 +46,7 @@ public class Constants {
 	 * Represents the number of times the maximum vector size will be taken to
 	 * get the block size
 	 */
-	public static final short VECTOR_SIZE_MULTI = 5;
+	public static short VECTOR_SIZE_MULTI = 5;
 
 	/**
 	 * Represents the byte which is used to fill the datablocks
