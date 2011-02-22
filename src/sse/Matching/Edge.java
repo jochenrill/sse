@@ -4,7 +4,6 @@ public class Edge<T, K> {
 	public boolean matched;
 	private BipartiteNode<T> left;
 	private BipartiteNode<K> right;
-	public int capacity = 10000;
 
 	public void setLeft(BipartiteNode<T> left) {
 		this.left = left;

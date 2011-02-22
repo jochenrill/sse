@@ -45,11 +45,5 @@ public class EdgePosition implements Comparable<EdgePosition>, Serializable {
         return movedPosition;
     }
 
-    public void setBlockPosition(long blockPosition) {
-        this.blockPosition = blockPosition;
-    }
-
-    public long getBlockPosition() {
-        return blockPosition;
-    }
+   
 }

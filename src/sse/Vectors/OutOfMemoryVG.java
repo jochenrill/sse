@@ -9,12 +9,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Stack;
 
-
-
 import sse.Graph.CDWAG;
 import sse.Graph.Edge;
 import sse.Graph.Node;
-import sse.Matching.BipartiteNode;
 import sse.Matching.Graph;
 
 public class OutOfMemoryVG {
@@ -24,16 +21,29 @@ public class OutOfMemoryVG {
 		this.graph = graph;
 	}
 
+	/**
+	 * This method prints the suffix vectors to a given file in form of a java
+	 * object stream
+	 * 
+	 * @param vectorFile
+	 *            the file the vectors will be printed to
+	 * @throws IOException
+	 */
 	public void printListOfVectors(File vectorFile) throws IOException {
 		ObjectOutputStream o = new ObjectOutputStream(new FileOutputStream(
 				vectorFile));
 		graph.sink.setLocation(graph.text.length());
+
+		// use a stack to traverse the tree
 		Stack<Node> s = new Stack<Node>();
 		s.push(graph.source);
-		System.out.println("Calculating places");
+		if (Constants.DEBUG)
+			System.out.println("Calculating places");
+		// calculate a list of all places for each node
 		calculatePlaces();
-		System.out.println("Calculating matching");
-	//	graph.find(graph.source, "seven");
+		if (Constants.DEBUG)
+			System.out.println("Calculating matching");
+		// run a bipartite matching alogrithm
 		bipartiteMatching();
 		while (!s.isEmpty()) {
 			Node n = s.pop();
@@ -66,19 +76,19 @@ public class OutOfMemoryVG {
 		g.calculateMatching();
 		ArrayList<Integer> places = new ArrayList<Integer>();
 		// Adapt matching
-		System.out.println("Adapt matching and collision detection");
-		System.out.println(g.matching.size());
-		System.out.println(graph.nodeCount);
+		if (Constants.DEBUG)
+			System.out.println("Adapt matching and collision detection");
+
 		for (sse.Matching.Edge<Node, Integer> e : g.matching) {
 
-			// TODO: temporary collision detection, remove when fixed
-			if (places.contains(e.getRight().getData())) {
-				System.out.println("Collision on place "
-						+ e.getRight().getData());
+			if (Constants.DEBUG) {
+				if (places.contains(e.getRight().getData())) {
+					System.out.println("Collision on place "
+							+ e.getRight().getData());
 
-			
-			} else {
-				places.add(e.getRight().getData());
+				} else {
+					places.add(e.getRight().getData());
+				}
 			}
 			e.getLeft().getData()
 					.setLocation(e.getRight().getData().intValue());
@@ -116,23 +126,12 @@ public class OutOfMemoryVG {
 		findPlace(n, 0, places);
 		Collections.sort(places);
 		if (places.size() == 0) {
-			throw new IllegalStateException("FUCK UP IN findPlace");
+			throw new IllegalStateException("No place found for Node " + n);
 		}
 		n.setNumOccurs(places.size());
-	//	 System.out.println("Node " + n +": "+places);
-		// n.setPlaces(places);
+
 		return places;
-		/*
-		 * int size = 0;
-		 * 
-		 * for (int i = 0; i < places.size(); i++) { if
-		 * (!graph.isOccPosition[places.get(i) -1 + size]) {
-		 * graph.isOccPosition[places.get(i) -1 + size] = true; return
-		 * places.get(i) + size; } }
-		 * 
-		 * throw new IllegalStateException("No place for node " + n.getId() +
-		 * " found");
-		 */
+
 	}
 
 	private void findPlace(Node n, int pathLength, ArrayList<Integer> places) {
@@ -154,10 +153,7 @@ public class OutOfMemoryVG {
 		SuffixVector r = new SuffixVector(0);
 		r.setDepth(0);
 		for (Edge e : graph.source.getEdges()) {
-			/*
-			 * if (e.getEnd().getLocation() == -1) {
-			 * e.getEnd().setLocation(findPlace(e.getEnd())); }
-			 */
+
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));
@@ -167,17 +163,12 @@ public class OutOfMemoryVG {
 	}
 
 	private SuffixVector printSuffixToFile(Node n) throws IOException {
-		/*
-		 * if (n.getLocation() == -1) { n.setLocation(findPlace(n)); }
-		 */
+
 		SuffixVector tmp = new SuffixVector(n.getLocation());
 		tmp.setNumOccurs(n.getNumOccurs());
 		tmp.setDepth(n.getLength());
 		for (Edge e : n.getEdges()) {
-			/*
-			 * if (e.getEnd().getLocation() == -1) {
-			 * e.getEnd().setLocation(findPlace(e.getEnd())); }
-			 */
+
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));

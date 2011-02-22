@@ -7,7 +7,6 @@ import java.io.RandomAccessFile;
 import sse.Vectors.Constants;
 
 public class BinaryParser {
-	// private DataInputStream stream;
 	private RandomAccessFile stream;
 	private String fileName;
 

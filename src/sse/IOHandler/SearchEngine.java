@@ -16,7 +16,7 @@ public class SearchEngine {
 	private long lastEdgeValue = 0;
 	private long lastDepthValue = 0;
 	private long numOccurs;
-	private boolean inEdge = false;
+	private boolean notReachedSink = false;
 
 	public SearchEngine(String word) {
 		this.word = word;
@@ -63,12 +63,14 @@ public class SearchEngine {
 		}
 		try {
 			long toDelete = currentBlock;
+			// open the first block
 			openNextFile(++currentBlock, startFile, 0, toDelete);
 			while (stream.getFilePointer() < stream.length()) {
+				// read first byte
 				int value = stream.readByte();
 				boolean jumpOver = false;
 				char foo = (char) value;
-				// parse suffix vector
+				// we found a suffix vector - parse it
 				if (foo == Constants.VECTOR_MARKER) {
 					// read depth of the node
 					long depthValue = 0;
@@ -109,9 +111,7 @@ public class SearchEngine {
 								Constants.NUMOCCURS_BYTE
 										+ " is not a valid number for number of occurences");
 					}
-					// we matched the string, but we have to look at the
-					// following suffix vector to determine the number of
-					// occurrences
+
 					long originalVectorPosition = 0;
 					switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
 					case 8:
@@ -131,7 +131,8 @@ public class SearchEngine {
 								Constants.EDGE_REFERENCE_BYTES
 										+ " is not a valid number for edge reference");
 					}
-					// if (lastDepthValue != 0 || lastEdgeValue != 0) {
+					// the suffix vector we are looking at might not be the one
+					// the edge was leading to
 					if (depthValue != 0) {
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
@@ -141,10 +142,17 @@ public class SearchEngine {
 							jumpOver = false;
 						}
 					}
+					/*
+					 * we matched to word and we found the correct suffix vector
+					 * the edge was leading to stop the search an print
+					 * numOccurs.
+					 */
 					if (word.length() == 0 && !jumpOver) {
-						inEdge = true;
+						notReachedSink = true;
 						break;
 					}
+					// the suffix vector was not the correct one, change
+					// depthValue back
 					if (!jumpOver) {
 						lastDepthValue = depthValue;
 					}
@@ -213,9 +221,7 @@ public class SearchEngine {
 						foo = (char) stream.readByte();
 					}
 				} else {
-					/*
-					 * if(word.length() == 0){ inEdge = true; break; }
-					 */
+
 					// Ignore padding bytes
 					if (value == Constants.PADDING_BYTE) {
 						// Block done, move to next block
@@ -244,8 +250,8 @@ public class SearchEngine {
 			delete.delete();
 		}
 		if (word.length() == 0) {
-			// if (inEdge) {
-			if (currentBlock == numberOfBlocks && !inEdge) {
+			// if we are at the end of the files and have reached the sink then numOccurs is 1
+			if (currentBlock == numberOfBlocks && !notReachedSink) {
 				System.out.println("1");
 			} else {
 				System.out.println(numOccurs);

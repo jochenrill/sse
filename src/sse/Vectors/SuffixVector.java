@@ -3,17 +3,19 @@ package sse.Vectors;
 import java.io.Serializable;
 import java.util.Hashtable;
 
+/**
+ * This class is used to represent a suffix vector generated from the cdwag
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class SuffixVector implements Comparable<SuffixVector>, Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -9022293708037890917L;
 	private int location;
 	private int depth;
 	private Hashtable<Character, EdgePosition> map;
-	private long blockPosition = 0;
 	private int numOccurs = -1;
-	
 
 	public SuffixVector(int loc) {
 		this.location = loc;
@@ -31,7 +33,8 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 		return Constants.VECTOR_DEPTH_BYTES + map.keySet().size()
 				+ map.keySet().size() * Constants.EDGE_REFERENCE_BYTES + 2
 				+ map.keySet().size() * Constants.ORIGINAL_EDGE_POSITION_BYTES
-				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES + Constants.NUMOCCURS_BYTE;
+				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES
+				+ Constants.NUMOCCURS_BYTE;
 	}
 
 	public void setLocation(int location) {
@@ -70,14 +73,6 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 		} else {
 			return 1;
 		}
-	}
-
-	public void setBlockPosition(long blockPosition) {
-		this.blockPosition = blockPosition;
-	}
-
-	public long getBlockPosition() {
-		return blockPosition;
 	}
 
 	public void setNumOccurs(int numOccurs) {

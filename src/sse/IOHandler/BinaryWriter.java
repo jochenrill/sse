@@ -143,6 +143,11 @@ public class BinaryWriter {
 		w.close();
 	}
 
+	/*
+	 * this method updates the position of an edge in the actual file aswell as
+	 * the information in which block the edge can be found.
+	 */
+
 	private void updateBlockPosition(ArrayList<SuffixVector> list,
 			ArrayList<EdgePosition> ep, long blockSize) {
 		// Start printing the blocks
@@ -162,7 +167,6 @@ public class BinaryWriter {
 					if ((bytesInCurrentBlock + 1) > blockSize) {
 
 						while (e != null && e.getPosition() < pos) {
-							e.setBlockPosition(currentBlock);
 							e.setMovedPosition(e.getMovedPosition() + padding);
 							if (iterator.hasNext()) {
 								e = iterator.next();
@@ -181,7 +185,6 @@ public class BinaryWriter {
 			// make sure that the vector fits in the blocksize
 			if ((bytesInCurrentBlock + v.getSize()) > blockSize) {
 				while (e != null && e.getPosition() < pos) {
-					e.setBlockPosition(currentBlock);
 					e.setMovedPosition(e.getMovedPosition() + padding);
 					if (iterator.hasNext()) {
 						e = iterator.next();
@@ -201,7 +204,6 @@ public class BinaryWriter {
 		for (; pos < input.length(); pos++) {
 			if ((bytesInCurrentBlock + 1) > blockSize) {
 				while (e != null && e.getPosition() < pos) {
-					e.setBlockPosition(currentBlock);
 					e.setMovedPosition(e.getMovedPosition() + padding);
 					if (iterator.hasNext()) {
 						e = iterator.next();
@@ -219,7 +221,6 @@ public class BinaryWriter {
 
 		// update the rest
 		while (e != null && e.getPosition() <= pos) {
-			e.setBlockPosition(currentBlock);
 			e.setMovedPosition(e.getMovedPosition() + padding);
 			if (iterator.hasNext()) {
 				e = iterator.next();
@@ -239,18 +240,18 @@ public class BinaryWriter {
 		short alphabetSize = 0;
 		boolean[] included = new boolean[255];
 		for (int i = 0; i < input.length(); i++) {
-			//System.out.println(input.charAt(i)+": " +(int)input.charAt(i));
 			if (!included[(char) input.charAt(i)]) {
 				included[(char) input.charAt(i)] = true;
 				alphabetSize++;
 			}
 		}
-		
+
 		// maximum vector size in bytes
 		long maximumVectorSize = 2 + alphabetSize + alphabetSize
 				* Constants.EDGE_REFERENCE_BYTES + alphabetSize
 				* Constants.ORIGINAL_EDGE_POSITION_BYTES
-				+ Constants.VECTOR_DEPTH_BYTES + Constants.ORIGINAL_VECTOR_POSITION_BYTES;
+				+ Constants.VECTOR_DEPTH_BYTES
+				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 		updateBlockPosition(list, ep, blockSize);
 		// Start printing the blocks
@@ -273,10 +274,7 @@ public class BinaryWriter {
 			System.out.println("Could not create file " + fileName
 					+ currentBlock);
 		}
-		/*
-		 * // write header. this is a 64 bit number to represent the block size
-		 * w.write(blockSize); bytesInCurrentBlock += 8;
-		 */
+
 		for (SuffixVector v : list) {
 			// write sequence before the vector
 			if (v.getLocation() != 0) {

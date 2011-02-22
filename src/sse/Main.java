@@ -17,6 +17,7 @@ import sse.Graph.CDWAG;
 import sse.IOHandler.BinaryParser;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
+import sse.Vectors.Constants;
 import sse.Vectors.EdgePosition;
 import sse.Vectors.InMemoryVG;
 import sse.Vectors.OutOfMemoryVG;
@@ -52,6 +53,10 @@ public class Main {
 
 		try {
 			CommandLine cmd = parser.parse(options, args);
+			if (cmd.hasOption("v")) {
+
+				Constants.DEBUG = true;
+			}
 			if (cmd.hasOption("search")) {
 				if (cmd.hasOption("i")) {
 					if (cmd.hasOption("text")) {
@@ -100,7 +105,7 @@ public class Main {
 
 					while (scanner.hasNextLine()) {
 
-						input +="\n"+ scanner.nextLine();
+						input += "\n" + scanner.nextLine();
 					}
 					scanner.close();
 					r.close();
@@ -120,8 +125,8 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				CDWAG t = new CDWAG(input);
-			//	t.printToFile("graph");
-				if (cmd.hasOption("v")) {
+				// t.printToFile("graph");
+				if (Constants.DEBUG) {
 					System.out
 							.println("Excecution time for generating the graph: "
 									+ ((System.currentTimeMillis() - time) / 1000));
@@ -168,7 +173,7 @@ public class Main {
 						}
 					}
 				}
-				if (cmd.hasOption("v")) {
+				if (Constants.DEBUG) {
 					System.out
 							.println("Excecution time for generating the vectors: "
 									+ ((System.currentTimeMillis() - time) / 1000));
@@ -176,7 +181,7 @@ public class Main {
 				time = System.currentTimeMillis();
 				Collections.sort(list);
 				Collections.sort(ep);
-				if (cmd.hasOption("v")) {
+				if (Constants.DEBUG) {
 					System.out
 							.println("Excecution time for sorting the vectors: "
 									+ ((System.currentTimeMillis() - time) / 1000));
@@ -197,7 +202,7 @@ public class Main {
 					}
 					p.setMovedPosition(p.getMovedPosition() + offset);
 				}
-				if (cmd.hasOption("v")) {
+				if (Constants.DEBUG) {
 					System.out
 							.println("Excecution time for updating the positions: "
 									+ ((System.currentTimeMillis() - time) / 1000));
@@ -209,11 +214,11 @@ public class Main {
 				} else {
 					out.writeBlocks(list, ep, !cmd.hasOption("enc"));
 				}
-				if (cmd.hasOption("v")) {
+				if (Constants.DEBUG) {
 					System.out.println("Excecution time for output: "
 							+ ((System.currentTimeMillis() - time) / 1000));
 				}
-				if (cmd.hasOption("v")) {
+				if (Constants.DEBUG) {
 					System.out
 							.println("Total excecution time: "
 									+ ((System.currentTimeMillis() - generalTime) / 1000));
@@ -235,8 +240,6 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// s = "ananasan$";
-		// s = "aatttatttatta$";
 
 	}
 }

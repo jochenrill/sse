@@ -12,6 +12,10 @@ public class Constants {
 	}
 
 	/**
+	 * Indicates whether debug mode is on
+	 */
+	public static boolean DEBUG = false;
+	/**
 	 * Represents the character used to distinct SuffixVectors from text.
 	 */
 	public static final char VECTOR_MARKER = '#';
