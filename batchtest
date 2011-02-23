@@ -1,0 +1,15 @@
+#!/bin/bash
+
+date 
+count=1;
+words=`wc -w words | awk '{print $1}'`
+for n in `cat words`
+    do echo "${n} poem" |xargs ./check | grep Failed;
+    let "mod=$words % $count"
+    if [ $mod -eq 0 ]; then
+        echo $count
+    fi
+    count=$(($count+1))
+done
+date
+

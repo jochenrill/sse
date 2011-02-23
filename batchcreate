@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for i in `seq 5 5 340`
+    do head -c $(($i*1000)) text > tmpfile
+    echo "Creating file with $i kB"
+    date
+    ./create tmpfile
+    echo "Done creating file with $i kB"
+    date
+done

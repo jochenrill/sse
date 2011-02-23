@@ -1,0 +1,46 @@
+rill@i09pc15:~/sse$ ./test 
+Di 22. Feb 13:44:17 CET 2011
+1
+2
+5
+10
+17
+25
+34
+50
+85
+170
+425
+850
+Di 22. Feb 13:50:25 CET 2011
+rill@i09pc15:~/sse$ rm def*
+rill@i09pc15:~/sse$ vim create 
+rill@i09pc15:~/sse$ ./create poem 
+Excecution time for generating the graph: 0.357
+Calculating places
+Calculating matching
+Adapt matching and collision detection
+[GC 593568K->492K(2453376K), 0.0013870 secs]
+[Full GC 492K->410K(2453376K), 0.0120520 secs]
+Excecution time for generating the vectors: 7.471
+Excecution time for sorting the vectors: 0.382
+Excecution time for updating the positions: 0.049
+Excecution time for output: 5.392
+Total excecution time: 13.651
+rill@i09pc15:~/sse$ ./test 
+Di 22. Feb 13:51:07 CET 2011
+1
+2
+5
+10
+17
+25
+34
+50
+85
+170
+425
+850
+Di 22. Feb 13:58:55 CET 2011
+rill@i09pc15:~/sse$ 
+
