@@ -1,10 +1,18 @@
 #!/bin/bash
-
 for i in `seq 5 5 340`
     do head -c $(($i*1000)) text > tmpfile
-    echo "Creating file with $i kB"
-    date
+    dstart=`date`
+    hstart=`echo $dstart| awk '{print $4}' | sed 's/:/ /g' | awk '{print $1}'`
+    mstart=`echo $dstart | awk '{print $4}' | sed 's/:/ /g' | awk '{print $2}'`
+    sstart=`echo $dstart | awk '{print $4}' | sed 's/:/ /g' | awk '{print $3}'`
+    tstart=`echo "$hstart * 3600 + $mstart * 60 + $sstart" | bc`
     ./create tmpfile
-    echo "Done creating file with $i kB"
-    date
+    dend=`date`
+    hend=`echo $dend| awk '{print $4}' | sed 's/:/ /g' | awk '{print $1}'`
+    mend=`echo $dend | awk '{print $4}' | sed 's/:/ /g' | awk '{print $2}'`
+    send=`echo $dend | awk '{print $4}' | sed 's/:/ /g' | awk '{print $3}'`
+    tend=`echo "$hend * 3600 + $mend * 60 + $send" | bc` 
+    exectime=`echo "$tend - $tstart" | bc`
+    echo "Time for creating file with $i kB: $exectime seconds"
+    echo "$i $exectime" >> results/graph
 done

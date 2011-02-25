@@ -141,7 +141,11 @@ public class Main {
 				if (cmd.hasOption("m")) {
 					InMemoryVG generator = new InMemoryVG(t);
 					list = generator.getListOfVectors();
-					ep = generator.getListOfEdges();
+					for (SuffixVector v : list) {
+						for (EdgePosition e : v.getMap().values()) {
+							ep.add(e);
+						}
+					}
 					generator = null;
 					t = null;
 					System.gc();
