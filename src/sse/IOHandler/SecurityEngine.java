@@ -58,7 +58,7 @@ public class SecurityEngine {
 	public void decrypt(String fileName) {
 		try {
 			FileOutputStream b = new FileOutputStream(fileName + ".dec");
-			Cipher c = Cipher.getInstance("AES");
+			Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			c.init(Cipher.DECRYPT_MODE, secureKey);
 			CipherInputStream cis = new CipherInputStream(new FileInputStream(
 					fileName + ".sec"), c);
@@ -85,7 +85,7 @@ public class SecurityEngine {
 		try {
 			DataInputStream b = new DataInputStream(new FileInputStream(
 					fileName));
-			Cipher c = Cipher.getInstance("AES");
+			Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
 			c.init(Cipher.ENCRYPT_MODE, secureKey);
 			CipherOutputStream cos = new CipherOutputStream(
