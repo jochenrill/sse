@@ -1,2 +1,2 @@
 #!/bin/bash
-java -Xss200m -Xms2500m -Xmx2500m -cp lib/jung/*:lib/commons-cli-1.2.jar:build/:lib/guava-r08.jar sse/Main -create -m -blocksize 5 -i `echo -n $1` 
+/opt/jdk1.6.0_20/bin/java -Xss200m -Xms2g -Xmx2g -cp lib/jung/*:lib/commons-cli-1.2.jar:build/:lib/guava-r08.jar sse/Main -create -m -blocksize 10 -i `echo -n $1` 

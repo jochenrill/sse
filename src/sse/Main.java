@@ -130,7 +130,7 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				CDWAG t = new CDWAG(input);
-
+				
 				if (Constants.DEBUG) {
 					System.out
 							.println("Excecution time for generating the graph: "
@@ -142,6 +142,7 @@ public class Main {
 				if (cmd.hasOption("m")) {
 					InMemoryVG generator = new InMemoryVG(t);
 					list = generator.getListOfVectors();
+					
 					for (SuffixVector v : list) {
 						for (EdgePosition e : v.getMap().values()) {
 							ep.add(e);
@@ -150,6 +151,7 @@ public class Main {
 					generator = null;
 					t = null;
 					System.gc();
+					
 				} else {
 					OutOfMemoryVG generator = new OutOfMemoryVG(t);
 					File vectorFile = new File("_vector.tmp");
@@ -162,6 +164,7 @@ public class Main {
 
 					generator = null;
 					System.gc();
+					
 					try {
 						ObjectInputStream o = new ObjectInputStream(
 								new FileInputStream("_vector.tmp"));

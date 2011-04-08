@@ -5,7 +5,9 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 import sse.Vectors.EdgePosition;
 
@@ -32,11 +34,13 @@ public class CDWAG {
 	public Node sink;
 	private Node bottom;
 	public long nodeCount = 0;
+
 	/**
 	 * Contains the list of EdgePositions for obtaining the SuffixVectors later
 	 * on.
 	 */
-	public ArrayList<EdgePosition> listOfEdges = new ArrayList<EdgePosition>();
+	// public ArrayList<EdgePosition> listOfEdges = new
+	// ArrayList<EdgePosition>();
 
 	/**
 	 * Initializes and constructs the graph for a given text.
@@ -248,6 +252,29 @@ public class CDWAG {
 			Edge endEdge = s.getEdge(c);
 			return endEdge != null;
 		}
+	}
+
+	public int edgeCount() {
+		LinkedList<Node> l = new LinkedList<Node>();
+		HashMap<Node, Integer> m = new HashMap<Node, Integer>();
+		edgeCount(source, m);
+		int count = 0;
+		for (Integer n : m.values()) {
+			count += n;
+		}
+		return count;
+	}
+
+	private void edgeCount(Node n, HashMap<Node, Integer> visited) {
+
+		if (n != sink) {
+
+			visited.put(n, n.getEdges().size());
+		}
+		for (Edge e : n.getEdges()) {
+			edgeCount(e.getEnd(), visited);
+		}
+
 	}
 
 }
