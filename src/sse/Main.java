@@ -148,9 +148,10 @@ public class Main {
 							ep.add(e);
 						}
 					}
+					
 					generator = null;
 					t = null;
-					System.gc();
+					
 					
 				} else {
 					OutOfMemoryVG generator = new OutOfMemoryVG(t);

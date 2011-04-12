@@ -46,3 +46,49 @@ correlation matrix of the fit parameters:
 a               1.000 
 b              -0.969  1.000 
 c               0.754 -0.872  1.000 
+
+
+*******************************************************************************
+Tue Apr 12 16:11:21 2011
+
+
+FIT:    data read from "memory_all_text"
+        format = z
+        #datapoints = 63
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+fitted parameters initialized with current variable values
+
+
+
+ Iteration 0
+ WSSR        : 903154            delta(WSSR)/WSSR   : 0
+ delta(WSSR) : 0                 limit for stopping : 1e-05
+ lambda	  : 130.13
+
+initial set of free parameter values
+
+a               = 1
+b               = 1
+
+After 5 iterations the fit converged.
+final sum of squares of residuals : 65.2668
+rel. change during last iteration : -2.91343e-07
+
+degrees of freedom    (FIT_NDF)                        : 61
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 1.03438
+variance of residuals (reduced chisquare) = WSSR/ndf   : 1.06995
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+
+a               = 0.297542         +/- 0.001433     (0.4817%)
+b               = 12.1234          +/- 0.2638       (2.176%)
+
+
+correlation matrix of the fit parameters:
+
+               a      b      
+a               1.000 
+b              -0.869  1.000 

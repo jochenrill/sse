@@ -1,8 +1,10 @@
 #!/bin/bash
-for i in `seq 5 5 430`
+for i in `seq 5 5 315`
 do head -c $(($i*1000)) text > tmpfile
 echo "$" >> tmpfile
-memory=`./create tmpfile | grep Memory | awk '{print $2}'`
+#/usr/bin/time -o foo -f "%e %M %K" ./create tmpfile
+#memory=`cat foo | awk '{print $2}'`
+memory=`./create tmpfile`
 let "memory = memory / 1000000"
 echo $memory
 echo "Graph memory for creating file with $i kB: $memory"
