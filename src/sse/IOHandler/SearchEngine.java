@@ -17,6 +17,7 @@ public class SearchEngine {
 	private long lastDepthValue = 0;
 	private long numOccurs;
 	private boolean notReachedSink = false;
+	public int files = 0;
 
 	public SearchEngine(String word) {
 		this.word = word;
@@ -34,6 +35,7 @@ public class SearchEngine {
 
 	private void openNextFile(long block, String fileName, long position,
 			long oldBlock) throws IOException {
+		files++;
 		stream.close();
 		if (decrypt) {
 			File delete = new File(fileName + oldBlock + ".dec");
