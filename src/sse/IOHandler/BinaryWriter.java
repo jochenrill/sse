@@ -231,7 +231,8 @@ public class BinaryWriter {
 	}
 
 	public void writeBlocks(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, boolean encrypt) {
+			ArrayList<EdgePosition> ep, boolean encrypt, long textLength,
+			boolean indcpa) {
 		if (encrypt) {
 			secEngine = new SecurityEngine();
 		}
@@ -252,7 +253,17 @@ public class BinaryWriter {
 				* Constants.ORIGINAL_EDGE_POSITION_BYTES
 				+ Constants.VECTOR_DEPTH_BYTES
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
+
+		// Calculate the maximum data size for IND-CPA-Security
+		long maximumDataSize = 2 + 2 + 2 * Constants.EDGE_REFERENCE_BYTES + 2
+				* Constants.ORIGINAL_EDGE_POSITION_BYTES
+				+ Constants.VECTOR_DEPTH_BYTES
+				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
+		maximumDataSize *= textLength;
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
+
+		long numOfBlocks = 2 * (maximumDataSize / blockSize) + 1;
+
 		updateBlockPosition(list, ep, blockSize);
 		// Start printing the blocks
 		int pos = 0;
@@ -408,6 +419,15 @@ public class BinaryWriter {
 			w.write(input.charAt(pos));
 			bytesInCurrentBlock++;
 		}
+		fillWithData(bytesInCurrentBlock, blockSize);
+		// Create a lot of empty blocks for IND-CPA-Security
+		if (indcpa) {
+			while (currentBlock * blockSize < maximumDataSize) {
+				openNextFile(++currentBlock, encrypt);
+				fillWithData(0, blockSize);
+			}
+		}
+
 		w.close();
 		// open writer for meta information file
 		try {
@@ -424,8 +444,16 @@ public class BinaryWriter {
 			new File(fileName + (currentBlock)).delete();
 		}
 		secEngine.printKey("key");
+
 		w.write(currentBlock);
 		w.close();
+		/*
+		 * System.out.println(currentBlock*blockSize);
+		 * System.out.println(maximumDataSize); System.out.println(numOfBlocks);
+		 * System.out.println(currentBlock);
+		 * System.out.println((maximumDataSize-
+		 * currentBlock*blockSize)/blockSize); System.out.println(blockSize);
+		 */
 	}
 
 	private void openNextFile(long currentBlock, boolean encrypt) {

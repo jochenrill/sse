@@ -50,6 +50,7 @@ public class Main {
 		options.addOption("create", false, "Turns on creation mode");
 		options.addOption("text", true,
 				"If search mode is used, this is the text that will be searched");
+		options.addOption("indcpa",false,"Turns on IND-CPA-Mode");
 		CommandLineParser parser = new GnuParser();
 
 		try {
@@ -68,6 +69,7 @@ public class Main {
 									cmd.getOptionValue("key"));
 							System.out.println(sEn.find(
 									cmd.getOptionValue("i"), true));
+							System.out.println(sEn.files);
 						} else {
 							SearchEngine sEn = new SearchEngine(
 									cmd.getOptionValue("text"));
@@ -130,7 +132,7 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				CDWAG t = new CDWAG(input);
-				
+				long textLength = t.text.length();
 				if (Constants.DEBUG) {
 					System.out
 							.println("Excecution time for generating the graph: "
@@ -138,6 +140,7 @@ public class Main {
 				}
 				time = System.currentTimeMillis();
 				ArrayList<SuffixVector> list = new ArrayList<SuffixVector>();
+				
 				ArrayList<EdgePosition> ep = new ArrayList<EdgePosition>();
 				if (cmd.hasOption("m")) {
 					InMemoryVG generator = new InMemoryVG(t);
@@ -148,6 +151,7 @@ public class Main {
 							ep.add(e);
 						}
 					}
+					
 					generator = null;
 					t = null;
 					System.gc();
@@ -224,7 +228,7 @@ public class Main {
 				if (cmd.hasOption("b")) {
 					out.writeAll(list, ep);
 				} else {
-					out.writeBlocks(list, ep, !cmd.hasOption("enc"));
+					out.writeBlocks(list, ep, !cmd.hasOption("enc"),textLength,cmd.hasOption("indcpa"));
 				}
 				if (Constants.DEBUG) {
 					System.out.println("Excecution time for output: "
