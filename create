@@ -1,2 +1,2 @@
 #!/bin/bash
-java -Xss200m -Xms3g -Xmx3g -cp lib/jung/*:lib/commons-cli-1.2.jar:build/:lib/guava-r08.jar sse/Main -create -indcpa -m -blocksize 10 -i `echo -n $1` 
+java -Xss200m -Xms3g -Xmx3g -cp lib/jung/*:lib/commons-cli-1.2.jar:build/:lib/guava-r08.jar sse/Main -create -indcpa -m -blocksize 5 -i `echo -n $1` 

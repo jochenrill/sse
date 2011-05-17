@@ -5,16 +5,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class SecurityEngine {
 	private Key secureKey;
+	private byte[] iv;
+	private Cipher c;
 
 	public SecurityEngine() {
 		KeyGenerator kg;
@@ -22,8 +26,13 @@ public class SecurityEngine {
 			kg = KeyGenerator.getInstance("AES");
 			kg.init(new SecureRandom());
 			secureKey = kg.generateKey();
+			c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+
 		} catch (NoSuchAlgorithmException e) {
 			System.out.println(e.getMessage());
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -34,6 +43,12 @@ public class SecurityEngine {
 			byte[] key = secureKey.getEncoded();
 			for (int i = 0; i < key.length; i++) {
 				keyStream.write(key[i]);
+			}
+			keyStream.close();
+			keyStream = new BinaryOut(fileName + ".iv");
+
+			for (int i = 0; i < iv.length; i++) {
+				keyStream.write(iv[i]);
 			}
 			keyStream.close();
 		} catch (IOException e) {
@@ -50,6 +65,12 @@ public class SecurityEngine {
 			keyStream.read(key, 0, 16);
 			keyStream.close();
 			secureKey = new SecretKeySpec(key, "AES");
+			keyStream = new DataInputStream(new DataInputStream(
+					new FileInputStream(new File(fileName + ".iv"))));
+			iv = new byte[16];
+			keyStream.read(iv, 0, 16);
+			keyStream.close();
+
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
@@ -58,8 +79,9 @@ public class SecurityEngine {
 	public void decrypt(String fileName) {
 		try {
 			FileOutputStream b = new FileOutputStream(fileName + ".dec");
-			Cipher c = Cipher.getInstance("AES");
-			c.init(Cipher.DECRYPT_MODE, secureKey);
+
+			c.init(Cipher.DECRYPT_MODE, secureKey, new IvParameterSpec(iv));
+
 			CipherInputStream cis = new CipherInputStream(new FileInputStream(
 					fileName + ".sec"), c);
 			byte[] block = new byte[8];
@@ -70,13 +92,11 @@ public class SecurityEngine {
 			cis.close();
 			b.close();
 
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println(e.getMessage());
-		} catch (NoSuchPaddingException e) {
-			System.out.println(e.getMessage());
 		} catch (InvalidKeyException e) {
 			System.out.println(e.getMessage());
 		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		} catch (InvalidAlgorithmParameterException e) {
 			System.out.println(e.getMessage());
 		}
 	}
@@ -85,9 +105,11 @@ public class SecurityEngine {
 		try {
 			DataInputStream b = new DataInputStream(new FileInputStream(
 					fileName));
-			Cipher c = Cipher.getInstance("AES");
 
-			c.init(Cipher.ENCRYPT_MODE, secureKey);
+			if (iv == null) {
+				c.init(Cipher.ENCRYPT_MODE, secureKey);
+				iv = c.getIV();
+			}
 			CipherOutputStream cos = new CipherOutputStream(
 					new FileOutputStream(fileName + ".sec"), c);
 			int i;
@@ -96,10 +118,7 @@ public class SecurityEngine {
 			}
 			cos.close();
 			b.close();
-		} catch (NoSuchAlgorithmException e) {
-			System.out.println(e.getMessage());
-		} catch (NoSuchPaddingException e) {
-			System.out.println(e.getMessage());
+
 		} catch (InvalidKeyException e) {
 			System.out.println(e.getMessage());
 		} catch (IOException e) {

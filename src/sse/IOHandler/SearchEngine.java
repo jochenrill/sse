@@ -18,6 +18,7 @@ public class SearchEngine {
 	private long numOccurs;
 	private boolean notReachedSink = false;
 	public int files = 0;
+	private boolean reachedEnd = false;
 
 	public SearchEngine(String word) {
 		this.word = word;
@@ -45,6 +46,10 @@ public class SearchEngine {
 			sEn.decrypt(fileName + block);
 			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
 					"r");
+			// if a block starts with a padding byte, it is a padding block =)
+			if (stream.readByte() == Constants.PADDING_BYTE) {
+				reachedEnd = true;
+			}
 			stream.seek(position);
 		} else {
 			stream = new RandomAccessFile(new File(fileName + block), "r");
@@ -67,7 +72,7 @@ public class SearchEngine {
 			long toDelete = currentBlock;
 			// open the first block
 			openNextFile(++currentBlock, startFile, 0, toDelete);
-			while (stream.getFilePointer() < stream.length()) {
+			while (stream.getFilePointer() < stream.length() && !reachedEnd) {
 				// read first byte
 				int value = stream.readByte();
 				boolean jumpOver = false;
@@ -225,7 +230,7 @@ public class SearchEngine {
 				} else {
 
 					// Ignore padding bytes
-					if (value == Constants.PADDING_BYTE) {
+					if (value == Constants.PADDING_BYTE ) {
 						// Block done, move to next block
 						toDelete = currentBlock;
 						openNextFile(++currentBlock, startFile, 0, toDelete);
@@ -252,8 +257,9 @@ public class SearchEngine {
 			delete.delete();
 		}
 		if (word.length() == 0) {
-			// if we are at the end of the files and have reached the sink then numOccurs is 1
-			if (currentBlock == numberOfBlocks && !notReachedSink) {
+			// if we are at the end of the files and have reached the sink then
+			// numOccurs is 1
+			if ( !notReachedSink) {
 				System.out.println("1");
 			} else {
 				System.out.println(numOccurs);

@@ -69,7 +69,7 @@ public class Main {
 									cmd.getOptionValue("key"));
 							System.out.println(sEn.find(
 									cmd.getOptionValue("i"), true));
-							System.out.println(sEn.files);
+						//	System.out.println(sEn.files);
 						} else {
 							SearchEngine sEn = new SearchEngine(
 									cmd.getOptionValue("text"));
@@ -109,6 +109,7 @@ public class Main {
 					while (scanner.hasNextLine()) {
 
 						input += scanner.nextLine();
+						input+="\n";
 					}
 					scanner.close();
 					r.close();

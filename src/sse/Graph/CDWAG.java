@@ -31,8 +31,8 @@ public class CDWAG {
 	/**
 	 * Contains the final node.
 	 */
+	public Node bottom;
 	public Node sink;
-	private Node bottom;
 	public long nodeCount = 0;
 
 	/**
