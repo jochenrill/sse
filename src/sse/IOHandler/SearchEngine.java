@@ -257,8 +257,7 @@ public class SearchEngine {
 			delete.delete();
 		}
 		if (word.length() == 0) {
-			// if we are at the end of the files and have reached the sink then
-			// numOccurs is 1
+			// if we have reached the sink then numOccurs is 1
 			if ( !notReachedSink) {
 				System.out.println("1");
 			} else {

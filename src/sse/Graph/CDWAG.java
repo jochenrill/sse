@@ -36,13 +36,6 @@ public class CDWAG {
 	public long nodeCount = 0;
 
 	/**
-	 * Contains the list of EdgePositions for obtaining the SuffixVectors later
-	 * on.
-	 */
-	// public ArrayList<EdgePosition> listOfEdges = new
-	// ArrayList<EdgePosition>();
-
-	/**
 	 * Initializes and constructs the graph for a given text.
 	 * 
 	 * The constructor initializes the needed variables and constructs the
@@ -254,27 +247,22 @@ public class CDWAG {
 		}
 	}
 
-	public int edgeCount() {
-		LinkedList<Node> l = new LinkedList<Node>();
-		HashMap<Node, Integer> m = new HashMap<Node, Integer>();
-		edgeCount(source, m);
-		int count = 0;
-		for (Integer n : m.values()) {
-			count += n;
-		}
-		return count;
-	}
+	/* Methods for counting edges - only for generating the test data */
 
-	private void edgeCount(Node n, HashMap<Node, Integer> visited) {
-
-		if (n != sink) {
-
-			visited.put(n, n.getEdges().size());
-		}
-		for (Edge e : n.getEdges()) {
-			edgeCount(e.getEnd(), visited);
-		}
-
-	}
+	/*
+	 * public int edgeCount() { LinkedList<Node> l = new LinkedList<Node>();
+	 * HashMap<Node, Integer> m = new HashMap<Node, Integer>();
+	 * edgeCount(source, m); int count = 0; for (Integer n : m.values()) { count
+	 * += n; } return count; }
+	 * 
+	 * private void edgeCount(Node n, HashMap<Node, Integer> visited) {
+	 * 
+	 * if (n != sink) {
+	 * 
+	 * visited.put(n, n.getEdges().size()); } for (Edge e : n.getEdges()) {
+	 * edgeCount(e.getEnd(), visited); }
+	 * 
+	 * }
+	 */
 
 }

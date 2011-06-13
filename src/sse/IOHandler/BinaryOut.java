@@ -9,6 +9,8 @@ package sse.IOHandler;
  *  output, a file, an OutputStream or a Socket.
  *
  *  The bytes written are not aligned.
+ *  
+ *  Taken from: http://introcs.cs.princeton.edu/stdlib/BinaryOut.java.html
  *
  *************************************************************************/
 

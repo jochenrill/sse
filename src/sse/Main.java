@@ -14,7 +14,6 @@ import java.util.Scanner;
 import org.apache.commons.cli.*;
 
 import sse.Graph.CDWAG;
-import sse.IOHandler.BinaryParser;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
 import sse.Vectors.Constants;
@@ -40,17 +39,18 @@ public class Main {
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
-		options.addOption("b", false,
-				"Turns off block usage. Used in evaluation and create mode. Default on.");
-		options.addOption("enc", false,
-				"Turns off block encryption. Default on.");
+		// options.addOption("b", false,
+		// "Turns off block usage. Used in evaluation and create mode. Default on.");
+		// options.addOption("enc", false,
+		// "Turns off block encryption. Default on.");
 		options.addOption("blocksize", true, "Sets the blocksize multiplier");
 		options.addOption("search", false, "Turns on search mode");
-		options.addOption("key", true, "Path to the key file for encryption");
+		options.addOption("key", true,
+		 "Path to the key file for encryption");
 		options.addOption("create", false, "Turns on creation mode");
 		options.addOption("text", true,
 				"If search mode is used, this is the text that will be searched");
-		options.addOption("indcpa",false,"Turns on IND-CPA-Mode");
+		options.addOption("indcpa", false, "Turns on IND-CPA-Mode");
 		CommandLineParser parser = new GnuParser();
 
 		try {
@@ -60,39 +60,24 @@ public class Main {
 				Constants.DEBUG = true;
 			}
 			if (cmd.hasOption("search")) {
+				// We need a key file, a search text and an input text for
+				// searching
 				if (cmd.hasOption("i")) {
 					if (cmd.hasOption("text")) {
-
 						if (cmd.hasOption("key")) {
 							SearchEngine sEn = new SearchEngine(
 									cmd.getOptionValue("text"),
 									cmd.getOptionValue("key"));
 							System.out.println(sEn.find(
 									cmd.getOptionValue("i"), true));
-						//	System.out.println(sEn.files);
 						} else {
-							SearchEngine sEn = new SearchEngine(
-									cmd.getOptionValue("text"));
-							System.out.println(sEn.find(
-									cmd.getOptionValue("i"), false));
+							throw new ParseException("Key argument missing");
 						}
 					} else {
 						throw new ParseException("Text argument missing");
 					}
 				} else {
 					throw new ParseException("Input argument is needed");
-				}
-			} else if (cmd.hasOption("evaluate")) {
-
-				if (cmd.hasOption("i")) {
-					BinaryParser p = new BinaryParser(cmd.getOptionValue("i"));
-					if (cmd.hasOption("b")) {
-						System.out.println(p.getText());
-					} else {
-						System.out.println(p.getTextWithBlocks());
-					}
-				} else {
-					throw new ParseException("Input file must be given.");
 				}
 
 			} else if (cmd.hasOption("create")) {
@@ -108,8 +93,7 @@ public class Main {
 
 					while (scanner.hasNextLine()) {
 
-						input += scanner.nextLine();
-						input+="\n";
+						input += "\n" + scanner.nextLine();
 					}
 					scanner.close();
 					r.close();
@@ -141,22 +125,23 @@ public class Main {
 				}
 				time = System.currentTimeMillis();
 				ArrayList<SuffixVector> list = new ArrayList<SuffixVector>();
-				
+
 				ArrayList<EdgePosition> ep = new ArrayList<EdgePosition>();
 				if (cmd.hasOption("m")) {
+					// Generate Vectors in memory. Much faster than out of
+					// memory
 					InMemoryVG generator = new InMemoryVG(t);
 					list = generator.getListOfVectors();
-					
+
 					for (SuffixVector v : list) {
 						for (EdgePosition e : v.getMap().values()) {
 							ep.add(e);
 						}
 					}
-					
+
 					generator = null;
 					t = null;
-					
-					
+
 				} else {
 					OutOfMemoryVG generator = new OutOfMemoryVG(t);
 					File vectorFile = new File("_vector.tmp");
@@ -169,7 +154,7 @@ public class Main {
 
 					generator = null;
 					System.gc();
-					
+
 					try {
 						ObjectInputStream o = new ObjectInputStream(
 								new FileInputStream("_vector.tmp"));
@@ -196,6 +181,8 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
+
+				// Sort position and vector objects for easier merging
 				Collections.sort(list);
 				Collections.sort(ep);
 				if (Constants.DEBUG) {
@@ -226,11 +213,10 @@ public class Main {
 				}
 				time = System.currentTimeMillis();
 				BinaryWriter out = new BinaryWriter(outputFile, input);
-				if (cmd.hasOption("b")) {
-					out.writeAll(list, ep);
-				} else {
-					out.writeBlocks(list, ep, !cmd.hasOption("enc"),textLength,cmd.hasOption("indcpa"));
-				}
+
+				out.writeBlocks(list, ep, true, textLength,
+						cmd.hasOption("indcpa"));
+
 				if (Constants.DEBUG) {
 					System.out.println("Excecution time for output: "
 							+ ((System.currentTimeMillis() - time) / 1000));

@@ -20,129 +20,6 @@ public class BinaryWriter {
 		this.fileName = fileName;
 	}
 
-	public void writeAll(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep) {
-		try {
-			w = new BinaryOut(fileName);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		int pos = 0;
-		for (SuffixVector v : list) {
-			// write sequence before the vector
-			if (v.getLocation() != 0) {
-				for (; pos < v.getLocation(); pos++) {
-					w.write(input.charAt(pos));
-				}
-			}
-			// write vector itself
-			w.write(Constants.VECTOR_MARKER);
-			switch (Constants.VECTOR_DEPTH_BYTES) {
-			case 8:
-				w.write((long) v.getDepth());
-				break;
-			case 4:
-				w.write((int) v.getDepth());
-				break;
-			case 2:
-				w.write((short) v.getDepth());
-				break;
-			case 1:
-				w.write((char) v.getDepth());
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						Constants.VECTOR_DEPTH_BYTES
-								+ " is not a valid number for vector depth");
-			}
-			switch (Constants.NUMOCCURS_BYTE) {
-			case 8:
-				w.write((long) v.getNumOccurs());
-				break;
-			case 4:
-				w.write((int) v.getNumOccurs());
-				break;
-			case 2:
-				w.write((short) v.getNumOccurs());
-				break;
-			case 1:
-				w.write((char) v.getNumOccurs());
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						Constants.NUMOCCURS_BYTE
-								+ " is not a valid number for number of occurences");
-			}
-			switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
-			case 8:
-				w.write((long) v.getLocation());
-				break;
-			case 4:
-				w.write((int) v.getLocation());
-				break;
-			case 2:
-				w.write((short) v.getLocation());
-				break;
-			case 1:
-				w.write((char) v.getLocation());
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						Constants.VECTOR_DEPTH_BYTES
-								+ " is not a valid number for vector depth");
-			}
-			for (Character c : v.getMap().keySet()) {
-				// write first char of edge
-				w.write(c);
-				// write bytesequence for representing the edge
-				switch (Constants.EDGE_REFERENCE_BYTES) {
-				case 8:
-					w.write((long) v.getMap().get(c).getMovedPosition());
-					break;
-				case 4:
-					w.write((int) v.getMap().get(c).getMovedPosition());
-					break;
-				case 2:
-					w.write((short) v.getMap().get(c).getMovedPosition());
-					break;
-				case 1:
-					w.write((char) v.getMap().get(c).getMovedPosition());
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							Constants.EDGE_REFERENCE_BYTES
-									+ " is not a valid number for edge reference");
-				}
-				// write bytesequence for representing the block the edge is
-				// leading to. We dont use blocks, so just write zero bytes
-				switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
-				case 8:
-					w.write((long) 0);
-					break;
-				case 4:
-					w.write((int) 0);
-					break;
-				case 2:
-					w.write((short) 0);
-					break;
-				case 1:
-					w.write((char) 0);
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							Constants.ORIGINAL_EDGE_POSITION_BYTES
-									+ " is not a valid number for edge reference");
-				}
-			}
-			w.write(Constants.VECTOR_MARKER);
-		}
-		// write the rest
-		for (; pos < input.length(); pos++) {
-			w.write(input.charAt(pos));
-		}
-		w.close();
-	}
-
 	/*
 	 * this method updates the position of an edge in the actual file aswell as
 	 * the information in which block the edge can be found.
@@ -261,8 +138,6 @@ public class BinaryWriter {
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
 		maximumDataSize *= textLength;
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
-
-		long numOfBlocks = 2 * (maximumDataSize / blockSize) + 1;
 
 		updateBlockPosition(list, ep, blockSize);
 		// Start printing the blocks
