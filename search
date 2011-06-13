@@ -1,2 +1,2 @@
 #!/bin/bash
-java -cp lib/commons-cli-1.2.jar:build/ sse/Main -search -key key -i default.vc -text "$@"
+java -jar sse.jar -search -key key -i default.vc -text "$@"

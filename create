@@ -1,2 +1,2 @@
 #!/bin/bash
-java -Xss200m -Xms2g -Xmx2g -cp lib/jung/*:lib/commons-cli-1.2.jar:build/:lib/guava-r08.jar sse/Main -create -indcpa -m -blocksize 5 -i `echo -n $1` 
+java -jar -Xss200m -Xms2g -Xmx2g sse.jar -create -indcpa -m -blocksize 5 -i `echo -n $1` 
