@@ -1,4 +1,9 @@
 package sse.Graph;
+/**
+ * This class is for returning pairs of values in the algorithm for generating the CDAWG
+ * @author Jochen Rill
+ *
+ */
 public class Pair {
     public boolean b;
     public int k;

@@ -3,7 +3,12 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
-
+/**
+ * Implementation of Ukkonen's algorithm for generating a suffix tree in O(n) time - for testing purposes only.
+ * @author Jochen Rill
+ *
+ */
+ 
 public class SuffixTree {
     private long nodeCount;
     private String text;

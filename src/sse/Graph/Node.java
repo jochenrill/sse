@@ -105,11 +105,10 @@ public class Node {
 	public ArrayList<Integer> getPlaces() {
 		return places;
 	}
-	
+
 	@Override
-	public boolean equals(Object o){
-		if(o instanceof Node){
-			Node tmp = (Node)o;
+	public boolean equals(Object o) {
+		if (o instanceof Node) {
 			return (((Node) o).getId() == id);
 		} else {
 			return false;

@@ -7,7 +7,6 @@ public class EdgePosition implements Comparable<EdgePosition>, Serializable {
     private static final long serialVersionUID = 1460328906527139022L;
     private long position;
     private long movedPosition;
-    private long blockPosition;
 
     public EdgePosition(int pos) {
         this.position = pos;

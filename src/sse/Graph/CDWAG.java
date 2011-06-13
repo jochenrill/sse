@@ -4,12 +4,7 @@ import java.io.BufferedWriter;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Stack;
-
-import sse.Vectors.EdgePosition;
 
 /**
  * This class represents and constructs the CDWAG (also called
