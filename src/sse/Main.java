@@ -13,6 +13,7 @@ import java.util.Scanner;
 
 import org.apache.commons.cli.*;
 
+import sse.Backend.FileSystemBackend;
 import sse.Graph.CDWAG;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
@@ -212,7 +213,7 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
-				BinaryWriter out = new BinaryWriter(outputFile, input);
+				BinaryWriter out = new BinaryWriter(outputFile, input, new FileSystemBackend(outputFile));
 
 				out.writeBlocks(list, ep, true, textLength,
 						cmd.hasOption("indcpa"));
@@ -240,8 +241,7 @@ public class Main {
 			System.out.println("Can't parse options: " + e.getMessage());
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("File not found.");
 		}
 
 	}
