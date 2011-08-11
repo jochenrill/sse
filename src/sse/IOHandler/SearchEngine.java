@@ -2,76 +2,72 @@ package sse.IOHandler;
 
 import java.io.File;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 
+import sse.Backend.Backend;
 import sse.Vectors.Constants;
 
 public class SearchEngine {
-	private String word;
 	private RandomAccessFile stream;
 	private long currentBlock;
 	private SecurityEngine sEn;
-	private boolean decrypt;
 	private long lastEdgeValue = 0;
 	private long lastDepthValue = 0;
 	private long numOccurs;
 	private boolean notReachedSink = false;
 	public int files = 0;
 	private boolean reachedEnd = false;
+	private Backend backend;
+	private String startFile;
 
-	public SearchEngine(String word) {
-		this.word = word;
-		this.currentBlock = 0;
-		this.decrypt = false;
-	}
-
-	public SearchEngine(String word, String keyFile) {
-		this.decrypt = true;
+	public SearchEngine(String keyFile, Backend backend, String startFile) {
 		this.sEn = new SecurityEngine();
 		this.sEn.readKey(keyFile);
-		this.word = word;
+
 		this.currentBlock = 0;
+		this.backend = backend;
+		this.startFile = startFile;
 	}
 
-	private void openNextFile(long block, String fileName, long position,
-			long oldBlock) throws IOException {
-		files++;
-		stream.close();
-		if (decrypt) {
-			File delete = new File(fileName + oldBlock + ".dec");
-			if (delete.exists()) {
-				delete.delete();
-			}
-			sEn.decrypt(fileName + block);
-			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
-					"r");
-			// if a block starts with a padding byte, it is a padding block =)
-			if (stream.readByte() == Constants.PADDING_BYTE) {
-				reachedEnd = true;
-			}
-			stream.seek(position);
-		} else {
-			stream = new RandomAccessFile(new File(fileName + block), "r");
-			stream.seek(position);
-		}
-	}
+	/*
+	 * private void openNextFile(long block, String fileName, long position,
+	 * long oldBlock) throws IOException { files++; stream.close();
+	 * 
+	 * File delete = new File(fileName + oldBlock + ".dec"); if
+	 * (delete.exists()) { delete.delete(); } sEn.decrypt(fileName + block);
+	 * stream = new RandomAccessFile(new File(fileName + block + ".dec"), "r");
+	 * // if a block starts with a padding byte, it is a padding block =) if
+	 * (stream.readByte() == Constants.PADDING_BYTE) { reachedEnd = true; }
+	 * stream.seek(position);
+	 * 
+	 * }
+	 */
 
-	public boolean find(String startFile, boolean decrypt) {
+	public boolean find(String word) {
 		long blockSize = 0;
 		long numberOfBlocks = 0;
+		DataInputStream firstStream = new DataInputStream(
+				backend.loadStartBlock());
+
 		try {
-			stream = new RandomAccessFile(new File(startFile), "r");
-			blockSize = stream.readLong();
-			numberOfBlocks = stream.readLong();
-			stream.close();
-		} catch (IOException e) {
-			System.out.println("Root block not found");
+			blockSize = firstStream.readLong();
+			numberOfBlocks = firstStream.readLong();
+			firstStream.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+
 		try {
 			long toDelete = currentBlock;
 			// open the first block
-			openNextFile(++currentBlock, startFile, 0, toDelete);
+			reachedEnd = backend.searchNext(++currentBlock, startFile, 0,
+					toDelete, stream, sEn);
+			stream = backend.getStream();
 			while (stream.getFilePointer() < stream.length() && !reachedEnd) {
 				// read first byte
 				int value = stream.readByte();
@@ -219,8 +215,10 @@ public class SearchEngine {
 										% ((blockToOpen - 1) * blockSize);
 							}
 							lastEdgeValue = originalEdgePosition;
-							openNextFile(blockToOpen, startFile, position,
-									currentBlock);
+							reachedEnd = backend.searchNext(blockToOpen,
+									startFile, position, currentBlock, stream,
+									sEn);
+							stream = backend.getStream();
 							currentBlock = blockToOpen;
 							break;
 						}
@@ -230,10 +228,12 @@ public class SearchEngine {
 				} else {
 
 					// Ignore padding bytes
-					if (value == Constants.PADDING_BYTE ) {
+					if (value == Constants.PADDING_BYTE) {
 						// Block done, move to next block
 						toDelete = currentBlock;
-						openNextFile(++currentBlock, startFile, 0, toDelete);
+						reachedEnd = backend.searchNext(++currentBlock,
+								startFile, 0, toDelete, stream, sEn);
+						stream = backend.getStream();
 					} else if (word.length() != 0 && foo == word.charAt(0)) {
 						word = word.substring(1, word.length());
 					} else if (word.length() != 0) {
@@ -245,7 +245,9 @@ public class SearchEngine {
 				if (!(stream.getFilePointer() < stream.length())
 						&& currentBlock < numberOfBlocks) {
 					toDelete = currentBlock;
-					openNextFile(++currentBlock, startFile, 0, toDelete);
+					reachedEnd = backend.searchNext(++currentBlock, startFile,
+							0, toDelete, stream, sEn);
+					stream = backend.getStream();
 				}
 			}
 		} catch (IOException e) {
@@ -258,7 +260,7 @@ public class SearchEngine {
 		}
 		if (word.length() == 0) {
 			// if we have reached the sink then numOccurs is 1
-			if ( !notReachedSink) {
+			if (!notReachedSink) {
 				System.out.println("1");
 			} else {
 				System.out.println(numOccurs);

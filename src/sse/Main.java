@@ -67,11 +67,26 @@ public class Main {
 				if (cmd.hasOption("i")) {
 					if (cmd.hasOption("text")) {
 						if (cmd.hasOption("key")) {
-							SearchEngine sEn = new SearchEngine(
-									cmd.getOptionValue("text"),
-									cmd.getOptionValue("key"));
-							System.out.println(sEn.find(
-									cmd.getOptionValue("i"), true));
+							if (cmd.hasOption("amazon")) {
+								SearchEngine sEn = new SearchEngine(
+										cmd.getOptionValue("key"),
+										new AmazonBackend(
+												"AKIAJPVLZKVNPTX56EDQ",
+												"ZgdUL7/kE2sx76i3YBBoGmAesRH7MKaxtygNiPeb",
+												cmd.getOptionValue("i"),
+												"kitsse"),
+										cmd.getOptionValue("i"));
+								System.out.println(sEn.find(cmd
+										.getOptionValue("text")));
+							} else {
+								SearchEngine sEn = new SearchEngine(
+										cmd.getOptionValue("key"),
+										new FileSystemBackend(cmd
+												.getOptionValue("i")),
+										cmd.getOptionValue("i"));
+								System.out.println(sEn.find(cmd
+										.getOptionValue("text")));
+							}
 						} else {
 							throw new ParseException("Key argument missing");
 						}

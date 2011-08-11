@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar sse.jar -search -key key -i default.vc -text "$@"
+java -jar sse.jar -search -amazon -key key -i default.vc -text "$@"

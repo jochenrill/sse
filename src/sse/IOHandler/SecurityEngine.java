@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -84,6 +85,29 @@ public class SecurityEngine {
 
 			CipherInputStream cis = new CipherInputStream(new FileInputStream(
 					fileName + ".sec"), c);
+			byte[] block = new byte[8];
+			int i;
+			while ((i = cis.read(block)) != -1) {
+				b.write(block, 0, i);
+			}
+			cis.close();
+			b.close();
+
+		} catch (InvalidKeyException e) {
+			System.out.println(e.getMessage());
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		} catch (InvalidAlgorithmParameterException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	public void decrypt(String fileName, InputStream s) {
+		try {
+			FileOutputStream b = new FileOutputStream(fileName + ".dec");
+
+			c.init(Cipher.DECRYPT_MODE, secureKey, new IvParameterSpec(iv));
+
+			CipherInputStream cis = new CipherInputStream(s, c);
 			byte[] block = new byte[8];
 			int i;
 			while ((i = cis.read(block)) != -1) {
