@@ -13,6 +13,7 @@ import java.util.Scanner;
 
 import org.apache.commons.cli.*;
 
+import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
 import sse.Graph.CDWAG;
 import sse.IOHandler.BinaryWriter;
@@ -40,14 +41,14 @@ public class Main {
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
+		options.addOption("amazon", false, "Uploads to Amazon S3");
 		// options.addOption("b", false,
 		// "Turns off block usage. Used in evaluation and create mode. Default on.");
 		// options.addOption("enc", false,
 		// "Turns off block encryption. Default on.");
 		options.addOption("blocksize", true, "Sets the blocksize multiplier");
 		options.addOption("search", false, "Turns on search mode");
-		options.addOption("key", true,
-		 "Path to the key file for encryption");
+		options.addOption("key", true, "Path to the key file for encryption");
 		options.addOption("create", false, "Turns on creation mode");
 		options.addOption("text", true,
 				"If search mode is used, this is the text that will be searched");
@@ -213,10 +214,23 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
-				BinaryWriter out = new BinaryWriter(outputFile, input, new FileSystemBackend(outputFile));
 
-				out.writeBlocks(list, ep, true, textLength,
-						cmd.hasOption("indcpa"));
+				if (cmd.hasOption("amazon")) {
+
+					BinaryWriter out = new BinaryWriter(outputFile, input,
+							new AmazonBackend("AKIAJPVLZKVNPTX56EDQ",
+									"ZgdUL7/kE2sx76i3YBBoGmAesRH7MKaxtygNiPeb",
+									outputFile, "kitsse"));
+					out.writeBlocks(list, ep, true, textLength,
+							cmd.hasOption("indcpa"));
+				} else {
+
+					BinaryWriter out = new BinaryWriter(outputFile, input,
+							new FileSystemBackend(outputFile));
+					out.writeBlocks(list, ep, true, textLength,
+							cmd.hasOption("indcpa"));
+
+				}
 
 				if (Constants.DEBUG) {
 					System.out.println("Excecution time for output: "

@@ -15,8 +15,8 @@ public class FileSystemBackend implements Backend {
 	}
 
 	@Override
-	public void openNextFile(long currentBlock, boolean encrypt, BinaryOut w,
-			SecurityEngine secEngine) {
+	public BinaryOut openNextFile(long currentBlock, boolean encrypt,
+			BinaryOut w, SecurityEngine secEngine) {
 		w.close();
 		// Encrypt the last block if needed
 		if (encrypt) {
@@ -27,10 +27,36 @@ public class FileSystemBackend implements Backend {
 		}
 		try {
 			w = new BinaryOut(fileName + currentBlock);
+
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName
 					+ currentBlock);
 		}
+		return w;
+	}
+
+	@Override
+	public void finalize(long currentBlock, boolean encrypt, BinaryOut w,
+			SecurityEngine secEngine) {
+		w.close();
+		// open writer for meta information file
+		try {
+			w = new BinaryOut(fileName, true);
+		} catch (IOException e) {
+			System.out.println("Could not create file " + fileName);
+		}
+		// write number of blocks
+
+		// encrypt the last block
+		if (encrypt) {
+			secEngine.encrypt(fileName + (currentBlock));
+			// remove the unencryted file
+			new File(fileName + (currentBlock)).delete();
+		}
+		secEngine.printKey("key");
+
+		w.write(currentBlock);
+		w.close();
 
 	}
 

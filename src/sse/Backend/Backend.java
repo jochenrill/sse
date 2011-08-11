@@ -5,6 +5,7 @@ import sse.IOHandler.SecurityEngine;
 
 public interface Backend {
 
-	public void openNextFile(long currentBlock, boolean encrypt, BinaryOut w, SecurityEngine secEngine);
+	public BinaryOut openNextFile(long currentBlock, boolean encrypt, BinaryOut w, SecurityEngine secEngine);
+	public void finalize (long currentBlock, boolean encrypt,BinaryOut w, SecurityEngine secEngine);
 	
 }

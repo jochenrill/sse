@@ -1,6 +1,5 @@
 package sse.IOHandler;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,6 +19,7 @@ public class BinaryWriter {
 	public BinaryWriter(String fileName, String input, Backend backend) {
 		this.input = input;
 		this.fileName = fileName;
+		this.backend = backend;
 	}
 
 	/*
@@ -169,7 +169,7 @@ public class BinaryWriter {
 				for (; pos < v.getLocation(); pos++) {
 					if ((bytesInCurrentBlock + 1) > blockSize) {
 						fillWithData(bytesInCurrentBlock, blockSize);
-						backend.openNextFile(++currentBlock, encrypt, w,
+						w = backend.openNextFile(++currentBlock, encrypt, w,
 								secEngine);
 						bytesInCurrentBlock = 0;
 					}
@@ -180,7 +180,7 @@ public class BinaryWriter {
 			// make sure that the vector fits in the blocksize
 			if ((bytesInCurrentBlock + v.getSize()) > blockSize) {
 				fillWithData(bytesInCurrentBlock, blockSize);
-				backend.openNextFile(++currentBlock, encrypt, w, secEngine);
+				w = backend.openNextFile(++currentBlock, encrypt, w, secEngine);
 				bytesInCurrentBlock = 0;
 			}
 			// we know the size of the vector and that it fits in the current
@@ -291,7 +291,7 @@ public class BinaryWriter {
 		for (; pos < input.length(); pos++) {
 			if ((bytesInCurrentBlock + 1) > blockSize) {
 				fillWithData(bytesInCurrentBlock, blockSize);
-				backend.openNextFile(++currentBlock, encrypt, w, secEngine);
+				w = backend.openNextFile(++currentBlock, encrypt, w, secEngine);
 				bytesInCurrentBlock = 0;
 			}
 			w.write(input.charAt(pos));
@@ -301,43 +301,14 @@ public class BinaryWriter {
 		// Create a lot of empty blocks for IND-CPA-Security
 		if (indcpa) {
 			while (currentBlock * blockSize < maximumDataSize) {
-				backend.openNextFile(++currentBlock, encrypt, w, secEngine);
+				w = backend.openNextFile(++currentBlock, encrypt, w, secEngine);
 				fillWithData(0, blockSize);
 			}
 		}
 
-		w.close();
-		// open writer for meta information file
-		try {
-			w = new BinaryOut(fileName, true);
-		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName);
-		}
-		// write number of blocks
-
-		// encrypt the last block
-		if (encrypt) {
-			secEngine.encrypt(fileName + (currentBlock));
-			// remove the unencryted file
-			new File(fileName + (currentBlock)).delete();
-		}
-		secEngine.printKey("key");
-
-		w.write(currentBlock);
-		w.close();
+		backend.finalize(currentBlock, encrypt, w, secEngine);
 
 	}
-
-	/*
-	 * private void openNextFile(long currentBlock, boolean encrypt) {
-	 * w.close(); // Encrypt the last block if needed if (encrypt) {
-	 * secEngine.encrypt(fileName + (currentBlock - 1)); // remove the
-	 * unencryted file new File(fileName + (currentBlock - 1)).delete();
-	 * 
-	 * } try { w = new BinaryOut(fileName + currentBlock); } catch (IOException
-	 * e) { System.out.println("Could not create file " + fileName +
-	 * currentBlock); } }
-	 */
 
 	private void fillWithData(long bytesInBlock, long blockSize) {
 		while (bytesInBlock < blockSize) {
