@@ -50,6 +50,7 @@ public class SearchEngine {
 	public boolean find(String word) {
 		long blockSize = 0;
 		long numberOfBlocks = 0;
+		
 		DataInputStream firstStream = new DataInputStream(
 				backend.loadStartBlock());
 
