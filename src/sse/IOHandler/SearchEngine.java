@@ -2,10 +2,8 @@ package sse.IOHandler;
 
 import java.io.File;
 
-import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 import sse.Backend.Backend;
@@ -19,7 +17,7 @@ public class SearchEngine {
 	private long lastDepthValue = 0;
 	private long numOccurs;
 	private boolean notReachedSink = false;
-	public int files = 0;
+	private int files = 0;
 	private boolean reachedEnd = false;
 	private Backend backend;
 	private String startFile;
@@ -31,6 +29,10 @@ public class SearchEngine {
 		this.currentBlock = 0;
 		this.backend = backend;
 		this.startFile = startFile;
+	}
+
+	public int getTransferedFilesCount() {
+		return files;
 	}
 
 	public boolean find(String word) {
@@ -45,13 +47,14 @@ public class SearchEngine {
 			numberOfBlocks = firstStream.readLong();
 			firstStream.close();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			System.out.println("Startblock not found! Exiting.");
+			System.exit(0);
 		}
 
 		try {
 			long toDelete = currentBlock;
 			// open the first block
+			files++;
 			reachedEnd = backend.searchNext(++currentBlock, startFile, 0,
 					toDelete, stream, sEn);
 			stream = backend.getStream();
@@ -202,6 +205,7 @@ public class SearchEngine {
 										% ((blockToOpen - 1) * blockSize);
 							}
 							lastEdgeValue = originalEdgePosition;
+							files++;
 							reachedEnd = backend.searchNext(blockToOpen,
 									startFile, position, currentBlock, stream,
 									sEn);
@@ -218,6 +222,7 @@ public class SearchEngine {
 					if (value == Constants.PADDING_BYTE) {
 						// Block done, move to next block
 						toDelete = currentBlock;
+						files++;
 						reachedEnd = backend.searchNext(++currentBlock,
 								startFile, 0, toDelete, stream, sEn);
 						stream = backend.getStream();
@@ -232,6 +237,7 @@ public class SearchEngine {
 				if (!(stream.getFilePointer() < stream.length())
 						&& currentBlock < numberOfBlocks) {
 					toDelete = currentBlock;
+					files++;
 					reachedEnd = backend.searchNext(++currentBlock, startFile,
 							0, toDelete, stream, sEn);
 					stream = backend.getStream();

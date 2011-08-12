@@ -34,8 +34,8 @@ public class AmazonBackend implements Backend {
 			this.bucket = service.getBucket(bucket);
 
 		} catch (S3ServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("S3 Service Exception: " + e.getMessage());
+			System.exit(0);
 		}
 	}
 
@@ -179,7 +179,6 @@ public class AmazonBackend implements Backend {
 
 	@Override
 	public RandomAccessFile getStream() {
-		// TODO Auto-generated method stub
 		return searchStream;
 	}
 
@@ -189,7 +188,7 @@ public class AmazonBackend implements Backend {
 		try {
 			@SuppressWarnings("deprecation")
 			S3Object obj = service.getObject(bucket, fileName);
-			
+
 			return obj.getDataInputStream();
 			// if a block starts with a padding byte, it is a padding block =)
 

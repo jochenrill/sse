@@ -70,6 +70,7 @@ public class Main {
 										cmd.getOptionValue("i"));
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
+								
 							} else {
 								SearchEngine sEn = new SearchEngine(
 										cmd.getOptionValue("key"),
@@ -78,6 +79,7 @@ public class Main {
 										cmd.getOptionValue("i"));
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
+								System.out.println(sEn.getTransferedFilesCount());
 							}
 						} else {
 							throw new ParseException("Key argument missing");
