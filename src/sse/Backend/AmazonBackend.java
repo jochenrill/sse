@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.lang.annotation.Inherited;
 import java.security.NoSuchAlgorithmException;
 
 import org.jets3t.service.S3Service;
