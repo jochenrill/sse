@@ -33,24 +33,10 @@ public class SearchEngine {
 		this.startFile = startFile;
 	}
 
-	/*
-	 * private void openNextFile(long block, String fileName, long position,
-	 * long oldBlock) throws IOException { files++; stream.close();
-	 * 
-	 * File delete = new File(fileName + oldBlock + ".dec"); if
-	 * (delete.exists()) { delete.delete(); } sEn.decrypt(fileName + block);
-	 * stream = new RandomAccessFile(new File(fileName + block + ".dec"), "r");
-	 * // if a block starts with a padding byte, it is a padding block =) if
-	 * (stream.readByte() == Constants.PADDING_BYTE) { reachedEnd = true; }
-	 * stream.seek(position);
-	 * 
-	 * }
-	 */
-
 	public boolean find(String word) {
 		long blockSize = 0;
 		long numberOfBlocks = 0;
-		
+
 		DataInputStream firstStream = new DataInputStream(
 				backend.loadStartBlock());
 

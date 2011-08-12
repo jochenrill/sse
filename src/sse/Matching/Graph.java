@@ -36,6 +36,7 @@ public class Graph<T, K> {
 	 * graph has Nodes on the left and places on the right side.
 	 */
 
+	@SuppressWarnings("unchecked")
 	private void constructFromCDWAG(Node n, HashMap<Node, Boolean> visited) {
 
 		if (n == sink) {
@@ -119,6 +120,7 @@ public class Graph<T, K> {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean augmentingPath(ArrayList<Edge<T, K>> path,
 			BipartiteNode<?> n, boolean left) {
 

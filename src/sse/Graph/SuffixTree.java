@@ -4,7 +4,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 /**
- * Implementation of Ukkonen's algorithm for generating a suffix tree in O(n) time - for testing purposes only.
+ * Implementation of Ukkonen's algorithm for generating a suffix tree in O(n) time - for testing purposes only
+ * and not needed in the implementation of sse.
  * @author Jochen Rill
  *
  */

@@ -33,19 +33,11 @@ public class Main {
 				"Defines the input file. Define either an input file or a string.");
 		options.addOption("o", true,
 				"Defines the output file. \"default.vc\" if no file is given.");
-		options.addOption("s", true,
-				"Defines the String used for input. Define either a string or an input file.");
-		options.addOption("evaluate", false,
-				"Turns on evaluation mode. Only works with unencrypted files.");
 		options.addOption("m", false, "Generates the SuffixVectors in memory");
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
 		options.addOption("amazon", false, "Uploads to Amazon S3");
-		// options.addOption("b", false,
-		// "Turns off block usage. Used in evaluation and create mode. Default on.");
-		// options.addOption("enc", false,
-		// "Turns off block encryption. Default on.");
 		options.addOption("blocksize", true, "Sets the blocksize multiplier");
 		options.addOption("search", false, "Turns on search mode");
 		options.addOption("key", true, "Path to the key file for encryption");
@@ -115,8 +107,6 @@ public class Main {
 					scanner.close();
 					r.close();
 
-				} else if (cmd.hasOption("s")) {
-					input = cmd.getOptionValue("s");
 				} else {
 					throw new MissingOptionException(
 							"You must define an input, either a string or a file");

@@ -1,7 +1,6 @@
 package sse.Backend;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -141,6 +140,7 @@ public class AmazonBackend implements Backend {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean searchNext(long block, String fileName, long position,
 			long oldBlock, RandomAccessFile stream, SecurityEngine sEn)
@@ -187,8 +187,9 @@ public class AmazonBackend implements Backend {
 	public InputStream loadStartBlock() {
 
 		try {
+			@SuppressWarnings("deprecation")
 			S3Object obj = service.getObject(bucket, fileName);
-
+			
 			return obj.getDataInputStream();
 			// if a block starts with a padding byte, it is a padding block =)
 
