@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 import org.apache.commons.cli.*;
+import org.ini4j.Ini;
 
 import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
@@ -49,6 +50,8 @@ public class Main {
 
 		try {
 			CommandLine cmd = parser.parse(options, args);
+			Ini config = new Ini(new File("sse.config"));
+
 			if (cmd.hasOption("v")) {
 
 				Constants.DEBUG = true;
@@ -60,17 +63,22 @@ public class Main {
 					if (cmd.hasOption("text")) {
 						if (cmd.hasOption("key")) {
 							if (cmd.hasOption("amazon")) {
-								SearchEngine sEn = new SearchEngine(
-										cmd.getOptionValue("key"),
-										new AmazonBackend(
-												"AKIAJPVLZKVNPTX56EDQ",
-												"ZgdUL7/kE2sx76i3YBBoGmAesRH7MKaxtygNiPeb",
-												cmd.getOptionValue("i"),
-												"kitsse"),
-										cmd.getOptionValue("i"));
-								System.out.println(sEn.find(cmd
-										.getOptionValue("text")));
-
+								if (config.containsKey("amazon")) {
+									SearchEngine sEn = new SearchEngine(
+											cmd.getOptionValue("key"),
+											new AmazonBackend(config.get(
+													"amazon", "key"), config
+													.get("amazon", "skey"), cmd
+													.getOptionValue("i"),
+													config.get("amazon",
+															"bucket")),
+											cmd.getOptionValue("i"));
+									System.out.println(sEn.find(cmd
+											.getOptionValue("text")));
+								} else {
+									System.out
+											.println("No Amazon Credentials found. Search can't be performed");
+								}
 							} else {
 								SearchEngine sEn = new SearchEngine(
 										cmd.getOptionValue("key"),
@@ -224,13 +232,18 @@ public class Main {
 				time = System.currentTimeMillis();
 
 				if (cmd.hasOption("amazon")) {
-
-					BinaryWriter out = new BinaryWriter(outputFile, input,
-							new AmazonBackend("AKIAJPVLZKVNPTX56EDQ",
-									"ZgdUL7/kE2sx76i3YBBoGmAesRH7MKaxtygNiPeb",
-									outputFile, "kitsse"));
-					out.writeBlocks(list, ep, textLength,
-							cmd.hasOption("indcpa"));
+					if (config.containsKey("amazon")) {
+						BinaryWriter out = new BinaryWriter(outputFile, input,
+								new AmazonBackend(config.get("amazon", "key"),
+										config.get("amazon", "skey"),
+										outputFile, config.get("amazon",
+												"bucket")));
+						out.writeBlocks(list, ep, textLength,
+								cmd.hasOption("indcpa"));
+					} else {
+						System.out
+								.println("Amazon credentials can't be found. Exiting.");
+					}
 				} else {
 
 					BinaryWriter out = new BinaryWriter(outputFile, input,
