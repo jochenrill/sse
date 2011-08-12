@@ -70,7 +70,7 @@ public class Main {
 										cmd.getOptionValue("i"));
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
-								
+
 							} else {
 								SearchEngine sEn = new SearchEngine(
 										cmd.getOptionValue("key"),
@@ -79,7 +79,8 @@ public class Main {
 										cmd.getOptionValue("i"));
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
-								System.out.println(sEn.getTransferedFilesCount());
+								System.out.println(sEn
+										.getTransferedFilesCount());
 							}
 						} else {
 							throw new ParseException("Key argument missing");
@@ -228,13 +229,13 @@ public class Main {
 							new AmazonBackend("AKIAJPVLZKVNPTX56EDQ",
 									"ZgdUL7/kE2sx76i3YBBoGmAesRH7MKaxtygNiPeb",
 									outputFile, "kitsse"));
-					out.writeBlocks(list, ep, true, textLength,
+					out.writeBlocks(list, ep, textLength,
 							cmd.hasOption("indcpa"));
 				} else {
 
 					BinaryWriter out = new BinaryWriter(outputFile, input,
 							new FileSystemBackend(outputFile));
-					out.writeBlocks(list, ep, true, textLength,
+					out.writeBlocks(list, ep, textLength,
 							cmd.hasOption("indcpa"));
 
 				}

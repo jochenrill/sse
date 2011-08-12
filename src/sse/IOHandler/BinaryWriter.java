@@ -110,11 +110,10 @@ public class BinaryWriter {
 	}
 
 	public void writeBlocks(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, boolean encrypt, long textLength,
-			boolean indcpa) {
-		if (encrypt) {
-			secEngine = new SecurityEngine();
-		}
+			ArrayList<EdgePosition> ep, long textLength, boolean indcpa) {
+
+		secEngine = new SecurityEngine();
+
 		// Calculate the size of the alphabet. This is needed to determine the
 		// maximum size for a vector.
 		short alphabetSize = 0;
@@ -169,8 +168,7 @@ public class BinaryWriter {
 				for (; pos < v.getLocation(); pos++) {
 					if ((bytesInCurrentBlock + 1) > blockSize) {
 						fillWithData(bytesInCurrentBlock, blockSize);
-						w = backend.openNextFile(++currentBlock, encrypt, w,
-								secEngine);
+						w = backend.openNextFile(++currentBlock, w, secEngine);
 						bytesInCurrentBlock = 0;
 					}
 					w.write(input.charAt(pos));
@@ -180,7 +178,7 @@ public class BinaryWriter {
 			// make sure that the vector fits in the blocksize
 			if ((bytesInCurrentBlock + v.getSize()) > blockSize) {
 				fillWithData(bytesInCurrentBlock, blockSize);
-				w = backend.openNextFile(++currentBlock, encrypt, w, secEngine);
+				w = backend.openNextFile(++currentBlock, w, secEngine);
 				bytesInCurrentBlock = 0;
 			}
 			// we know the size of the vector and that it fits in the current
@@ -291,7 +289,7 @@ public class BinaryWriter {
 		for (; pos < input.length(); pos++) {
 			if ((bytesInCurrentBlock + 1) > blockSize) {
 				fillWithData(bytesInCurrentBlock, blockSize);
-				w = backend.openNextFile(++currentBlock, encrypt, w, secEngine);
+				w = backend.openNextFile(++currentBlock, w, secEngine);
 				bytesInCurrentBlock = 0;
 			}
 			w.write(input.charAt(pos));
@@ -301,12 +299,12 @@ public class BinaryWriter {
 		// Create a lot of empty blocks for IND-CPA-Security
 		if (indcpa) {
 			while (currentBlock * blockSize < maximumDataSize) {
-				w = backend.openNextFile(++currentBlock, encrypt, w, secEngine);
+				w = backend.openNextFile(++currentBlock, w, secEngine);
 				fillWithData(0, blockSize);
 			}
 		}
 
-		backend.finalize(currentBlock, encrypt, w, secEngine);
+		backend.finalize(currentBlock, w, secEngine);
 
 	}
 

@@ -20,16 +20,18 @@ public class FileSystemBackend implements Backend {
 	}
 
 	@Override
-	public BinaryOut openNextFile(long currentBlock, boolean encrypt,
-			BinaryOut w, SecurityEngine secEngine) {
+	/**
+	 * 	{@inheritDoc}
+	 */
+	public BinaryOut openNextFile(long currentBlock, BinaryOut w,
+			SecurityEngine secEngine) {
 		w.close();
 		// Encrypt the last block if needed
-		if (encrypt) {
-			secEngine.encrypt(fileName + (currentBlock - 1));
-			// remove the unencryted file
-			new File(fileName + (currentBlock - 1)).delete();
 
-		}
+		secEngine.encrypt(fileName + (currentBlock - 1));
+		// remove the unencryted file
+		new File(fileName + (currentBlock - 1)).delete();
+
 		try {
 			w = new BinaryOut(fileName + currentBlock);
 
@@ -41,7 +43,10 @@ public class FileSystemBackend implements Backend {
 	}
 
 	@Override
-	public void finalize(long currentBlock, boolean encrypt, BinaryOut w,
+	/**
+	 * 	{@inheritDoc}
+	 */
+	public void finalize(long currentBlock, BinaryOut w,
 			SecurityEngine secEngine) {
 		w.close();
 		// open writer for meta information file
@@ -53,11 +58,11 @@ public class FileSystemBackend implements Backend {
 		// write number of blocks
 
 		// encrypt the last block
-		if (encrypt) {
-			secEngine.encrypt(fileName + (currentBlock));
-			// remove the unencryted file
-			new File(fileName + (currentBlock)).delete();
-		}
+
+		secEngine.encrypt(fileName + (currentBlock));
+		// remove the unencryted file
+		new File(fileName + (currentBlock)).delete();
+
 		secEngine.printKey("key");
 
 		w.write(currentBlock);
@@ -66,6 +71,9 @@ public class FileSystemBackend implements Backend {
 	}
 
 	@Override
+	/**
+	 * 	{@inheritDoc}
+	 */
 	public boolean searchNext(long block, String fileName, long position,
 			long oldBlock, RandomAccessFile stream, SecurityEngine sEn)
 			throws IOException {
@@ -89,11 +97,18 @@ public class FileSystemBackend implements Backend {
 
 	}
 
+	/**
+	 * 	{@inheritDoc}
+	 */
+	@Override
 	public RandomAccessFile getStream() {
 		return searchStream;
 	}
 
 	@Override
+	/**
+	 * 	{@inheritDoc}
+	 */
 	public InputStream loadStartBlock() {
 		try {
 			return new FileInputStream(new File(fileName));
