@@ -31,17 +31,16 @@ public class Main {
 		Options options = new Options();
 
 		options.addOption("i", true,
-				"Defines the input file. Define either an input file or a string.");
+				"Defines the input file.");
 		options.addOption("o", true,
 				"Defines the output file. \"default.vc\" if no file is given.");
 		options.addOption("m", false, "Generates the SuffixVectors in memory");
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
-		options.addOption("amazon", false, "Uploads to Amazon S3");
-		options.addOption("blocksize", true, "Sets the blocksize multiplier");
+		options.addOption("amazon", false, "Uploads to Amazon S3. Credentials must be specified in sse.config.");
 		options.addOption("search", false, "Turns on search mode");
-		options.addOption("key", true, "Path to the key file for encryption");
+		options.addOption("key", true, "Path to the key file for encryption. IV muss be named <key_file>.iv");
 		options.addOption("create", false, "Turns on creation mode");
 		options.addOption("text", true,
 				"If search mode is used, this is the text that will be searched");
@@ -154,10 +153,6 @@ public class Main {
 					outputFile = cmd.getOptionValue("o");
 				} else {
 					outputFile = "default.vc";
-				}
-				if (cmd.hasOption("blocksize")) {
-					Constants.VECTOR_SIZE_MULTI = Short.valueOf(cmd
-							.getOptionValue("blocksize"));
 				}
 
 				double generalTime = System.currentTimeMillis();

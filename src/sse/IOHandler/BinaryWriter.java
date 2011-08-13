@@ -125,7 +125,11 @@ public class BinaryWriter {
 				+ Constants.VECTOR_DEPTH_BYTES
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
 		// = 865 in default configuration
-		
+		// the size of the actual data we have to store
+		long actualDataSize = textLength;
+		for (SuffixVector v : list) {
+			actualDataSize += v.getSize();
+		}
 		// Calculate the maximum data size for IND-CPA-Security
 		long maximumDataSize = 2 + 2 + 2 * Constants.EDGE_REFERENCE_BYTES + 2
 				* Constants.ORIGINAL_EDGE_POSITION_BYTES
@@ -133,18 +137,19 @@ public class BinaryWriter {
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
 		// = 28 in default configuration
 		maximumDataSize *= textLength;
-		if(maximumDataSize > Math.pow(2, Constants.EDGE_REFERENCE_BYTES*8)){
+		if (maximumDataSize > Math.pow(2, Constants.EDGE_REFERENCE_BYTES * 8)) {
 			System.out.println("Warning: EDGE_REFERENCE_BYTES might be to low");
+		}
+		
+		// if indcpa security is not needed use the actual data size as maximum size
+		if(!indcpa){
+			maximumDataSize = actualDataSize;
 		}
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 
 		// the minimum number of block we have to create
 		long blockNumber = maximumDataSize / blockSize + 1;
-		// the size of the actual data we have to store
-		long actualDataSize = textLength;
-		for (SuffixVector v : list) {
-			actualDataSize += v.getSize();
-		}
+
 		// the number of actual data per block
 		long blockDataSize = actualDataSize / (blockNumber - 1);
 		updateBlockPosition(list, ep, blockDataSize);
@@ -304,10 +309,17 @@ public class BinaryWriter {
 		}
 		fillWithData(bytesInCurrentBlock, blockSize);
 		// Create a lot of empty blocks for IND-CPA-Security
+
 		if (indcpa) {
-			while (currentBlock * blockSize < maximumDataSize) {
-				w = backend.openNextFile(++currentBlock, w, secEngine);
-				fillWithData(0, blockSize);
+			/*
+			 * while (currentBlock * blockSize < maximumDataSize) { w =
+			 * backend.openNextFile(++currentBlock, w, secEngine);
+			 * fillWithData(0, blockSize); }
+			 */
+			// Sanity check for ind-cpa security
+			if (currentBlock * blockSize < maximumDataSize) {
+				System.out
+						.println("Warning: There might be to few blocks. IND-CPA security can not be guaranteed");
 			}
 		}
 
