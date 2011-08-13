@@ -116,14 +116,7 @@ public class BinaryWriter {
 
 		// Calculate the size of the alphabet. This is needed to determine the
 		// maximum size for a vector.
-		short alphabetSize = 0;
-		boolean[] included = new boolean[255];
-		for (int i = 0; i < input.length(); i++) {
-			if (!included[(char) input.charAt(i)]) {
-				included[(char) input.charAt(i)] = true;
-				alphabetSize++;
-			}
-		}
+		short alphabetSize = Constants.ALPHABET_SIZE;
 
 		// maximum vector size in bytes
 		long maximumVectorSize = 2 + alphabetSize + alphabetSize
@@ -140,7 +133,16 @@ public class BinaryWriter {
 		maximumDataSize *= textLength;
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 
-		updateBlockPosition(list, ep, blockSize);
+		// the minimum number of block we have to create
+		long blockNumber = maximumDataSize / blockSize + 1;
+		// the size of the actual data we have to store
+		long actualDataSize = textLength;
+		for (SuffixVector v : list) {
+			actualDataSize += v.getSize();
+		}
+		// the number of actual data per block
+		long blockDataSize = actualDataSize / (blockNumber - 1);
+		updateBlockPosition(list, ep, blockDataSize);
 		// Start printing the blocks
 		int pos = 0;
 		long bytesInCurrentBlock = 0;
@@ -151,8 +153,8 @@ public class BinaryWriter {
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
-		// write blocksize
-		w.write(blockSize);
+		// write size of actual data contained in a block
+		w.write(blockDataSize);
 		w.close();
 		// open writer for currentBlock
 		try {
@@ -166,7 +168,7 @@ public class BinaryWriter {
 			// write sequence before the vector
 			if (v.getLocation() != 0) {
 				for (; pos < v.getLocation(); pos++) {
-					if ((bytesInCurrentBlock + 1) > blockSize) {
+					if ((bytesInCurrentBlock + 1) > blockDataSize) {
 						fillWithData(bytesInCurrentBlock, blockSize);
 						w = backend.openNextFile(++currentBlock, w, secEngine);
 						bytesInCurrentBlock = 0;
@@ -176,7 +178,7 @@ public class BinaryWriter {
 				}
 			}
 			// make sure that the vector fits in the blocksize
-			if ((bytesInCurrentBlock + v.getSize()) > blockSize) {
+			if ((bytesInCurrentBlock + v.getSize()) > blockDataSize) {
 				fillWithData(bytesInCurrentBlock, blockSize);
 				w = backend.openNextFile(++currentBlock, w, secEngine);
 				bytesInCurrentBlock = 0;
@@ -287,7 +289,7 @@ public class BinaryWriter {
 		}
 		// write the rest (from end of last suffix vector to end of string)
 		for (; pos < input.length(); pos++) {
-			if ((bytesInCurrentBlock + 1) > blockSize) {
+			if ((bytesInCurrentBlock + 1) > blockDataSize) {
 				fillWithData(bytesInCurrentBlock, blockSize);
 				w = backend.openNextFile(++currentBlock, w, secEngine);
 				bytesInCurrentBlock = 0;

@@ -12,6 +12,11 @@ public class Constants {
 	}
 
 	/**
+	 * The size of the maximal alphabet which can be used (95 = printable ascii
+	 * characters)
+	 */
+	public static short ALPHABET_SIZE = 95;
+	/**
 	 * Indicates whether debug mode is on
 	 */
 	public static boolean DEBUG = false;
@@ -52,6 +57,6 @@ public class Constants {
 	 * Represents the byte which is used to fill the datablocks
 	 */
 	public static final char PADDING_BYTE = (byte) 0;
-	
+
 	public static final short NUMOCCURS_BYTE = 4;
 }

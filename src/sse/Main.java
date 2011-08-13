@@ -75,8 +75,8 @@ public class Main {
 											cmd.getOptionValue("i"));
 									System.out.println(sEn.find(cmd
 											.getOptionValue("text")));
-									System.out.println(sEn
-											.getTransferedFilesCount());
+									System.out.println("Files opened:"
+											+ sEn.getTransferedFilesCount());
 								} else {
 									System.out
 											.println("No Amazon Credentials found. Search can't be performed");
@@ -89,8 +89,8 @@ public class Main {
 										cmd.getOptionValue("i"));
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
-								System.out.println(sEn
-										.getTransferedFilesCount());
+								System.out.println("Files opened: "
+										+ sEn.getTransferedFilesCount());
 							}
 						} else {
 							throw new ParseException("Key argument missing");
