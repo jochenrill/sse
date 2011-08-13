@@ -52,6 +52,32 @@ public class Main {
 			CommandLine cmd = parser.parse(options, args);
 			Ini config = new Ini(new File("sse.config"));
 
+			// parse configuration
+			if (config.containsKey("general")) {
+				Constants.ALPHABET_SIZE = Short.parseShort(config.get(
+						"general", "alphabet_size"));
+				Constants.DEBUG = Boolean.parseBoolean(config.get("general",
+						"debug"));
+				Constants.EDGE_REFERENCE_BYTES = Short.parseShort(config.get(
+						"general", "edge_reference_bytes"));
+				Constants.NUMOCCURS_BYTE = Short.parseShort(config.get(
+						"general", "numoccurs_byte"));
+				Constants.ORIGINAL_EDGE_POSITION_BYTES = Short
+						.parseShort(config.get("general",
+								"original_edge_position_bytes"));
+				Constants.ORIGINAL_VECTOR_POSITION_BYTES = Short
+						.parseShort(config.get("general",
+								"original_vector_position_bytes"));
+				Constants.PADDING_BYTE = (char) Byte.parseByte(config.get(
+						"general", "padding_byte"));
+				Constants.VECTOR_DEPTH_BYTES = Short.parseShort(config.get(
+						"general", "vector_depth_bytes"));
+				Constants.VECTOR_MARKER = config
+						.get("general", "vector_marker").charAt(0);
+				Constants.VECTOR_SIZE_MULTI = Short.parseShort(config.get(
+						"general", "vector_size_multi"));
+			}
+
 			if (cmd.hasOption("v")) {
 
 				Constants.DEBUG = true;
