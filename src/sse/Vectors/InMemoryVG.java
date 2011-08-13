@@ -3,6 +3,7 @@ package sse.Vectors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Stack;
 
 import sse.Graph.CDWAG;
@@ -21,22 +22,12 @@ public class InMemoryVG {
 		Graph<Node, Integer> g = new Graph<Node, Integer>();
 		g.constructFromCDWAG(graph);
 		g.calculateMatching();
-		ArrayList<Integer> places = new ArrayList<Integer>();
 		// Adapt matching
 		if (Constants.DEBUG)
-			System.out.println("Adapt matching and collision detection");
+			System.out.println("Adapt matching");
 
 		for (sse.Matching.Edge<Node, Integer> e : g.matching) {
 
-			if (Constants.DEBUG) {
-				if (places.contains(e.getRight().getData())) {
-					System.out.println("Collision on place "
-							+ e.getRight().getData());
-
-				} else {
-					places.add(e.getRight().getData());
-				}
-			}
 			e.getLeft().getData()
 					.setLocation(e.getRight().getData().intValue());
 
@@ -60,6 +51,10 @@ public class InMemoryVG {
 
 		n.setPlaces(findPlace(n));
 		visited.put(n, true);
+		// Random rnd = new Random();
+
+		// n.setLocation(n.getPlaces().get(rnd.nextInt(n.getPlaces().size())));
+		// System.out.println(n.getLocation());
 		for (Edge e : n.getEdges()) {
 
 			if (visited.get(e.getEnd()) == null && e.getEnd() != graph.sink) {
@@ -157,5 +152,4 @@ public class InMemoryVG {
 		return tmp;
 	}
 
-	
 }

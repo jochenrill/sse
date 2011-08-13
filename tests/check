@@ -1,5 +1,5 @@
 #!/bin/bash
-i=`./search "$1"`
+i=`../search "$1"`
 occurs=`echo $i | wc -w`
 if [ $occurs -eq 1 ]; then
 	numoccurs=0	

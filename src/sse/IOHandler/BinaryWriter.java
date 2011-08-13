@@ -34,8 +34,7 @@ public class BinaryWriter {
 		long bytesInCurrentBlock = 0;
 		long currentBlock = 1;
 		long padding = 0;
-		// 8 byte for header
-		// bytesInCurrentBlock += 8;
+		
 		Iterator<EdgePosition> iterator = ep.iterator();
 		EdgePosition e = iterator.next();
 		for (SuffixVector v : list) {
@@ -152,6 +151,11 @@ public class BinaryWriter {
 
 		// the number of actual data per block
 		long blockDataSize = actualDataSize / (blockNumber - 1);
+		
+		// problem: if  blockDataSize < maximumVector size we have a problem. needs to be adjusted
+		if(blockDataSize < maximumVectorSize){
+			System.out.println("Warning: increase block multiplier!");
+		}
 		updateBlockPosition(list, ep, blockDataSize);
 		// Start printing the blocks
 		int pos = 0;

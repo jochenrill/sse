@@ -126,6 +126,7 @@ public class SearchEngine {
 					}
 					// the suffix vector we are looking at might not be the one
 					// the edge was leading to
+					
 					if (depthValue != 0) {
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
@@ -136,8 +137,8 @@ public class SearchEngine {
 						}
 					}
 					/*
-					 * we matched to word and we found the correct suffix vector
-					 * the edge was leading to stop the search an print
+					 * we matched the word and we found the correct suffix vector
+					 * the edge was leading to. stop the search and print
 					 * numOccurs.
 					 */
 					if (word.length() == 0 && !jumpOver) {
@@ -219,7 +220,7 @@ public class SearchEngine {
 				} else {
 
 					// Ignore padding bytes
-					if (value == Constants.PADDING_BYTE) {
+					if (value == Constants.PADDING_BYTE && currentBlock < numberOfBlocks) {
 						// Block done, move to next block
 						toDelete = currentBlock;
 						files++;
@@ -230,7 +231,7 @@ public class SearchEngine {
 						word = word.substring(1, word.length());
 					} else if (word.length() != 0) {
 						return false;
-					}
+					} 
 				}
 				// Make sure that we open the next block if the last byte in a
 				// block is indeed a character
