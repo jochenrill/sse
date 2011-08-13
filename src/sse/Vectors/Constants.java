@@ -34,7 +34,7 @@ public class Constants {
 	 * Must be either 8, 4, 2 or 1.
 	 */
 
-	public static final short EDGE_REFERENCE_BYTES = 8;
+	public static final short EDGE_REFERENCE_BYTES = 4;
 	/**
 	 * Represents the number of bytes used to describe the original position of
 	 * the vector in the text. This is needed to calculate which vectors we have

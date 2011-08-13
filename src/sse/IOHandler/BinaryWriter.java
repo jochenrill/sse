@@ -124,13 +124,18 @@ public class BinaryWriter {
 				* Constants.ORIGINAL_EDGE_POSITION_BYTES
 				+ Constants.VECTOR_DEPTH_BYTES
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
-
+		// = 865 in default configuration
+		
 		// Calculate the maximum data size for IND-CPA-Security
 		long maximumDataSize = 2 + 2 + 2 * Constants.EDGE_REFERENCE_BYTES + 2
 				* Constants.ORIGINAL_EDGE_POSITION_BYTES
 				+ Constants.VECTOR_DEPTH_BYTES
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
+		// = 28 in default configuration
 		maximumDataSize *= textLength;
+		if(maximumDataSize > Math.pow(2, Constants.EDGE_REFERENCE_BYTES*8)){
+			System.out.println("Warning: EDGE_REFERENCE_BYTES might be to low");
+		}
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 
 		// the minimum number of block we have to create
