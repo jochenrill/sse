@@ -1,0 +1,9 @@
+#!/bin/bash
+for i in `seq 5 5 325`
+    do head -c $(($i*1000)) text> tmpfile
+    echo "$" >> tmpfile
+    nodes="`./create tmpfile`"
+    echo "$i kB"
+    echo "$i $nodes" >> results/graph
+done
+

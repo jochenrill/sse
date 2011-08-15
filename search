@@ -1,0 +1,2 @@
+#!/bin/bash
+java -jar sse.jar -search -key key -i default.vc -text "$@"

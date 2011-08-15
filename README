@@ -1,0 +1,5 @@
+Usage:
+
+./prepare text : Will prepare a given text for usage with the program. During preparation all occurences of "$" and "#" will be removed and the text will be concluded with a "$"
+./create text : Will encrypt a given text according to the SSE protocol. Default blocksize multiplier is 5, ind-cpa security is on. Edit "create" to change the values.
+./search word: Searches files created with "create" for a given word and prints out the number of times it is found.
