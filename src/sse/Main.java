@@ -30,17 +30,18 @@ public class Main {
 	public static void main(String[] args) {
 		Options options = new Options();
 
-		options.addOption("i", true,
-				"Defines the input file.");
+		options.addOption("i", true, "Defines the input file.");
 		options.addOption("o", true,
 				"Defines the output file. \"default.vc\" if no file is given.");
 		options.addOption("m", false, "Generates the SuffixVectors in memory");
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
-		options.addOption("amazon", false, "Uploads to Amazon S3. Credentials must be specified in sse.config.");
+		options.addOption("amazon", false,
+				"Uploads to Amazon S3. Credentials must be specified in sse.config.");
 		options.addOption("search", false, "Turns on search mode");
-		options.addOption("key", true, "Path to the key file for encryption. IV muss be named <key_file>.iv");
+		options.addOption("key", true,
+				"Path to the key file for encryption. IV muss be named <key_file>.iv");
 		options.addOption("create", false, "Turns on creation mode");
 		options.addOption("text", true,
 				"If search mode is used, this is the text that will be searched");
@@ -75,6 +76,8 @@ public class Main {
 						.get("general", "vector_marker").charAt(0);
 				Constants.VECTOR_SIZE_MULTI = Short.parseShort(config.get(
 						"general", "vector_size_multi"));
+				Constants.EXACT_MATCHING = Boolean.parseBoolean(config.get(
+						"general", "exact_matching"));
 			}
 
 			if (cmd.hasOption("v")) {
