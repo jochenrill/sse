@@ -1,5 +1,5 @@
 #!/bin/bash
-i=`../search "$1"`
+i=`./search "$1"`
 occurs=`echo $i | wc -w`
 if [ $occurs -eq 1 ]; then
 	numoccurs=0	
@@ -8,9 +8,17 @@ else
 fi
 
 realnumoccurs=`grep -o "$1" $2 | wc -l`
-if [ $numoccurs -eq $realnumoccurs ]; then
-	echo "Check for $1 Valid"
+if [ $numoccurs == "false"  ];  then
+    if [ $realnumoccurs -eq 0 ]; then
+        echo "Check for $1 valid"
+    else
+        echo "Check for $1 Failed. Got $numoccurs expected 0"
+    fi
 else
-	echo "Check for $1 Failed. Got $numoccurs expected $realnumoccurs"
+    if [ $numoccurs -eq $realnumoccurs ]; then
+	    echo "Check for $1 Valid"
+    else
+	    echo "Check for $1 Failed. Got $numoccurs expected $realnumoccurs"
+    fi
 fi
 

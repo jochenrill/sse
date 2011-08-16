@@ -51,10 +51,11 @@ public class InMemoryVG {
 
 		n.setPlaces(findPlace(n));
 		visited.put(n, true);
-		// Random rnd = new Random();
 
-		// n.setLocation(n.getPlaces().get(rnd.nextInt(n.getPlaces().size())));
-		// System.out.println(n.getLocation());
+		if (!Constants.EXACT_MATCHING) {
+			Random rnd = new Random();
+			n.setLocation(n.getPlaces().get(rnd.nextInt(n.getPlaces().size())));
+		}
 		for (Edge e : n.getEdges()) {
 
 			if (visited.get(e.getEnd()) == null && e.getEnd() != graph.sink) {
@@ -75,7 +76,9 @@ public class InMemoryVG {
 		if (Constants.DEBUG)
 			System.out.println("Calculating matching");
 		// run a bipartite matching alogrithm
-		bipartiteMatching();
+		if (Constants.EXACT_MATCHING) {
+			bipartiteMatching();
+		}
 		while (!s.isEmpty()) {
 			Node n = s.pop();
 			n.visited = true;

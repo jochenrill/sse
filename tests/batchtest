@@ -2,9 +2,9 @@
 
 #date 
 #count=1;
-words=`wc -w words | awk '{print $1}'`
-for n in `cat ../samples/words`
-    do echo "${n} ../samples/poem" |xargs ./check | grep Failed;
+words=`wc -w samples/words | awk '{print $1}'`
+for n in `cat samples/words`
+    do echo "${n} samples/poem" |xargs ./check | grep Failed;
  #   let "mod=$words % $count"
   #  if [ $mod -eq 0 ]; then
    #     echo $count

@@ -67,7 +67,16 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 			throw new NullPointerException();
 		}
 		if (this.location == o.getLocation()) {
-			return 0;
+			
+			// If the location is the same the vectors get sorted by depth. This is important for the random distribution to work.
+			// If multiple vectors occupy the same location, the one with the lowest depth must be chosen.
+			if (this.getDepth() < o.getDepth()) {
+				return -1;
+			} else if (this.getDepth() > o.getDepth()) {
+				return 1;
+			} else {
+				return 0;
+			}
 		} else if (this.location < o.getLocation()) {
 			return -1;
 		} else {
