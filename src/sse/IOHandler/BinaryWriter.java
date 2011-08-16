@@ -28,7 +28,7 @@ public class BinaryWriter {
 	 */
 
 	private void updateBlockPosition(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, long blockSize) {
+			ArrayList<EdgePosition> ep, long actualDataSize, long maximumBlockSize) {
 		// Start printing the blocks
 		int pos = 0;
 		long bytesInCurrentBlock = 0;
@@ -42,7 +42,7 @@ public class BinaryWriter {
 			if (v.getLocation() != 0) {
 				for (; pos < v.getLocation(); pos++) {
 
-					if ((bytesInCurrentBlock + 1) > blockSize) {
+					if ((bytesInCurrentBlock + 1) > actualDataSize) {
 
 						while (e != null && e.getPosition() < pos) {
 							e.setMovedPosition(e.getMovedPosition() + padding);
@@ -53,7 +53,7 @@ public class BinaryWriter {
 							}
 						}
 
-						padding += blockSize - bytesInCurrentBlock;
+						padding += maximumBlockSize - bytesInCurrentBlock;
 						currentBlock++;
 						bytesInCurrentBlock = 0;
 					}
@@ -61,7 +61,7 @@ public class BinaryWriter {
 				}
 			}
 			// make sure that the vector fits in the blocksize
-			if ((bytesInCurrentBlock + v.getSize()) > blockSize) {
+			if ((bytesInCurrentBlock + v.getSize()) > actualDataSize) {
 				while (e != null && e.getPosition() < pos) {
 					e.setMovedPosition(e.getMovedPosition() + padding);
 					if (iterator.hasNext()) {
@@ -70,7 +70,7 @@ public class BinaryWriter {
 						e = null;
 					}
 				}
-				padding += blockSize - bytesInCurrentBlock;
+				padding += maximumBlockSize - bytesInCurrentBlock;
 
 				currentBlock++;
 				bytesInCurrentBlock = 0;
@@ -80,7 +80,7 @@ public class BinaryWriter {
 		}
 		// write the rest (from end of last suffix vector to end of string)
 		for (; pos < input.length(); pos++) {
-			if ((bytesInCurrentBlock + 1) > blockSize) {
+			if ((bytesInCurrentBlock + 1) > actualDataSize) {
 				while (e != null && e.getPosition() < pos) {
 					e.setMovedPosition(e.getMovedPosition() + padding);
 					if (iterator.hasNext()) {
@@ -89,7 +89,7 @@ public class BinaryWriter {
 						e = null;
 					}
 				}
-				padding += blockSize - bytesInCurrentBlock;
+				padding += actualDataSize - bytesInCurrentBlock;
 
 				currentBlock++;
 				bytesInCurrentBlock = 0;
@@ -156,7 +156,7 @@ public class BinaryWriter {
 		if(blockDataSize < maximumVectorSize){
 			System.out.println("Warning: increase block multiplier!");
 		}
-		updateBlockPosition(list, ep, blockDataSize);
+		updateBlockPosition(list, ep, blockDataSize, blockSize);
 		// Start printing the blocks
 		int pos = 0;
 		long bytesInCurrentBlock = 0;
@@ -168,7 +168,7 @@ public class BinaryWriter {
 			System.out.println("Could not create file " + fileName);
 		}
 		// write size of actual data contained in a block
-		w.write(blockDataSize);
+		w.write(blockSize);
 		w.close();
 		// open writer for currentBlock
 		try {
