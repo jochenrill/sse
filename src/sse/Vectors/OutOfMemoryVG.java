@@ -154,9 +154,10 @@ public class OutOfMemoryVG {
 		r.setDepth(0);
 		for (Edge e : graph.source.getEdges()) {
 
+			boolean sink = e.getEnd() == graph.sink;
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
-					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));
+					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1), sink);
 			r.addEdge(graph.text.charAt(e.getEdgeLabelStart()), p);
 		}
 		return r;
@@ -169,9 +170,10 @@ public class OutOfMemoryVG {
 		tmp.setDepth(n.getLength());
 		for (Edge e : n.getEdges()) {
 
+			boolean sink = e.getEnd() == graph.sink;
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
-					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));
+					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1), sink);
 			tmp.addEdge(graph.text.charAt(e.getEdgeLabelStart()), p);
 		}
 		return tmp;

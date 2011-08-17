@@ -28,13 +28,14 @@ public class BinaryWriter {
 	 */
 
 	private void updateBlockPosition(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, long actualDataSize, long maximumBlockSize) {
+			ArrayList<EdgePosition> ep, long actualDataSize,
+			long maximumBlockSize) {
 		// Start printing the blocks
 		int pos = 0;
 		long bytesInCurrentBlock = 0;
 		long currentBlock = 1;
 		long padding = 0;
-		
+
 		Iterator<EdgePosition> iterator = ep.iterator();
 		EdgePosition e = iterator.next();
 		for (SuffixVector v : list) {
@@ -139,9 +140,10 @@ public class BinaryWriter {
 		if (maximumDataSize > Math.pow(2, Constants.EDGE_REFERENCE_BYTES * 8)) {
 			System.out.println("Warning: EDGE_REFERENCE_BYTES might be to low");
 		}
-		
-		// if indcpa security is not needed use the actual data size as maximum size
-		if(!indcpa){
+
+		// if indcpa security is not needed use the actual data size as maximum
+		// size
+		if (!indcpa) {
 			maximumDataSize = actualDataSize;
 		}
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
@@ -151,9 +153,10 @@ public class BinaryWriter {
 
 		// the number of actual data per block
 		long blockDataSize = actualDataSize / (blockNumber - 1);
-		
-		// problem: if  blockDataSize < maximumVector size we have a problem. needs to be adjusted
-		if(blockDataSize < maximumVectorSize){
+
+		// problem: if blockDataSize < maximumVector size we have a problem.
+		// needs to be adjusted
+		if (blockDataSize < maximumVectorSize) {
 			System.out.println("Warning: increase block multiplier!");
 		}
 		updateBlockPosition(list, ep, blockDataSize, blockSize);
@@ -259,19 +262,46 @@ public class BinaryWriter {
 			for (Character c : v.getMap().keySet()) {
 				// write first char of edge
 				w.write(c);
-				// write bytesequence for representing the edge
+				/*
+				 * write bytesequence for representing the edge the first bit in
+				 * each edge reference is dedicated to indicate whether the edge
+				 * will lead to the sink or not this allows the search algorithm
+				 * to return the number of occurences without following the
+				 * (possibly very long) edge to the sink
+				 */
+				// TODO: Check whether the range of the representation of the
+				// edges is long enough, so that the first bit will never be
+				// used
 				switch (Constants.EDGE_REFERENCE_BYTES) {
 				case 8:
-					w.write((long) v.getMap().get(c).getMovedPosition());
+					if (v.getMap().get(c).leadsToSink()) {
+						w.write((long) ((v.getMap().get(c).getMovedPosition() <<1) | Long
+								.parseLong("0x0000000000000001")));
+					} else {
+						w.write((long) ((v.getMap().get(c).getMovedPosition() <<1)& Long
+								.parseLong("0xFFFFFFFFFFFFFFFE")));
+					}
 					break;
 				case 4:
-					w.write((int) v.getMap().get(c).getMovedPosition());
+					if (v.getMap().get(c).leadsToSink()) {
+						w.write((int) ((v.getMap().get(c).getMovedPosition()<<1) | 0x00000001));
+					} else {
+						w.write((int) ((v.getMap().get(c).getMovedPosition()<<1) & 0xFFFFFFFE));
+					}
 					break;
 				case 2:
-					w.write((short) v.getMap().get(c).getMovedPosition());
+					if (v.getMap().get(c).leadsToSink()) {
+						w.write((short) ((v.getMap().get(c).getMovedPosition()<<1) | 0x0001));
+					} else {
+						w.write((short) ((v.getMap().get(c).getMovedPosition() <<1)& 0xFFFE));
+					}
 					break;
 				case 1:
-					w.write((char) v.getMap().get(c).getMovedPosition());
+					if (v.getMap().get(c).leadsToSink()) {
+						w.write((char) ((v.getMap().get(c).getMovedPosition()<<1) | 0x01));
+					} else {
+						w.write((char) ((v.getMap().get(c).getMovedPosition()<<1) & 0xFE));
+					}
 					break;
 				default:
 					throw new UnsupportedOperationException(
