@@ -11,13 +11,11 @@ public class Constants {
 	private Constants() {
 	}
 
-	
-	public final static int MASK1 = 0x80000000;
-	public final static int MASK2 = 0x7FFFFFFF;
 	/**
-	 * Defines whether exact position matching for vectors should be used. Running time for exact matching is at least O(n^2).
-	 * If this is false, the positions will be distributed randomly. This will lead to multiple vectors occupying the same location.
-	 * Might be less secure (or not ..). 
+	 * Defines whether exact position matching for vectors should be used.
+	 * Running time for exact matching is at least O(n^2). If this is false, the
+	 * positions will be distributed randomly. This will lead to multiple
+	 * vectors occupying the same location. Might be less secure (or not ..).
 	 */
 	public static boolean EXACT_MATCHING = true;
 	/**
