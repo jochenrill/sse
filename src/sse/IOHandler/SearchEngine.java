@@ -22,9 +22,9 @@ public class SearchEngine {
 	private Backend backend;
 	private String startFile;
 
-	public SearchEngine(String keyFile, Backend backend, String startFile) {
-		this.sEn = new SecurityEngine();
-		this.sEn.readKey(keyFile);
+	public SearchEngine(Backend backend, String startFile, char password[]) {
+		this.sEn = new SecurityEngine(password);
+		this.sEn.readKey(backend.loadStartBlock());
 
 		this.currentBlock = 0;
 		this.backend = backend;

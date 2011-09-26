@@ -11,27 +11,50 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class SecurityEngine {
 	private Key secureKey;
 	private byte[] iv;
 	private Cipher c;
+	private byte[] salt;
+	private char[] password;
+	private SecretKeyFactory factory;
 
-	public SecurityEngine() {
+	public SecurityEngine(char[] password) {
 		KeyGenerator kg;
 		try {
-			kg = KeyGenerator.getInstance("AES");
-			kg.init(new SecureRandom());
-			secureKey = kg.generateKey();
+			factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+			// Read a password from console
+
+			this.password = password;
+
+			salt = new byte[8];
+			new SecureRandom().nextBytes(salt);
+
+			KeySpec spec = new PBEKeySpec(this.password, salt, 1024, 128);
+
+			SecretKey tmp = factory.generateSecret(spec);
+			secureKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+			/*
+			 * kg = KeyGenerator.getInstance("AES"); kg.init(new
+			 * SecureRandom()); secureKey = kg.generateKey();
+			 */
+
 			c = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
 		} catch (NoSuchAlgorithmException e) {
 			System.out.println(e.getMessage());
 		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidKeySpecException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -40,16 +63,18 @@ public class SecurityEngine {
 	public void printKey(String fileName) {
 		BinaryOut keyStream;
 		try {
-			keyStream = new BinaryOut(fileName);
-			byte[] key = secureKey.getEncoded();
-			for (int i = 0; i < key.length; i++) {
-				keyStream.write(key[i]);
-			}
-			keyStream.close();
-			keyStream = new BinaryOut(fileName + ".iv");
+			keyStream = new BinaryOut(fileName, true);
+			/*
+			 * byte[] key = secureKey.getEncoded(); for (int i = 0; i <
+			 * key.length; i++) { keyStream.write(key[i]); } keyStream.close();
+			 */
 
 			for (int i = 0; i < iv.length; i++) {
 				keyStream.write(iv[i]);
+			}
+
+			for (int i = 0; i < salt.length; i++) {
+				keyStream.write(salt[i]);
 			}
 			keyStream.close();
 		} catch (IOException e) {
@@ -57,23 +82,35 @@ public class SecurityEngine {
 		}
 	}
 
-	public void readKey(String fileName) {
+	public void readKey(InputStream key) {
 		DataInputStream keyStream;
 		try {
-			keyStream = new DataInputStream(new DataInputStream(
-					new FileInputStream(new File(fileName))));
-			byte[] key = new byte[16];
-			keyStream.read(key, 0, 16);
-			keyStream.close();
-			secureKey = new SecretKeySpec(key, "AES");
-			keyStream = new DataInputStream(new DataInputStream(
-					new FileInputStream(new File(fileName + ".iv"))));
+			/*
+			 * keyStream = new DataInputStream(new DataInputStream( new
+			 * FileInputStream(new File(fileName)))); byte[] key = new byte[16];
+			 * keyStream.read(key, 0, 16); keyStream.close();
+			 */
+			// secureKey = new SecretKeySpec(key, "AES");
+			keyStream = new DataInputStream(new DataInputStream(key));
+			// Jump over the irrelevant information
+			keyStream.readLong();
+			keyStream.readLong();
+
+			// read IV and Key
 			iv = new byte[16];
 			keyStream.read(iv, 0, 16);
+			salt = new byte[8];
+			keyStream.read(salt, 0, 8);
 			keyStream.close();
+			KeySpec spec = new PBEKeySpec(password, salt, 1024, 128);
+			SecretKey tmp = factory.generateSecret(spec);
+			secureKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
+		} catch (InvalidKeySpecException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -101,6 +138,7 @@ public class SecurityEngine {
 			System.out.println(e.getMessage());
 		}
 	}
+
 	public void decrypt(String fileName, InputStream s) {
 		try {
 			FileOutputStream b = new FileOutputStream(fileName + ".dec");

@@ -118,10 +118,13 @@ public class AmazonBackend implements Backend {
 			e.printStackTrace();
 		}
 
-		secEngine.printKey("key");
+		
 
 		w.write(currentBlock);
 		w.close();
+		
+		// print Key writes the IV and salt to the meta information file
+		secEngine.printKey(fileName);
 		// upload meta block
 		// upload encrypted block
 		try {

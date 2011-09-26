@@ -110,9 +110,9 @@ public class BinaryWriter {
 	}
 
 	public void writeBlocks(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, long textLength, boolean indcpa) {
+			ArrayList<EdgePosition> ep, long textLength, boolean indcpa,char password[]) {
 
-		secEngine = new SecurityEngine();
+		secEngine = new SecurityEngine(password);
 
 		// Calculate the size of the alphabet. This is needed to determine the
 		// maximum size for a vector.
