@@ -33,7 +33,7 @@ public class BinaryWriter {
 		// Start printing the blocks
 		int pos = 0;
 		long bytesInCurrentBlock = 0;
-		long currentBlock = 1;
+		//long currentBlock = 1;
 		long padding = 0;
 
 		Iterator<EdgePosition> iterator = ep.iterator();
@@ -55,7 +55,7 @@ public class BinaryWriter {
 						}
 
 						padding += maximumBlockSize - bytesInCurrentBlock;
-						currentBlock++;
+						//currentBlock++;
 						bytesInCurrentBlock = 0;
 					}
 					bytesInCurrentBlock++;
@@ -73,7 +73,7 @@ public class BinaryWriter {
 				}
 				padding += maximumBlockSize - bytesInCurrentBlock;
 
-				currentBlock++;
+				//currentBlock++;
 				bytesInCurrentBlock = 0;
 			}
 			// write vector itself
@@ -92,7 +92,7 @@ public class BinaryWriter {
 				}
 				padding += actualDataSize - bytesInCurrentBlock;
 
-				currentBlock++;
+				//currentBlock++;
 				bytesInCurrentBlock = 0;
 			}
 			bytesInCurrentBlock++;

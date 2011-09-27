@@ -1,7 +1,6 @@
 package sse.IOHandler;
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,7 +27,6 @@ public class SecurityEngine {
 	private SecretKeyFactory factory;
 
 	public SecurityEngine(char[] password) {
-		KeyGenerator kg;
 		try {
 			factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 			// Read a password from console

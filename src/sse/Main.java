@@ -16,6 +16,7 @@ import org.ini4j.Ini;
 
 import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
+import sse.Backend.GoogleBackend;
 import sse.Graph.CDWAG;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
@@ -39,6 +40,10 @@ public class Main {
 		options.addOption("v", false, "Verbose");
 		options.addOption("amazon", false,
 				"Uploads to Amazon S3. Credentials must be specified in sse.config.");
+		options.addOption(
+				"google",
+				false,
+				"Uploads to Google Cloud Services. Credentials must be specified in sse.config.");
 		options.addOption("search", false, "Turns on search mode");
 		options.addOption(
 				"password",
@@ -117,6 +122,31 @@ public class Main {
 							} else {
 								System.out
 										.println("No Amazon Credentials found. Search can't be performed.");
+							}
+						} else if (cmd.hasOption("google")) {
+							if (config.containsKey("google")) {
+								char[] password;
+								if (cmd.hasOption("password")) {
+									password = cmd.getOptionValue("password")
+											.toCharArray();
+								} else {
+									password = System.console().readPassword(
+											"[%s]:", "Password");
+								}
+								SearchEngine sEn = new SearchEngine(
+
+								new GoogleBackend(config.get("google", "key"),
+										config.get("google", "skey"),
+										cmd.getOptionValue("i"), config.get(
+												"google", "bucket")),
+										cmd.getOptionValue("i"), password);
+								System.out.println(sEn.find(cmd
+										.getOptionValue("text")));
+								System.out.println("Files opened:"
+										+ sEn.getTransferedFilesCount());
+							} else {
+								System.out
+										.println("No Google Credentials found. Search can't be performed.");
 							}
 						} else {
 							char[] password;
@@ -291,6 +321,27 @@ public class Main {
 					} else {
 						System.out
 								.println("Amazon credentials can't be found. Exiting.");
+					}
+				} else if (cmd.hasOption("google")) {
+					if (config.containsKey("google")) {
+						char[] password;
+						if (cmd.hasOption("password")) {
+							password = cmd.getOptionValue("password")
+									.toCharArray();
+						} else {
+							password = System.console().readPassword("[%s]:",
+									"Password");
+						}
+						BinaryWriter out = new BinaryWriter(outputFile, input,
+								new GoogleBackend(config.get("google", "key"),
+										config.get("google", "skey"),
+										outputFile, config.get("google",
+												"bucket")));
+						out.writeBlocks(list, ep, textLength,
+								cmd.hasOption("indcpa"), password);
+					} else {
+						System.out
+								.println("Google credentials can't be found. Exiting.");
 					}
 				} else {
 					char[] password;
