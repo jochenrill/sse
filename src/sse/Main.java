@@ -108,6 +108,7 @@ public class Main {
 									password = System.console().readPassword(
 											"[%s]:", "Password");
 								}
+								System.out.println("[INFO:] Using Amazon backend.");
 								SearchEngine sEn = new SearchEngine(
 
 								new AmazonBackend(config.get("amazon", "key"),
@@ -133,6 +134,8 @@ public class Main {
 									password = System.console().readPassword(
 											"[%s]:", "Password");
 								}
+								System.out.println("[INFO:] Using Google backend.");
+
 								SearchEngine sEn = new SearchEngine(
 
 								new GoogleBackend(config.get("google", "key"),
@@ -157,6 +160,8 @@ public class Main {
 								password = System.console().readPassword(
 										"[%s]:", "Password");
 							}
+							System.out.println("[INFO:] Using Filesystem backend.");
+
 							SearchEngine sEn = new SearchEngine(
 
 							new FileSystemBackend(cmd.getOptionValue("i")),
@@ -311,6 +316,8 @@ public class Main {
 							password = System.console().readPassword("[%s]:",
 									"Password");
 						}
+						System.out.println("[INFO:] Using Amazon backend.");
+
 						BinaryWriter out = new BinaryWriter(outputFile, input,
 								new AmazonBackend(config.get("amazon", "key"),
 										config.get("amazon", "skey"),
@@ -332,6 +339,8 @@ public class Main {
 							password = System.console().readPassword("[%s]:",
 									"Password");
 						}
+						System.out.println("[INFO:] Using Google backend.");
+
 						BinaryWriter out = new BinaryWriter(outputFile, input,
 								new GoogleBackend(config.get("google", "key"),
 										config.get("google", "skey"),
@@ -351,6 +360,8 @@ public class Main {
 						password = System.console().readPassword("[%s]:",
 								"Password");
 					}
+					System.out.println("[INFO:] Using filesystem backend.");
+
 					BinaryWriter out = new BinaryWriter(outputFile, input,
 							new FileSystemBackend(outputFile));
 					out.writeBlocks(list, ep, textLength,
