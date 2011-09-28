@@ -16,15 +16,15 @@ public class SearchEngine {
 	private long lastEdgeValue = 0;
 	private long lastDepthValue = 0;
 	private long numOccurs;
-	private boolean notReachedSink = false;
+	private boolean reachedSink = false;
 	private int files = 0;
 	private boolean reachedEnd = false;
 	private Backend backend;
 	private String startFile;
 
-	public SearchEngine(String keyFile, Backend backend, String startFile) {
-		this.sEn = new SecurityEngine();
-		this.sEn.readKey(keyFile);
+	public SearchEngine(Backend backend, String startFile, char password[]) {
+		this.sEn = new SecurityEngine(password);
+		this.sEn.readKey(backend.loadStartBlock());
 
 		this.currentBlock = 0;
 		this.backend = backend;
@@ -106,7 +106,7 @@ public class SearchEngine {
 					}
 
 					long originalVectorPosition = 0;
-					switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
+					switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
 					case 8:
 						originalVectorPosition = stream.readLong();
 						break;
@@ -121,12 +121,12 @@ public class SearchEngine {
 						break;
 					default:
 						throw new UnsupportedOperationException(
-								Constants.EDGE_REFERENCE_BYTES
-										+ " is not a valid number for edge reference");
+								Constants.ORIGINAL_VECTOR_POSITION_BYTES
+										+ " is not a valid number for vector position");
 					}
 					// the suffix vector we are looking at might not be the one
 					// the edge was leading to
-					
+
 					if (depthValue != 0) {
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
@@ -137,12 +137,13 @@ public class SearchEngine {
 						}
 					}
 					/*
-					 * we matched the word and we found the correct suffix vector
-					 * the edge was leading to. stop the search and print
+					 * we matched the word and we found the correct suffix
+					 * vector the edge was leading to. stop the search and print
 					 * numOccurs.
 					 */
 					if (word.length() == 0 && !jumpOver) {
-						notReachedSink = true;
+						break;
+					} else if (word.length() == 0 && reachedSink) {
 						break;
 					}
 					// the suffix vector was not the correct one, change
@@ -152,21 +153,37 @@ public class SearchEngine {
 					}
 					// read char representing edge
 					foo = (char) stream.readByte();
+					boolean sink;
 					while (foo != Constants.VECTOR_MARKER) {
-						// read reference to position in text
+						/* read reference to position in text
+						 * it is expected, that the least significant bit in the reference indicates whether the 
+						 * edge leads to the sink or not, hence the bit operations.
+						 */
 						long edgeValue = 0;
+
 						switch (Constants.EDGE_REFERENCE_BYTES) {
 						case 8:
+
 							edgeValue = stream.readLong();
+							sink = (edgeValue & Long
+									.parseLong("0x0000000000000001")) == 1;
+							edgeValue = (edgeValue & Long
+									.parseLong("0xFFFFFFFFFFFFFFFE")) >> 1;
 							break;
 						case 4:
 							edgeValue = (long) stream.readInt();
+							sink = (edgeValue & 0x00000001) == 1;
+							edgeValue = (edgeValue & 0xFFFFFFFE) >> 1;
 							break;
 						case 2:
 							edgeValue = (long) stream.readShort();
+							sink = (edgeValue & 0x0001) == 1;
+							edgeValue = (edgeValue & 0xFFFE) >> 1;
 							break;
 						case 1:
 							edgeValue = (long) stream.readChar();
+							sink = (edgeValue & 0x01) == 1;
+							edgeValue = (edgeValue & 0xFE) >> 1;
 							break;
 						default:
 							throw new UnsupportedOperationException(
@@ -197,6 +214,7 @@ public class SearchEngine {
 							// Jump to the block at the given position
 							// if (blockValue - currentBlock == 0) {
 							// we are staying in the current block
+							reachedSink = sink;
 							long blockToOpen = (edgeValue / blockSize) + 1;
 							long position = 0;
 							if (blockToOpen == 1) {
@@ -220,7 +238,8 @@ public class SearchEngine {
 				} else {
 
 					// Ignore padding bytes
-					if (value == Constants.PADDING_BYTE && currentBlock < numberOfBlocks) {
+					if (value == Constants.PADDING_BYTE
+							&& currentBlock < numberOfBlocks) {
 						// Block done, move to next block
 						toDelete = currentBlock;
 						files++;
@@ -231,7 +250,7 @@ public class SearchEngine {
 						word = word.substring(1, word.length());
 					} else if (word.length() != 0) {
 						return false;
-					} 
+					}
 				}
 				// Make sure that we open the next block if the last byte in a
 				// block is indeed a character
@@ -254,7 +273,7 @@ public class SearchEngine {
 		}
 		if (word.length() == 0) {
 			// if we have reached the sink then numOccurs is 1
-			if (!notReachedSink) {
+			if (reachedSink) {
 				System.out.println("1");
 			} else {
 				System.out.println(numOccurs);

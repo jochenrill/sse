@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Stack;
 
 import sse.Graph.CDWAG;
@@ -44,7 +45,9 @@ public class OutOfMemoryVG {
 		if (Constants.DEBUG)
 			System.out.println("Calculating matching");
 		// run a bipartite matching alogrithm
-		bipartiteMatching();
+		if (Constants.EXACT_MATCHING) {
+			bipartiteMatching();
+		}
 		while (!s.isEmpty()) {
 			Node n = s.pop();
 			n.visited = true;
@@ -113,6 +116,11 @@ public class OutOfMemoryVG {
 
 		n.setPlaces(findPlace(n));
 		visited.put(n, true);
+
+		if (!Constants.EXACT_MATCHING) {
+			Random rnd = new Random();
+			n.setLocation(n.getPlaces().get(rnd.nextInt(n.getPlaces().size())));
+		}
 		for (Edge e : n.getEdges()) {
 
 			if (visited.get(e.getEnd()) == null && e.getEnd() != graph.sink) {
@@ -154,9 +162,10 @@ public class OutOfMemoryVG {
 		r.setDepth(0);
 		for (Edge e : graph.source.getEdges()) {
 
+			boolean sink = e.getEnd() == graph.sink;
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
-					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));
+					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1), sink);
 			r.addEdge(graph.text.charAt(e.getEdgeLabelStart()), p);
 		}
 		return r;
@@ -169,9 +178,10 @@ public class OutOfMemoryVG {
 		tmp.setDepth(n.getLength());
 		for (Edge e : n.getEdges()) {
 
+			boolean sink = e.getEnd() == graph.sink;
 			EdgePosition p;
 			p = new EdgePosition(e.getEnd().getLocation()
-					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1));
+					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1), sink);
 			tmp.addEdge(graph.text.charAt(e.getEdgeLabelStart()), p);
 		}
 		return tmp;

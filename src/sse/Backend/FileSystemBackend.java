@@ -63,11 +63,11 @@ public class FileSystemBackend implements Backend {
 		// remove the unencryted file
 		new File(fileName + (currentBlock)).delete();
 
-		secEngine.printKey("key");
+		
 
 		w.write(currentBlock);
 		w.close();
-
+		secEngine.printKey(fileName);
 	}
 
 	@Override

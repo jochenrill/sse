@@ -16,6 +16,7 @@ import org.ini4j.Ini;
 
 import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
+import sse.Backend.GoogleBackend;
 import sse.Graph.CDWAG;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
@@ -39,9 +40,15 @@ public class Main {
 		options.addOption("v", false, "Verbose");
 		options.addOption("amazon", false,
 				"Uploads to Amazon S3. Credentials must be specified in sse.config.");
+		options.addOption(
+				"google",
+				false,
+				"Uploads to Google Cloud Services. Credentials must be specified in sse.config.");
 		options.addOption("search", false, "Turns on search mode");
-		options.addOption("key", true,
-				"Path to the key file for encryption. IV muss be named <key_file>.iv");
+		options.addOption(
+				"password",
+				true,
+				"Provides the password for search and encryption. If the password is not provided, the user will be prompted to enter it.");
 		options.addOption("create", false, "Turns on creation mode");
 		options.addOption("text", true,
 				"If search mode is used, this is the text that will be searched");
@@ -87,42 +94,84 @@ public class Main {
 			if (cmd.hasOption("search")) {
 				// We need a key file, a search text and an input text for
 				// searching
+
 				if (cmd.hasOption("i")) {
 					if (cmd.hasOption("text")) {
-						if (cmd.hasOption("key")) {
-							if (cmd.hasOption("amazon")) {
-								if (config.containsKey("amazon")) {
-									SearchEngine sEn = new SearchEngine(
-											cmd.getOptionValue("key"),
-											new AmazonBackend(config.get(
-													"amazon", "key"), config
-													.get("amazon", "skey"), cmd
-													.getOptionValue("i"),
-													config.get("amazon",
-															"bucket")),
-											cmd.getOptionValue("i"));
-									System.out.println(sEn.find(cmd
-											.getOptionValue("text")));
-									System.out.println("Files opened:"
-											+ sEn.getTransferedFilesCount());
+
+						if (cmd.hasOption("amazon")) {
+							if (config.containsKey("amazon")) {
+								char[] password;
+								if (cmd.hasOption("password")) {
+									password = cmd.getOptionValue("password")
+											.toCharArray();
 								} else {
-									System.out
-											.println("No Amazon Credentials found. Search can't be performed");
+									password = System.console().readPassword(
+											"[%s]:", "Password");
 								}
-							} else {
+								System.out.println("[INFO:] Using Amazon backend.");
 								SearchEngine sEn = new SearchEngine(
-										cmd.getOptionValue("key"),
-										new FileSystemBackend(cmd
-												.getOptionValue("i")),
-										cmd.getOptionValue("i"));
+
+								new AmazonBackend(config.get("amazon", "key"),
+										config.get("amazon", "skey"),
+										cmd.getOptionValue("i"), config.get(
+												"amazon", "bucket")),
+										cmd.getOptionValue("i"), password);
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
-								System.out.println("Files opened: "
+								System.out.println("Files opened:"
 										+ sEn.getTransferedFilesCount());
+							} else {
+								System.out
+										.println("No Amazon Credentials found. Search can't be performed.");
+							}
+						} else if (cmd.hasOption("google")) {
+							if (config.containsKey("google")) {
+								char[] password;
+								if (cmd.hasOption("password")) {
+									password = cmd.getOptionValue("password")
+											.toCharArray();
+								} else {
+									password = System.console().readPassword(
+											"[%s]:", "Password");
+								}
+								System.out.println("[INFO:] Using Google backend.");
+
+								SearchEngine sEn = new SearchEngine(
+
+								new GoogleBackend(config.get("google", "key"),
+										config.get("google", "skey"),
+										cmd.getOptionValue("i"), config.get(
+												"google", "bucket")),
+										cmd.getOptionValue("i"), password);
+								System.out.println(sEn.find(cmd
+										.getOptionValue("text")));
+								System.out.println("Files opened:"
+										+ sEn.getTransferedFilesCount());
+							} else {
+								System.out
+										.println("No Google Credentials found. Search can't be performed.");
 							}
 						} else {
-							throw new ParseException("Key argument missing");
+							char[] password;
+							if (cmd.hasOption("password")) {
+								password = cmd.getOptionValue("password")
+										.toCharArray();
+							} else {
+								password = System.console().readPassword(
+										"[%s]:", "Password");
+							}
+							System.out.println("[INFO:] Using Filesystem backend.");
+
+							SearchEngine sEn = new SearchEngine(
+
+							new FileSystemBackend(cmd.getOptionValue("i")),
+									cmd.getOptionValue("i"), password);
+							System.out.println(sEn.find(cmd
+									.getOptionValue("text")));
+							System.out.println("Files opened: "
+									+ sEn.getTransferedFilesCount());
 						}
+
 					} else {
 						throw new ParseException("Text argument missing");
 					}
@@ -259,23 +308,64 @@ public class Main {
 
 				if (cmd.hasOption("amazon")) {
 					if (config.containsKey("amazon")) {
+						char[] password;
+						if (cmd.hasOption("password")) {
+							password = cmd.getOptionValue("password")
+									.toCharArray();
+						} else {
+							password = System.console().readPassword("[%s]:",
+									"Password");
+						}
+						System.out.println("[INFO:] Using Amazon backend.");
+
 						BinaryWriter out = new BinaryWriter(outputFile, input,
 								new AmazonBackend(config.get("amazon", "key"),
 										config.get("amazon", "skey"),
 										outputFile, config.get("amazon",
 												"bucket")));
 						out.writeBlocks(list, ep, textLength,
-								cmd.hasOption("indcpa"));
+								cmd.hasOption("indcpa"), password);
 					} else {
 						System.out
 								.println("Amazon credentials can't be found. Exiting.");
 					}
+				} else if (cmd.hasOption("google")) {
+					if (config.containsKey("google")) {
+						char[] password;
+						if (cmd.hasOption("password")) {
+							password = cmd.getOptionValue("password")
+									.toCharArray();
+						} else {
+							password = System.console().readPassword("[%s]:",
+									"Password");
+						}
+						System.out.println("[INFO:] Using Google backend.");
+
+						BinaryWriter out = new BinaryWriter(outputFile, input,
+								new GoogleBackend(config.get("google", "key"),
+										config.get("google", "skey"),
+										outputFile, config.get("google",
+												"bucket")));
+						out.writeBlocks(list, ep, textLength,
+								cmd.hasOption("indcpa"), password);
+					} else {
+						System.out
+								.println("Google credentials can't be found. Exiting.");
+					}
 				} else {
+					char[] password;
+					if (cmd.hasOption("password")) {
+						password = cmd.getOptionValue("password").toCharArray();
+					} else {
+						password = System.console().readPassword("[%s]:",
+								"Password");
+					}
+					System.out.println("[INFO:] Using filesystem backend.");
 
 					BinaryWriter out = new BinaryWriter(outputFile, input,
 							new FileSystemBackend(outputFile));
 					out.writeBlocks(list, ep, textLength,
-							cmd.hasOption("indcpa"));
+							cmd.hasOption("indcpa"), password);
 
 				}
 

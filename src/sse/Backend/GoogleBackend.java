@@ -6,40 +6,39 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
 
-import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
-import org.jets3t.service.impl.rest.httpclient.RestS3Service;
-import org.jets3t.service.model.S3Bucket;
+import org.jets3t.service.impl.rest.httpclient.GoogleStorageService;
+import org.jets3t.service.model.GSObject;
 import org.jets3t.service.model.S3Object;
-import org.jets3t.service.security.AWSCredentials;
-
+import org.jets3t.service.security.GSCredentials;
 import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
 import sse.Vectors.Constants;
 
-public class AmazonBackend implements Backend {
+public class GoogleBackend implements Backend {
 
-	private S3Service service;
+	private GoogleStorageService service;
 	private String fileName;
-	private S3Bucket bucket;
+	private String bucket;
 	private RandomAccessFile searchStream;
 
-	public AmazonBackend(String key, String secret, String fileName,
+	public GoogleBackend(String key, String secret, String fileName,
 			String bucket) {
-		AWSCredentials login = new AWSCredentials(key, secret);
+		GSCredentials login = new GSCredentials(key, secret);
 		this.fileName = fileName;
-		try {
-			service = new RestS3Service(login);
-			this.bucket = service.getBucket(bucket);
 
-		} catch (S3ServiceException e) {
-			System.out.println("S3 Service Exception: " + e.getMessage());
-			System.exit(0);
+		try {
+			service = new GoogleStorageService(login);
+			this.bucket = bucket;
+		} catch (ServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
+
 	/**
-	 * 	{@inheritDoc}
+	 * {@inheritDoc}
 	 */
 	@Override
 	public BinaryOut openNextFile(long currentBlock, BinaryOut w,
@@ -52,7 +51,7 @@ public class AmazonBackend implements Backend {
 		new File(fileName + (currentBlock - 1)).delete();
 		try {
 			// upload the encrypted file
-			S3Object obj = new S3Object(new File(fileName + (currentBlock - 1)
+			GSObject obj = new GSObject(new File(fileName + (currentBlock - 1)
 					+ ".sec"));
 			service.putObject(bucket, obj);
 			// delete the generated file
@@ -63,7 +62,7 @@ public class AmazonBackend implements Backend {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (S3ServiceException e) {
+		} catch (ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -79,7 +78,7 @@ public class AmazonBackend implements Backend {
 	}
 
 	/**
-	 * 	{@inheritDoc}
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void finalize(long currentBlock, BinaryOut w,
@@ -102,7 +101,7 @@ public class AmazonBackend implements Backend {
 		// upload encrypted block
 		try {
 			// upload the encrypted file
-			S3Object obj = new S3Object(new File(fileName + (currentBlock)
+			GSObject obj = new GSObject(new File(fileName + (currentBlock)
 					+ ".sec"));
 			service.putObject(bucket, obj);
 			// delete the generated file
@@ -113,16 +112,14 @@ public class AmazonBackend implements Backend {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (S3ServiceException e) {
+		} catch (ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		
-
 		w.write(currentBlock);
 		w.close();
-		
+
 		// print Key writes the IV and salt to the meta information file
 		secEngine.printKey(fileName);
 		// upload meta block
@@ -139,7 +136,8 @@ public class AmazonBackend implements Backend {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (S3ServiceException e) {
+
+		} catch (ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -147,9 +145,8 @@ public class AmazonBackend implements Backend {
 	}
 
 	/**
-	 * 	{@inheritDoc}
+	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean searchNext(long block, String fileName, long position,
 			long oldBlock, RandomAccessFile stream, SecurityEngine sEn)
@@ -163,7 +160,7 @@ public class AmazonBackend implements Backend {
 			delete.delete();
 		}
 		try {
-			S3Object obj = service.getObject(bucket, fileName + block + ".sec");
+			GSObject obj = service.getObject(bucket, fileName + block + ".sec");
 
 			sEn.decrypt(fileName + block, obj.getDataInputStream());
 			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
@@ -174,9 +171,7 @@ public class AmazonBackend implements Backend {
 			}
 			stream.seek(position);
 			searchStream = stream;
-		} catch (S3ServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
 		} catch (ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -201,8 +196,7 @@ public class AmazonBackend implements Backend {
 	public InputStream loadStartBlock() {
 
 		try {
-			@SuppressWarnings("deprecation")
-			S3Object obj = service.getObject(bucket, fileName);
+			GSObject obj = service.getObject(bucket, fileName);
 
 			return obj.getDataInputStream();
 			// if a block starts with a padding byte, it is a padding block =)

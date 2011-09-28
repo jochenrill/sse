@@ -7,10 +7,12 @@ public class EdgePosition implements Comparable<EdgePosition>, Serializable {
     private static final long serialVersionUID = 1460328906527139022L;
     private long position;
     private long movedPosition;
+    private boolean leadsToSink;
 
-    public EdgePosition(int pos) {
+    public EdgePosition(int pos, boolean sink) {
         this.position = pos;
         this.movedPosition = pos;
+        this.leadsToSink = sink;
     }
 
     public void setPosition(int position) {
@@ -18,6 +20,9 @@ public class EdgePosition implements Comparable<EdgePosition>, Serializable {
         this.movedPosition = position;
     }
 
+    public boolean leadsToSink(){
+    	return leadsToSink;
+    }
     public long getPosition() {
         return position;
     }
