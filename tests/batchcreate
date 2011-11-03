@@ -1,24 +1,16 @@
 #!/bin/bash
-for i in `seq 5 5 430`
-    do head -c $(($i*1000)) text > tmpfile
-    echo "$" >> tmpfile
-    dstart=`date`
-    hstart=`echo $dstart| awk '{print $4}' | sed 's/:/ /g' | awk '{print $1}'`
-    mstart=`echo $dstart | awk '{print $4}' | sed 's/:/ /g' | awk '{print $2}'`
-    sstart=`echo $dstart | awk '{print $4}' | sed 's/:/ /g' | awk '{print $3}'`
-    tstart=`echo "$hstart * 3600 + $mstart * 60 + $sstart" | bc`
-    ./create tmpfile
-    dend=`date`
-    hend=`echo $dend| awk '{print $4}' | sed 's/:/ /g' | awk '{print $1}'`
-    mend=`echo $dend | awk '{print $4}' | sed 's/:/ /g' | awk '{print $2}'`
-    send=`echo $dend | awk '{print $4}' | sed 's/:/ /g' | awk '{print $3}'`
-    tend=`echo "$hend * 3600 + $mend * 60 + $send" | bc` 
-    exectime=`echo "$tend - $tstart" | bc`
+for i in `seq 5 5 300`
+    do head -c $(($i*1000)) ../samples/text > ../samples/tmpfile
+    echo "$" >> ../samples/tmpfile
+    exectime=`bash -c "time -p ../create tmpfile 1>/dev/null" 2>&1 | grep real | awk '{print $2}'`
     size=`ls -s | head -n1 | awk '{print $2}' | sed 's/M//g'`
-    let "size = size - 1776"
+    let "size = size - 1536"
     size=`echo "scale=2;$size / 1000" | bc`
-    #echo "Time for creating file with $i kB: $exectime seconds"
-    echo "Size für file with $i kB: $size kB"
-    echo "$i $size" >> results/graph
-    #echo "$i $exectime" >> results/graph
+    outputtime=`./create samples/small  | grep output | awk '{print $5}'`
+    echo "Total time for creating file with $i kB: $exectime seconds"
+    echo "Size für file mit $i kB: $size kB"
+    echo "Ouput time for creating file with $i kB: $outputtime seconds"
+    echo "$i $size" >> results/graph1
+    echo "$i $exectime" >> results/graph2
+    echo "$i $outputtime" >> results/graph3
 done

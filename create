@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar -Xss200m -Xms4g -Xmx4g sse.jar -create -google -indcpa -m  -i `echo -n $1` 
+java -jar -Xss200m -Xms4g -Xmx4g sse.jar -create -amazon -indcpa -m -password abc -i `echo -n $1` 
