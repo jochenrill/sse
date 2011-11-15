@@ -1,16 +1,21 @@
 #!/bin/bash
+for y in `seq 10`
+    do
 for i in `seq 5 5 300`
-    do head -c $(($i*1000)) ../samples/text > ../samples/tmpfile
+    do head -c $(($i*1000)) ../samples/cantrbry/plrabn12.txt > ../tmpfile
     echo "$" >> ../samples/tmpfile
-    exectime=`bash -c "time -p ../create tmpfile 1>/dev/null" 2>&1 | grep real | awk '{print $2}'`
-    size=`ls -s | head -n1 | awk '{print $2}' | sed 's/M//g'`
-    let "size = size - 1536"
-    size=`echo "scale=2;$size / 1000" | bc`
-    outputtime=`./create samples/small  | grep output | awk '{print $5}'`
+    output=`bash -c "time -p ../create ../tmpfile " 2>&1`
+    echo $output
+    exectime=`echo $output | grep real | awk '{print $2}'`
+    #size=`ls -s | head -n1 | awk '{print $2}' | sed 's/M//g'`
+    #let "size = size - 1536"
+    #size=`echo "scale=2;$size / 1000" | bc`
+    outputtime=`echo $output  | grep output | awk '{print $5}'`
     echo "Total time for creating file with $i kB: $exectime seconds"
-    echo "Size für file mit $i kB: $size kB"
+   # echo "Size für file mit $i kB: $size kB"
     echo "Ouput time for creating file with $i kB: $outputtime seconds"
-    echo "$i $size" >> results/graph1
-    echo "$i $exectime" >> results/graph2
-    echo "$i $outputtime" >> results/graph3
+   # echo "$i $size" >> ../results_new/outputsize
+    echo "$i $exectime" >> ../results_new/exectime
+    echo "$i $outputtime" >> ../results_new/uploadtime
+done
 done
