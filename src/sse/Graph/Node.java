@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 
+import sse.Vectors.SuffixVector;
+
 public class Node {
 	private Hashtable<Character, Edge> edges;
 	private Node suffixLink;
@@ -14,6 +16,8 @@ public class Node {
 	private boolean hasVector = false;
 	public boolean usedInMatching = false;
 
+	public SuffixVector vector;
+	
 	private int numOccurs = 1;
 	private ArrayList<Integer> places;
 

@@ -256,8 +256,8 @@ public class BinaryWriter {
 				break;
 			default:
 				throw new UnsupportedOperationException(
-						Constants.VECTOR_DEPTH_BYTES
-								+ " is not a valid number for vector depth");
+						Constants.ORIGINAL_VECTOR_POSITION_BYTES
+								+ " is not a valid number for original vector position");
 			}
 			for (Character c : v.getMap().keySet()) {
 				// write first char of edge

@@ -87,6 +87,8 @@ public class InMemoryVG {
 					if (!e.getEnd().hasVector()) {
 						SuffixVector tmp = printSuffix(e.getEnd());
 						e.getEnd().setVector(true);
+						// foo
+						e.getEnd().vector = tmp;
 						list.add(tmp);
 					}
 					if (!e.getEnd().visited) {
@@ -154,6 +156,7 @@ public class InMemoryVG {
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1), sink);
 			tmp.addEdge(graph.text.charAt(e.getEdgeLabelStart()), p);
+			p.end = e.getEnd().vector;
 		}
 		return tmp;
 	}
