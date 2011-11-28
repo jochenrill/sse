@@ -2043,7 +2043,7 @@ What pleasure I from such obedience paid,
 When will and reason (reason also is choice) 
 Useless and vain, of freedom both despoil'd, 
 Made passive both, had serv'd necessity, 
-Not me?  they therefore, as to right belong$ 'd, 
+Not me?  they therefore, as to right belong 'd, 
 So were created, nor can justly accuse 
 Their Maker, or their making, or their fate, 
 As if predestination over-rul'd 
@@ -2060,7 +2060,7 @@ I form'd them free: and free they must remain,
 Till they enthrall themselves; I else must change 
 Their nature, and revoke the high decree 
 Unchangeable, eternal, which ordain'd 
-$THeir freedom: they themselves ordain'd their fall. 
+THeir freedom: they themselves ordain'd their fall. 
 The first sort by their own suggestion fell, 
 Self-tempted, self-deprav'd:  Man falls, deceiv'd 
 By the other first:  Man therefore shall find grace, 
@@ -2150,7 +2150,7 @@ Say, heavenly Powers, where shall we find such love?
 Which of you will be mortal, to redeem 
 Man's mortal crime, and just the unjust to save? 
 Dwells in all Heaven charity so dear? 
-And silence was in Heaven: $ on Man's behalf 
+And silence was in Heaven:  on Man's behalf 
 He ask'd, but all the heavenly quire stood mute, 
 Patron or intercessour none appear'd, 
 Much less that durst upon his own head draw 
@@ -2180,7 +2180,7 @@ Account me Man; I for his sake will leave
  Life in myself for ever; by thee I live; 
  Though now to Death I yield, and am his due, 
  All that of me can die, yet, that debt paid, 
- $ thou wilt not leave me in the loathsome grave 
+  thou wilt not leave me in the loathsome grave 
  His prey, nor suffer my unspotted soul 
  For ever with corruption there to dwell; 
  But I shall rise victorious, and subdue 
@@ -7498,7 +7498,7 @@ Law to ourselves; our reason is our law.
 To whom the Tempter guilefully replied. 
 Indeed! hath God then said that of the fruit 
 Of all these garden-trees ye shall not eat, 
-Yet Lords declared of all in earth or air$? 
+Yet Lords declared of all in earth or air? 
 To whom thus Eve, yet sinless.  Of the fruit 
 Of each tree in the garden we may eat; 
 But of the fruit of this fair tree amidst 
@@ -9148,7 +9148,7 @@ With incense, where the golden altar fumed,
 By their great intercessour, came in sight 
 Before the Father's throne: them the glad Son 
 Presenting, thus to intercede began. 
-See$ Father, what first-fruits on earth are sprung 
+See Father, what first-fruits on earth are sprung 
 From thy implanted grace in Man; these sighs 
 And prayers, which in this golden censer mixed 
 With incense, I thy priest before thee bring; 
@@ -9352,7 +9352,7 @@ Possession of the garden; he alone,
 To find where Adam sheltered, took his way, 
 Not unperceived of Adam; who to Eve, 
 While the great visitant approached, thus spake. 
-Eve$ now expect great tidings, which perhaps 
+Eve now expect great tidings, which perhaps 
 Of us will soon determine, or impose 
 New laws to be observed; for I descry, 
 From yonder blazing cloud that veils the hill, 
@@ -9395,7 +9395,7 @@ That all his senses bound; Eve, who unseen
 Yet all had heard, with audible lament 
 Discovered soon the place of her retire. 
 O unexpected stroke, worse than of Death! 
-Must I thus leave thee$ Paradise? thus leave 
+Must I thus leave thee Paradise? thus leave 
 Thee, native soil! these happy walks and shades, 
 Fit haunt of Gods? where I had hope to spend, 
 Quiet though sad, the respite of that day 
@@ -10663,7 +10663,7 @@ Wearied I fell asleep:  But now lead on;
 In me is no delay; with thee to go, 
 Is to stay here; without thee here to stay, 
 Is to go hence unwilling; thou to me 
-Art all things under $Heaven, all places thou, 
+Art all things under Heaven, all places thou, 
 Who for my wilful crime art banished hence. 
 This further consolation yet secure 
 I carry hence; though all by me is lost, 
@@ -10697,3 +10697,4 @@ They, hand in hand, with wandering steps and slow,
 Through Eden took their solitary way. 
  
 [The End]
+$
