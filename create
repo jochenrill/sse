@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar -Xss200m -Xms1g -Xmx1g sse.jar -create -indcpa -m -password abc -i `echo -n $1` 
+java -jar -Xss200m -Xms500m -Xmx500m sse.jar -create -indcpa -m -password abc -i `echo -n $1` 

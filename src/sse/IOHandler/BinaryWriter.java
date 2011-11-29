@@ -266,34 +266,20 @@ public class BinaryWriter {
 				// used
 				switch (Constants.EDGE_REFERENCE_BYTES) {
 				case 8:
-					if (v.getMap().get(c).leadsToSink()) {
-						w.write((long) ((v.getMap().get(c).getMovedPosition() << 1) | Long
-								.parseLong("0x0000000000000001")));
-					} else {
-						w.write((long) ((v.getMap().get(c).getMovedPosition() << 1) & Long
-								.parseLong("0xFFFFFFFFFFFFFFFE")));
-					}
+
+					w.write((long) ((v.getMap().get(c).getMovedPosition())));
 					break;
 				case 4:
-					if (v.getMap().get(c).leadsToSink()) {
-						w.write((int) ((v.getMap().get(c).getMovedPosition() << 1) | 0x00000001));
-					} else {
-						w.write((int) ((v.getMap().get(c).getMovedPosition() << 1) & 0xFFFFFFFE));
-					}
+					w.write((int) ((v.getMap().get(c).getMovedPosition())));
+
 					break;
 				case 2:
-					if (v.getMap().get(c).leadsToSink()) {
-						w.write((short) ((v.getMap().get(c).getMovedPosition() << 1) | 0x0001));
-					} else {
-						w.write((short) ((v.getMap().get(c).getMovedPosition() << 1) & 0xFFFE));
-					}
+					w.write((short) ((v.getMap().get(c).getMovedPosition())));
+
 					break;
 				case 1:
-					if (v.getMap().get(c).leadsToSink()) {
-						w.write((char) ((v.getMap().get(c).getMovedPosition() << 1) | 0x01));
-					} else {
-						w.write((char) ((v.getMap().get(c).getMovedPosition() << 1) & 0xFE));
-					}
+					w.write((char) ((v.getMap().get(c).getMovedPosition())));
+
 					break;
 				default:
 					throw new UnsupportedOperationException(
@@ -322,11 +308,11 @@ public class BinaryWriter {
 				}
 				// if vector == null then the edge is leading to the sink
 				int tmpOccurs = 1;
-				if(v.getMap().get(c).end.vector != null){
-					tmpOccurs =v.getMap().get(c).end.vector.getNumOccurs();
+				if (v.getMap().get(c).end.vector != null) {
+					tmpOccurs = v.getMap().get(c).end.vector.getNumOccurs();
 				}
 				switch (Constants.NUMOCCURS_BYTE) {
-				
+
 				case 8:
 					w.write((long) tmpOccurs);
 					break;

@@ -16,7 +16,6 @@ public class SearchEngine {
 	private long lastEdgeValue = 0;
 	private long lastDepthValue = 0;
 	private long numOccurs;
-	private boolean reachedSink = false;
 	private int files = 0;
 	private boolean reachedEnd = false;
 	private Backend backend;
@@ -88,16 +87,6 @@ public class SearchEngine {
 								Constants.VECTOR_DEPTH_BYTES
 										+ " is not a valid number for vector depth");
 					}
-					// long lastNumOccurs = numOccurs;
-					/*
-					 * switch (Constants.NUMOCCURS_BYTE) { case 8: numOccurs =
-					 * stream.readLong(); break; case 4: numOccurs = (long)
-					 * stream.readInt(); break; case 2: numOccurs = (long)
-					 * stream.readShort(); break; case 1: numOccurs = (long)
-					 * stream.readChar(); break; default: throw new
-					 * UnsupportedOperationException( Constants.NUMOCCURS_BYTE +
-					 * " is not a valid number for number of occurences"); }
-					 */
 
 					long originalVectorPosition = 0;
 					switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
@@ -125,7 +114,6 @@ public class SearchEngine {
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
 							jumpOver = true;
-							// numOccurs = lastNumOccurs;
 						} else {
 							jumpOver = false;
 						}
@@ -137,49 +125,37 @@ public class SearchEngine {
 					 */
 					if (word.length() == 0 && !jumpOver) {
 						break;
-					} else if (word.length() == 0 && reachedSink) {
+					} else if (word.length() == 0) {
 						break;
 					}
-					// the suffix vector was not the correct one, change
+					// the suffix vector was the correct one, change
 					// depthValue back
 					if (!jumpOver) {
 						lastDepthValue = depthValue;
 					}
 					// read char representing edge
 					foo = (char) stream.readByte();
-					boolean sink;
 					while (foo != Constants.VECTOR_MARKER) {
-						/*
-						 * read reference to position in text it is expected,
-						 * that the least significant bit in the reference
-						 * indicates whether the edge leads to the sink or not,
-						 * hence the bit operations.
-						 */
+
 						long edgeValue = 0;
 
 						switch (Constants.EDGE_REFERENCE_BYTES) {
 						case 8:
 
 							edgeValue = stream.readLong();
-							sink = (edgeValue & Long
-									.parseLong("0x0000000000000001")) == 1;
-							edgeValue = (edgeValue & Long
-									.parseLong("0xFFFFFFFFFFFFFFFE")) >> 1;
+
 							break;
 						case 4:
 							edgeValue = (long) stream.readInt();
-							sink = (edgeValue & 0x00000001) == 1;
-							edgeValue = (edgeValue & 0xFFFFFFFE) >> 1;
+
 							break;
 						case 2:
 							edgeValue = (long) stream.readShort();
-							sink = (edgeValue & 0x0001) == 1;
-							edgeValue = (edgeValue & 0xFFFE) >> 1;
+
 							break;
 						case 1:
 							edgeValue = (long) stream.readChar();
-							sink = (edgeValue & 0x01) == 1;
-							edgeValue = (edgeValue & 0xFE) >> 1;
+
 							break;
 						default:
 							throw new UnsupportedOperationException(
@@ -228,7 +204,7 @@ public class SearchEngine {
 							// Jump to the block at the given position
 							// if (blockValue - currentBlock == 0) {
 							// we are staying in the current block
-							reachedSink = sink;
+
 							long blockToOpen = (edgeValue / blockSize) + 1;
 							long position = 0;
 							if (blockToOpen == 1) {
@@ -286,19 +262,15 @@ public class SearchEngine {
 			delete.delete();
 		}
 
-		// request random blocks to make sure the amount of transfered blocks is always word.length+1
-		while (files < searchLength + 1){
-			backend.loadRandomBlock((int)numberOfBlocks);
+		// request random blocks to make sure the amount of transfered blocks is
+		// always word.length+1
+		while (files < searchLength + 1) {
+			backend.loadRandomBlock((int) numberOfBlocks);
 			files++;
 		}
 
 		if (word.length() == 0) {
-			// if we have reached the sink then numOccurs is 1
-			if (reachedSink) {
-				System.out.println("1");
-			} else {
-				System.out.println(numOccurs);
-			}
+			System.out.println(numOccurs);
 			return true;
 		} else {
 			return false;
