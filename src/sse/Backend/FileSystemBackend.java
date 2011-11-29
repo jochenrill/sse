@@ -119,4 +119,13 @@ public class FileSystemBackend implements Backend {
 		return null;
 	}
 
+	@Override
+	/**
+	 * {@inheritDoc}
+	 */
+	public void loadRandomBlock(int numberOfBlocks) {
+		// nothing to do if using file system backend
+		
+	}
+
 }

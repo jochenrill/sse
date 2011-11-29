@@ -33,7 +33,7 @@ public class BinaryWriter {
 		// Start printing the blocks
 		int pos = 0;
 		long bytesInCurrentBlock = 0;
-		//long currentBlock = 1;
+		// long currentBlock = 1;
 		long padding = 0;
 
 		Iterator<EdgePosition> iterator = ep.iterator();
@@ -55,7 +55,7 @@ public class BinaryWriter {
 						}
 
 						padding += maximumBlockSize - bytesInCurrentBlock;
-						//currentBlock++;
+						// currentBlock++;
 						bytesInCurrentBlock = 0;
 					}
 					bytesInCurrentBlock++;
@@ -73,7 +73,7 @@ public class BinaryWriter {
 				}
 				padding += maximumBlockSize - bytesInCurrentBlock;
 
-				//currentBlock++;
+				// currentBlock++;
 				bytesInCurrentBlock = 0;
 			}
 			// write vector itself
@@ -92,7 +92,7 @@ public class BinaryWriter {
 				}
 				padding += actualDataSize - bytesInCurrentBlock;
 
-				//currentBlock++;
+				// currentBlock++;
 				bytesInCurrentBlock = 0;
 			}
 			bytesInCurrentBlock++;
@@ -110,7 +110,8 @@ public class BinaryWriter {
 	}
 
 	public void writeBlocks(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, long textLength, boolean indcpa,char password[]) {
+			ArrayList<EdgePosition> ep, long textLength, boolean indcpa,
+			char password[]) {
 
 		secEngine = new SecurityEngine(password);
 
@@ -223,24 +224,15 @@ public class BinaryWriter {
 						Constants.VECTOR_DEPTH_BYTES
 								+ " is not a valid number for vector depth");
 			}
-			switch (Constants.NUMOCCURS_BYTE) {
-			case 8:
-				w.write((long) v.getNumOccurs());
-				break;
-			case 4:
-				w.write((int) v.getNumOccurs());
-				break;
-			case 2:
-				w.write((short) v.getNumOccurs());
-				break;
-			case 1:
-				w.write((char) v.getNumOccurs());
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						Constants.NUMOCCURS_BYTE
-								+ " is not a valid number for number of occurences");
-			}
+			/*
+			 * switch (Constants.NUMOCCURS_BYTE) { case 8: w.write((long)
+			 * v.getNumOccurs()); break; case 4: w.write((int)
+			 * v.getNumOccurs()); break; case 2: w.write((short)
+			 * v.getNumOccurs()); break; case 1: w.write((char)
+			 * v.getNumOccurs()); break; default: throw new
+			 * UnsupportedOperationException( Constants.NUMOCCURS_BYTE +
+			 * " is not a valid number for number of occurences"); }
+			 */
 			switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
 			case 8:
 				w.write((long) v.getLocation());
@@ -275,32 +267,32 @@ public class BinaryWriter {
 				switch (Constants.EDGE_REFERENCE_BYTES) {
 				case 8:
 					if (v.getMap().get(c).leadsToSink()) {
-						w.write((long) ((v.getMap().get(c).getMovedPosition() <<1) | Long
+						w.write((long) ((v.getMap().get(c).getMovedPosition() << 1) | Long
 								.parseLong("0x0000000000000001")));
 					} else {
-						w.write((long) ((v.getMap().get(c).getMovedPosition() <<1)& Long
+						w.write((long) ((v.getMap().get(c).getMovedPosition() << 1) & Long
 								.parseLong("0xFFFFFFFFFFFFFFFE")));
 					}
 					break;
 				case 4:
 					if (v.getMap().get(c).leadsToSink()) {
-						w.write((int) ((v.getMap().get(c).getMovedPosition()<<1) | 0x00000001));
+						w.write((int) ((v.getMap().get(c).getMovedPosition() << 1) | 0x00000001));
 					} else {
-						w.write((int) ((v.getMap().get(c).getMovedPosition()<<1) & 0xFFFFFFFE));
+						w.write((int) ((v.getMap().get(c).getMovedPosition() << 1) & 0xFFFFFFFE));
 					}
 					break;
 				case 2:
 					if (v.getMap().get(c).leadsToSink()) {
-						w.write((short) ((v.getMap().get(c).getMovedPosition()<<1) | 0x0001));
+						w.write((short) ((v.getMap().get(c).getMovedPosition() << 1) | 0x0001));
 					} else {
-						w.write((short) ((v.getMap().get(c).getMovedPosition() <<1)& 0xFFFE));
+						w.write((short) ((v.getMap().get(c).getMovedPosition() << 1) & 0xFFFE));
 					}
 					break;
 				case 1:
 					if (v.getMap().get(c).leadsToSink()) {
-						w.write((char) ((v.getMap().get(c).getMovedPosition()<<1) | 0x01));
+						w.write((char) ((v.getMap().get(c).getMovedPosition() << 1) | 0x01));
 					} else {
-						w.write((char) ((v.getMap().get(c).getMovedPosition()<<1) & 0xFE));
+						w.write((char) ((v.getMap().get(c).getMovedPosition() << 1) & 0xFE));
 					}
 					break;
 				default:
@@ -327,6 +319,30 @@ public class BinaryWriter {
 					throw new UnsupportedOperationException(
 							Constants.ORIGINAL_EDGE_POSITION_BYTES
 									+ " is not a valid number for edge reference");
+				}
+				// if vector == null then the edge is leading to the sink
+				int tmpOccurs = 1;
+				if(v.getMap().get(c).end.vector != null){
+					tmpOccurs =v.getMap().get(c).end.vector.getNumOccurs();
+				}
+				switch (Constants.NUMOCCURS_BYTE) {
+				
+				case 8:
+					w.write((long) tmpOccurs);
+					break;
+				case 4:
+					w.write((int) tmpOccurs);
+					break;
+				case 2:
+					w.write((short) tmpOccurs);
+					break;
+				case 1:
+					w.write((char) tmpOccurs);
+					break;
+				default:
+					throw new UnsupportedOperationException(
+							Constants.NUMOCCURS_BYTE
+									+ " is not a valid number for number of occurences");
 				}
 			}
 			w.write(Constants.VECTOR_MARKER);

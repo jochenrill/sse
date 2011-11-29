@@ -1,6 +1,7 @@
 package sse.Vectors;
 
 import java.io.Serializable;
+import sse.Graph.Node;
 
 public class EdgePosition implements Comparable<EdgePosition>, Serializable {
     
@@ -8,7 +9,7 @@ public class EdgePosition implements Comparable<EdgePosition>, Serializable {
     private long position;
     private long movedPosition;
     private boolean leadsToSink;
-    public SuffixVector end;
+    public Node end;
 
     public EdgePosition(int pos, boolean sink) {
         this.position = pos;

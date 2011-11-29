@@ -34,7 +34,7 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 				+ map.keySet().size() * Constants.EDGE_REFERENCE_BYTES + 2
 				+ map.keySet().size() * Constants.ORIGINAL_EDGE_POSITION_BYTES
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES
-				+ Constants.NUMOCCURS_BYTE;
+				+ map.keySet().size()* Constants.NUMOCCURS_BYTE;
 	}
 
 	public void setLocation(int location) {

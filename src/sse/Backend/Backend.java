@@ -76,4 +76,12 @@ public interface Backend {
 	 */
 	public InputStream loadStartBlock();
 
+	/**
+	 * This method loads a random block file and deletes it again.
+	 * 
+	 * @param numberOfBlocks
+	 *            : the total number of blocks available
+	 */
+	public void loadRandomBlock(int numberOfBlocks);
+
 }

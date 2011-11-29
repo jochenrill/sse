@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
@@ -210,6 +211,28 @@ public class GoogleBackend implements Backend {
 		}
 
 		return null;
+
+	}
+
+	@Override
+	/**
+	 * {@inheritDoc}
+	 */
+	public void loadRandomBlock(int numberOfBlocks) {
+		Random rnd = new Random();
+		try {
+			GSObject obj = service.getObject(bucket,
+					fileName + rnd.nextInt(numberOfBlocks) + ".sec");
+
+			// if a block starts with a padding byte, it is a padding block =)
+
+		} catch (S3ServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

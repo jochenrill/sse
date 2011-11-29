@@ -55,6 +55,11 @@ public class Constants {
 	 */
 	public static short ORIGINAL_EDGE_POSITION_BYTES = 4;
 	/**
+	 * Represents the number of bytes used to describe the endpoint of an edge. This is needed to be able
+	 * to skip over any remaining characters of a edge when the result of the search is already known.
+	 */
+	public static short END_POSITION_BYTES = 4;
+	/**
 	 * Represents the number of times the maximum vector size will be taken to
 	 * get the block size
 	 */

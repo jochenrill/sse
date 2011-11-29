@@ -21,6 +21,7 @@ public class SearchEngine {
 	private boolean reachedEnd = false;
 	private Backend backend;
 	private String startFile;
+	private int searchLength;
 
 	public SearchEngine(Backend backend, String startFile, char password[]) {
 		this.sEn = new SecurityEngine(password);
@@ -39,6 +40,7 @@ public class SearchEngine {
 		long blockSize = 0;
 		long numberOfBlocks = 0;
 
+		searchLength = word.length();
 		DataInputStream firstStream = new DataInputStream(
 				backend.loadStartBlock());
 
@@ -58,7 +60,8 @@ public class SearchEngine {
 			reachedEnd = backend.searchNext(++currentBlock, startFile, 0,
 					toDelete, stream, sEn);
 			stream = backend.getStream();
-			while (stream.getFilePointer() < stream.length() && !reachedEnd) {
+			while (stream.getFilePointer() < stream.length() && !reachedEnd
+					&& word.length() > 0) {
 				// read first byte
 				int value = stream.readByte();
 				boolean jumpOver = false;
@@ -85,25 +88,16 @@ public class SearchEngine {
 								Constants.VECTOR_DEPTH_BYTES
 										+ " is not a valid number for vector depth");
 					}
-					long lastNumOccurs = numOccurs;
-					switch (Constants.NUMOCCURS_BYTE) {
-					case 8:
-						numOccurs = stream.readLong();
-						break;
-					case 4:
-						numOccurs = (long) stream.readInt();
-						break;
-					case 2:
-						numOccurs = (long) stream.readShort();
-						break;
-					case 1:
-						numOccurs = (long) stream.readChar();
-						break;
-					default:
-						throw new UnsupportedOperationException(
-								Constants.NUMOCCURS_BYTE
-										+ " is not a valid number for number of occurences");
-					}
+					// long lastNumOccurs = numOccurs;
+					/*
+					 * switch (Constants.NUMOCCURS_BYTE) { case 8: numOccurs =
+					 * stream.readLong(); break; case 4: numOccurs = (long)
+					 * stream.readInt(); break; case 2: numOccurs = (long)
+					 * stream.readShort(); break; case 1: numOccurs = (long)
+					 * stream.readChar(); break; default: throw new
+					 * UnsupportedOperationException( Constants.NUMOCCURS_BYTE +
+					 * " is not a valid number for number of occurences"); }
+					 */
 
 					long originalVectorPosition = 0;
 					switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
@@ -131,7 +125,7 @@ public class SearchEngine {
 						if (lastEdgeValue - lastDepthValue < originalVectorPosition
 								- depthValue) {
 							jumpOver = true;
-							numOccurs = lastNumOccurs;
+							// numOccurs = lastNumOccurs;
 						} else {
 							jumpOver = false;
 						}
@@ -155,9 +149,11 @@ public class SearchEngine {
 					foo = (char) stream.readByte();
 					boolean sink;
 					while (foo != Constants.VECTOR_MARKER) {
-						/* read reference to position in text
-						 * it is expected, that the least significant bit in the reference indicates whether the 
-						 * edge leads to the sink or not, hence the bit operations.
+						/*
+						 * read reference to position in text it is expected,
+						 * that the least significant bit in the reference
+						 * indicates whether the edge leads to the sink or not,
+						 * hence the bit operations.
 						 */
 						long edgeValue = 0;
 
@@ -209,6 +205,24 @@ public class SearchEngine {
 							throw new UnsupportedOperationException(
 									Constants.EDGE_REFERENCE_BYTES
 											+ " is not a valid number for edge reference");
+						}
+						switch (Constants.NUMOCCURS_BYTE) {
+						case 8:
+							numOccurs = stream.readLong();
+							break;
+						case 4:
+							numOccurs = (long) stream.readInt();
+							break;
+						case 2:
+							numOccurs = (long) stream.readShort();
+							break;
+						case 1:
+							numOccurs = (long) stream.readChar();
+							break;
+						default:
+							throw new UnsupportedOperationException(
+									Constants.NUMOCCURS_BYTE
+											+ " is not a valid number for number of occurences");
 						}
 						if (!jumpOver && foo == word.charAt(0)) {
 							// Jump to the block at the given position
@@ -271,6 +285,13 @@ public class SearchEngine {
 		if (delete.exists()) {
 			delete.delete();
 		}
+
+		// request random blocks to make sure the amount of transfered blocks is always word.length+1
+		while (files < searchLength + 1){
+			backend.loadRandomBlock((int)numberOfBlocks);
+			files++;
+		}
+
 		if (word.length() == 0) {
 			// if we have reached the sink then numOccurs is 1
 			if (reachedSink) {

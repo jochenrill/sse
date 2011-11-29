@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
 
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
@@ -38,8 +39,9 @@ public class AmazonBackend implements Backend {
 			System.exit(0);
 		}
 	}
+
 	/**
-	 * 	{@inheritDoc}
+	 * {@inheritDoc}
 	 */
 	@Override
 	public BinaryOut openNextFile(long currentBlock, BinaryOut w,
@@ -79,7 +81,7 @@ public class AmazonBackend implements Backend {
 	}
 
 	/**
-	 * 	{@inheritDoc}
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void finalize(long currentBlock, BinaryOut w,
@@ -118,11 +120,9 @@ public class AmazonBackend implements Backend {
 			e.printStackTrace();
 		}
 
-		
-
 		w.write(currentBlock);
 		w.close();
-		
+
 		// print Key writes the IV and salt to the meta information file
 		secEngine.printKey(fileName);
 		// upload meta block
@@ -147,7 +147,7 @@ public class AmazonBackend implements Backend {
 	}
 
 	/**
-	 * 	{@inheritDoc}
+	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
@@ -216,6 +216,29 @@ public class AmazonBackend implements Backend {
 		}
 
 		return null;
+
+	}
+
+	@Override
+	/**
+	 * {@inheritDoc}
+	 */
+	public void loadRandomBlock(int numberOfBlocks) {
+		Random rnd = new Random();
+		try {
+			@SuppressWarnings("deprecation")
+			S3Object obj = service.getObject(bucket,
+					fileName + rnd.nextInt(numberOfBlocks) + ".sec");
+
+			// if a block starts with a padding byte, it is a padding block =)
+
+		} catch (S3ServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

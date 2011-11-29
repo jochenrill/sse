@@ -141,6 +141,7 @@ public class InMemoryVG {
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1), sink);
 			r.addEdge(graph.text.charAt(e.getEdgeLabelStart()), p);
+			p.end = e.getEnd();
 		}
 		return r;
 	}
@@ -156,7 +157,7 @@ public class InMemoryVG {
 			p = new EdgePosition(e.getEnd().getLocation()
 					- (e.getEdgeLabelEnd() - e.getEdgeLabelStart() + 1), sink);
 			tmp.addEdge(graph.text.charAt(e.getEdgeLabelStart()), p);
-			p.end = e.getEnd().vector;
+			p.end = e.getEnd();
 		}
 		return tmp;
 	}
