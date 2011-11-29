@@ -239,7 +239,7 @@ public class SearchEngine {
 					} else if (word.length() != 0 && foo == word.charAt(0)) {
 						word = word.substring(1, word.length());
 					} else if (word.length() != 0) {
-						return false;
+						break;
 					}
 				}
 				// Make sure that we open the next block if the last byte in a
