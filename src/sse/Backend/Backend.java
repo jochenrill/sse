@@ -82,6 +82,6 @@ public interface Backend {
 	 * @param numberOfBlocks
 	 *            : the total number of blocks available
 	 */
-	public void loadRandomBlock(int numberOfBlocks);
+	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn);
 
 }

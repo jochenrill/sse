@@ -218,12 +218,14 @@ public class GoogleBackend implements Backend {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void loadRandomBlock(int numberOfBlocks) {
+	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
 		Random rnd = new Random();
 		try {
+			int rand = rnd.nextInt(numberOfBlocks) + 1;
 			GSObject obj = service.getObject(bucket,
 					fileName + rnd.nextInt(numberOfBlocks) + ".sec");
-
+			sEn.decrypt(fileName + rand, obj.getDataInputStream());
+			new File(fileName + rand + ".dec").delete();
 			// if a block starts with a padding byte, it is a padding block =)
 
 		} catch (S3ServiceException e) {

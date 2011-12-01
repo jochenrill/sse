@@ -123,7 +123,7 @@ public class FileSystemBackend implements Backend {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void loadRandomBlock(int numberOfBlocks) {
+	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
 		// nothing to do if using file system backend
 		
 	}

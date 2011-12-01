@@ -270,7 +270,7 @@ public class SearchEngine {
 		// request random blocks to make sure the amount of transfered blocks is
 		// always word.length+1
 		while (files < searchLength + 1) {
-			backend.loadRandomBlock((int) numberOfBlocks);
+			backend.loadRandomBlock((int) numberOfBlocks,sEn);
 			files++;
 		}
 
