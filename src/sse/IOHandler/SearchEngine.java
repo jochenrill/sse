@@ -69,6 +69,7 @@ public class SearchEngine {
 				if (foo == Constants.VECTOR_MARKER) {
 					// read depth of the node
 					long depthValue = 0;
+					long lastNumOccurs = numOccurs;
 					switch (Constants.VECTOR_DEPTH_BYTES) {
 					case 8:
 						depthValue = stream.readLong();
@@ -199,6 +200,10 @@ public class SearchEngine {
 							throw new UnsupportedOperationException(
 									Constants.NUMOCCURS_BYTE
 											+ " is not a valid number for number of occurences");
+						}
+						// Falls der Vektor übersprungen wird muss numOccurs zurückgesetzt werden  
+						if(jumpOver){
+							numOccurs = lastNumOccurs;
 						}
 						if (!jumpOver && foo == word.charAt(0)) {
 							// Jump to the block at the given position
