@@ -23,21 +23,21 @@ public class FileSystemBackend implements Backend {
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public BinaryOut openNextFile(long currentBlock, BinaryOut w,
+	public BinaryOut openNextFile(int currentBlock, int nextBlock, BinaryOut w,
 			SecurityEngine secEngine) {
 		w.close();
+
 		// Encrypt the last block if needed
 
-		secEngine.encrypt(fileName + (currentBlock - 1));
+		secEngine.encrypt(fileName + (currentBlock));
 		// remove the unencryted file
-		new File(fileName + (currentBlock - 1)).delete();
+		new File(fileName + (currentBlock)).delete();
 
 		try {
-			w = new BinaryOut(fileName + currentBlock);
+			w = new BinaryOut(fileName + nextBlock);
 
 		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName
-					+ currentBlock);
+			System.out.println("Could not create file " + fileName + nextBlock);
 		}
 		return w;
 	}
@@ -63,8 +63,6 @@ public class FileSystemBackend implements Backend {
 		// remove the unencryted file
 		new File(fileName + (currentBlock)).delete();
 
-		
-
 		w.write(currentBlock);
 		w.close();
 		secEngine.printKey(fileName);
@@ -88,6 +86,7 @@ public class FileSystemBackend implements Backend {
 		sEn.decrypt(fileName + block);
 		stream = new RandomAccessFile(new File(fileName + block + ".dec"), "r");
 		// if a block starts with a padding byte, it is a padding block =)
+		// TODO: not needed anymore?
 		if (stream.readByte() == Constants.PADDING_BYTE) {
 			reachedEnd = true;
 		}
@@ -98,7 +97,7 @@ public class FileSystemBackend implements Backend {
 	}
 
 	/**
-	 * 	{@inheritDoc}
+	 * {@inheritDoc}
 	 */
 	@Override
 	public RandomAccessFile getStream() {
@@ -125,7 +124,7 @@ public class FileSystemBackend implements Backend {
 	 */
 	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
 		// nothing to do if using file system backend
-		
+
 	}
 
 }

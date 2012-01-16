@@ -40,8 +40,12 @@ public class Constants {
 	 * Represents the number of bytes used to represent an edge in a vector.
 	 * Must be either 8, 4, 2 or 1.
 	 */
-
 	public static short EDGE_REFERENCE_BYTES = 4;
+	/**
+	 * Represents the number of bytes used to represent a block.
+	 * Must be either 8, 4, 2 or 1.
+	 */
+	public static short BLOCK_REFERENCE_BYTES = 4;
 	/**
 	 * Represents the number of bytes used to describe the original position of
 	 * the vector in the text. This is needed to calculate which vectors we have

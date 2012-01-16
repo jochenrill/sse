@@ -9,6 +9,7 @@ public class EdgePosition implements Comparable<EdgePosition>, Serializable {
     private long position;
     private long movedPosition;
     private boolean leadsToSink;
+    private int block;
     public Node end;
 
     public EdgePosition(int pos, boolean sink) {
@@ -50,6 +51,14 @@ public class EdgePosition implements Comparable<EdgePosition>, Serializable {
     public long getMovedPosition() {
         return movedPosition;
     }
+
+	public int getBlock() {
+		return block;
+	}
+
+	public void setBlock(int block) {
+		this.block = block;
+	}
 
    
 }

@@ -3,6 +3,8 @@ package sse.Vectors;
 import java.io.Serializable;
 import java.util.Hashtable;
 
+import sse.IOHandler.Block;
+
 /**
  * This class is used to represent a suffix vector generated from the cdwag
  * 
@@ -16,6 +18,8 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 	private int depth;
 	private Hashtable<Character, EdgePosition> map;
 	private int numOccurs = -1;
+	private int blockLocation;
+	private Block block;
 
 	public SuffixVector(int loc) {
 		this.location = loc;
@@ -34,7 +38,8 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 				+ map.keySet().size() * Constants.EDGE_REFERENCE_BYTES + 2
 				+ map.keySet().size() * Constants.ORIGINAL_EDGE_POSITION_BYTES
 				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES
-				+ map.keySet().size()* Constants.NUMOCCURS_BYTE;
+				+ map.keySet().size() * Constants.NUMOCCURS_BYTE
+				+ map.keySet().size() * Constants.BLOCK_REFERENCE_BYTES;
 	}
 
 	public void setLocation(int location) {
@@ -67,9 +72,11 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 			throw new NullPointerException();
 		}
 		if (this.location == o.getLocation()) {
-			
-			// If the location is the same the vectors get sorted by depth. This is important for the random distribution to work.
-			// If multiple vectors occupy the same location, the one with the lowest depth must be chosen.
+
+			// If the location is the same the vectors get sorted by depth. This
+			// is important for the random distribution to work.
+			// If multiple vectors occupy the same location, the one with the
+			// lowest depth must be chosen.
 			if (this.getDepth() < o.getDepth()) {
 				return -1;
 			} else if (this.getDepth() > o.getDepth()) {
@@ -90,5 +97,21 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 
 	public int getNumOccurs() {
 		return numOccurs;
+	}
+
+	public int getBlockLocation() {
+		return blockLocation;
+	}
+
+	public void setBlockLocation(int blockLocation) {
+		this.blockLocation = blockLocation;
+	}
+
+	public Block getBlock() {
+		return block;
+	}
+
+	public void setBlock(Block block) {
+		this.block = block;
 	}
 }

@@ -324,7 +324,7 @@ public class Main {
 										outputFile, config.get("amazon",
 												"bucket")));
 						out.writeBlocks(list, ep, textLength,
-								cmd.hasOption("indcpa"), password);
+								 password);
 					} else {
 						System.out
 								.println("Amazon credentials can't be found. Exiting.");
@@ -347,7 +347,7 @@ public class Main {
 										outputFile, config.get("google",
 												"bucket")));
 						out.writeBlocks(list, ep, textLength,
-								cmd.hasOption("indcpa"), password);
+								password);
 					} else {
 						System.out
 								.println("Google credentials can't be found. Exiting.");
@@ -365,7 +365,7 @@ public class Main {
 					BinaryWriter out = new BinaryWriter(outputFile, input,
 							new FileSystemBackend(outputFile));
 					out.writeBlocks(list, ep, textLength,
-							cmd.hasOption("indcpa"), password);
+							 password);
 
 				}
 

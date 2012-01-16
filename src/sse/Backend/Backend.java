@@ -21,7 +21,7 @@ public interface Backend {
 	 *            the current encryption engine
 	 * @return the new output stream
 	 */
-	public BinaryOut openNextFile(long currentBlock, BinaryOut w,
+	public BinaryOut openNextFile(int currentBlock,int nextBlock, BinaryOut w,
 			SecurityEngine secEngine);
 
 	/**
@@ -81,6 +81,9 @@ public interface Backend {
 	 * 
 	 * @param numberOfBlocks
 	 *            : the total number of blocks available
+	 * @param sEn
+	 *            : the SecurityEngine used to decrypt the block and write it to
+	 *            the harddisk
 	 */
 	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn);
 

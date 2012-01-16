@@ -56,7 +56,7 @@ public class SearchEngine {
 			long toDelete = currentBlock;
 			// open the first block
 			files++;
-			reachedEnd = backend.searchNext(++currentBlock, startFile, 0,
+			reachedEnd = backend.searchNext(currentBlock, startFile, 0,
 					toDelete, stream, sEn);
 			stream = backend.getStream();
 			while (stream.getFilePointer() < stream.length() && !reachedEnd
@@ -183,6 +183,25 @@ public class SearchEngine {
 									Constants.EDGE_REFERENCE_BYTES
 											+ " is not a valid number for edge reference");
 						}
+					long blockReference = 0;
+						switch (Constants.BLOCK_REFERENCE_BYTES) {
+						case 8:
+							blockReference = stream.readLong();
+							break;
+						case 4:
+							blockReference = (long) stream.readInt();
+							break;
+						case 2:
+							blockReference = (long) stream.readShort();
+							break;
+						case 1:
+							blockReference = (long) stream.readChar();
+							break;
+						default:
+							throw new UnsupportedOperationException(
+									Constants.BLOCK_REFERENCE_BYTES
+											+ " is not a valid number for block reference");
+						}
 						switch (Constants.NUMOCCURS_BYTE) {
 						case 8:
 							numOccurs = stream.readLong();
@@ -201,8 +220,9 @@ public class SearchEngine {
 									Constants.NUMOCCURS_BYTE
 											+ " is not a valid number for number of occurences");
 						}
-						// Falls der Vektor übersprungen wird muss numOccurs zurückgesetzt werden  
-						if(jumpOver){
+						// Falls der Vektor übersprungen wird muss numOccurs
+						// zurückgesetzt werden
+						if (jumpOver) {
 							numOccurs = lastNumOccurs;
 						}
 						if (!jumpOver && foo == word.charAt(0)) {
@@ -210,14 +230,9 @@ public class SearchEngine {
 							// if (blockValue - currentBlock == 0) {
 							// we are staying in the current block
 
-							long blockToOpen = (edgeValue / blockSize) + 1;
-							long position = 0;
-							if (blockToOpen == 1) {
-								position = edgeValue;
-							} else {
-								position = edgeValue
-										% ((blockToOpen - 1) * blockSize);
-							}
+							long blockToOpen = blockReference;
+							long position = edgeValue;
+
 							lastEdgeValue = originalEdgePosition;
 							files++;
 							reachedEnd = backend.searchNext(blockToOpen,
@@ -235,10 +250,33 @@ public class SearchEngine {
 					// Ignore padding bytes
 					if (value == Constants.PADDING_BYTE
 							&& currentBlock < numberOfBlocks) {
-						// Block done, move to next block
+
+						// Block done, read block until the end to find the
+						// reference to the next one
+						stream.seek(blockSize);
+						long blockReference = 0;
+						switch (Constants.BLOCK_REFERENCE_BYTES) {
+						case 8:
+							blockReference = stream.readLong();
+							break;
+						case 4:
+							blockReference = (long) stream.readInt();
+							break;
+						case 2:
+							blockReference = (long) stream.readShort();
+							break;
+						case 1:
+							blockReference = (long) stream.readChar();
+							break;
+						default:
+							throw new UnsupportedOperationException(
+									Constants.BLOCK_REFERENCE_BYTES
+											+ " is not a valid number for block reference");
+						}
+
 						toDelete = currentBlock;
 						files++;
-						reachedEnd = backend.searchNext(++currentBlock,
+						reachedEnd = backend.searchNext(blockReference,
 								startFile, 0, toDelete, stream, sEn);
 						stream = backend.getStream();
 					} else if (word.length() != 0 && foo == word.charAt(0)) {
@@ -249,14 +287,14 @@ public class SearchEngine {
 				}
 				// Make sure that we open the next block if the last byte in a
 				// block is indeed a character
-				if (!(stream.getFilePointer() < stream.length())
-						&& currentBlock < numberOfBlocks) {
-					toDelete = currentBlock;
-					files++;
-					reachedEnd = backend.searchNext(++currentBlock, startFile,
-							0, toDelete, stream, sEn);
-					stream = backend.getStream();
-				}
+				// TODO: check whether this is really not needed anymore
+				/*
+				 * if (!(stream.getFilePointer() < stream.length()) &&
+				 * currentBlock < numberOfBlocks) { toDelete = currentBlock;
+				 * files++; reachedEnd = backend.searchNext(++currentBlock,
+				 * startFile, 0, toDelete, stream, sEn); stream =
+				 * backend.getStream(); }
+				 */
 			}
 		} catch (IOException e) {
 			System.out.println("Error while parsing block " + currentBlock);
@@ -270,7 +308,7 @@ public class SearchEngine {
 		// request random blocks to make sure the amount of transfered blocks is
 		// always word.length+1
 		while (files < searchLength + 1) {
-			backend.loadRandomBlock((int) numberOfBlocks,sEn);
+			backend.loadRandomBlock((int) numberOfBlocks, sEn);
 			files++;
 		}
 

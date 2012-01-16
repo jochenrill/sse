@@ -42,21 +42,21 @@ public class GoogleBackend implements Backend {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BinaryOut openNextFile(long currentBlock, BinaryOut w,
+	public BinaryOut openNextFile(int currentBlock, int nextBlock, BinaryOut w,
 			SecurityEngine secEngine) {
 		w.close();
 		// Encrypt the last block if needed
 
-		secEngine.encrypt(fileName + (currentBlock - 1));
+		secEngine.encrypt(fileName + (currentBlock));
 		// remove the unencryted file
-		new File(fileName + (currentBlock - 1)).delete();
+		new File(fileName + (currentBlock)).delete();
 		try {
 			// upload the encrypted file
-			GSObject obj = new GSObject(new File(fileName + (currentBlock - 1)
+			GSObject obj = new GSObject(new File(fileName + (currentBlock)
 					+ ".sec"));
 			service.putObject(bucket, obj);
 			// delete the generated file
-			new File(fileName + (currentBlock - 1) + ".sec").delete();
+			new File(fileName + (currentBlock) + ".sec").delete();
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -69,7 +69,7 @@ public class GoogleBackend implements Backend {
 		}
 
 		try {
-			w = new BinaryOut(fileName + currentBlock);
+			w = new BinaryOut(fileName + nextBlock);
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName
 					+ currentBlock);
