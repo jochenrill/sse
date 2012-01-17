@@ -52,7 +52,7 @@ public class Main {
 		options.addOption("create", false, "Turns on creation mode");
 		options.addOption("text", true,
 				"If search mode is used, this is the text that will be searched");
-		options.addOption("indcpa", false, "Turns on IND-CPA-Mode");
+
 		CommandLineParser parser = new GnuParser();
 
 		try {
@@ -108,7 +108,8 @@ public class Main {
 									password = System.console().readPassword(
 											"[%s]:", "Password");
 								}
-								System.out.println("[INFO:] Using Amazon backend.");
+								System.out
+										.println("[INFO:] Using Amazon backend.");
 								SearchEngine sEn = new SearchEngine(
 
 								new AmazonBackend(config.get("amazon", "key"),
@@ -134,7 +135,8 @@ public class Main {
 									password = System.console().readPassword(
 											"[%s]:", "Password");
 								}
-								System.out.println("[INFO:] Using Google backend.");
+								System.out
+										.println("[INFO:] Using Google backend.");
 
 								SearchEngine sEn = new SearchEngine(
 
@@ -160,7 +162,8 @@ public class Main {
 								password = System.console().readPassword(
 										"[%s]:", "Password");
 							}
-							System.out.println("[INFO:] Using Filesystem backend.");
+							System.out
+									.println("[INFO:] Using Filesystem backend.");
 
 							SearchEngine sEn = new SearchEngine(
 
@@ -323,8 +326,7 @@ public class Main {
 										config.get("amazon", "skey"),
 										outputFile, config.get("amazon",
 												"bucket")));
-						out.writeBlocks(list, ep, textLength,
-								 password);
+						out.writeBlocks(list, ep, textLength, password);
 					} else {
 						System.out
 								.println("Amazon credentials can't be found. Exiting.");
@@ -346,8 +348,7 @@ public class Main {
 										config.get("google", "skey"),
 										outputFile, config.get("google",
 												"bucket")));
-						out.writeBlocks(list, ep, textLength,
-								password);
+						out.writeBlocks(list, ep, textLength, password);
 					} else {
 						System.out
 								.println("Google credentials can't be found. Exiting.");
@@ -364,8 +365,7 @@ public class Main {
 
 					BinaryWriter out = new BinaryWriter(outputFile, input,
 							new FileSystemBackend(outputFile));
-					out.writeBlocks(list, ep, textLength,
-							 password);
+					out.writeBlocks(list, ep, textLength, password);
 
 				}
 

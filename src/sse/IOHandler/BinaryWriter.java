@@ -6,10 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.NavigableMap;
 import java.util.Random;
 import java.util.Stack;
-import java.util.TreeMap;
 
 import sse.Backend.Backend;
 import sse.Vectors.Constants;
@@ -40,7 +38,6 @@ public class BinaryWriter {
 			int maximumBlockSize, int actualDataSize) {
 		int numberOfBlocks = (2 * maximumDataSize / maximumBlockSize) + 1;
 		Block blockList[] = new Block[numberOfBlocks];
-		// int usage[] = new int[numberOfBlocks + 1];
 		blocks = new LinkedList<Integer>();
 		for (int i = 1; i <= numberOfBlocks - 1; i++) {
 			blocks.add(i);
@@ -68,7 +65,6 @@ public class BinaryWriter {
 		// always start with block 0
 		blocks.push(0);
 		for (SuffixVector v : list) {
-			// if (v.getLocation() != 0) {
 
 			int diff = v.getLocation() - lastLocation;
 			pos += diff;
@@ -96,7 +92,6 @@ public class BinaryWriter {
 						break;
 					}
 				}
-				// usage[block] = minimumFill;
 				lastPos = pos - bytesInCurrentBlock + 1;
 
 			} else {
@@ -109,11 +104,7 @@ public class BinaryWriter {
 					// put the vector in the block and start the next one
 					vectorsToUpdate.add(v);
 					bytesInCurrentBlock = 0;
-					/*
-					 * if (blocks.isEmpty()) { int foo = 0; for (Block b :
-					 * blockList) { if (b != null) { foo += b.getUpperBound() -
-					 * b.getLowerBound(); } } System.out.println(foo); }
-					 */
+
 					int block = blocks.pop();
 					blockList[block] = new Block(pos, lastPos, block);
 					while (!vectorsToUpdate.isEmpty()) {
@@ -134,12 +125,12 @@ public class BinaryWriter {
 							break;
 						}
 					}
-					// usage[block] = bytesInCurrentBlock + v.getSize();
+
 					lastPos = pos + 1;
 				} else {
 					// move vector to next block
 					int block = blocks.pop();
-					// usage[block] = bytesInCurrentBlock;
+
 					bytesInCurrentBlock = v.getSize();
 
 					blockList[block] = new Block(pos - bytesInCurrentBlock,
@@ -170,7 +161,6 @@ public class BinaryWriter {
 				bytesInCurrentBlock += v.getSize();
 			}
 
-			// }
 		}
 
 		// finish until end of text
@@ -277,7 +267,6 @@ public class BinaryWriter {
 		Block lastBlock;
 
 		currentBlock = blockAssignment.get(0);
-		// w = backend.openNextFile(0, currentBlock.getId(), w, secEngine);
 
 		for (SuffixVector v : list) {
 			// write sequence before the vector

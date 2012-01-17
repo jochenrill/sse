@@ -221,7 +221,7 @@ public class GoogleBackend implements Backend {
 	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
 		Random rnd = new Random();
 		try {
-			int rand = rnd.nextInt(numberOfBlocks) + 1;
+			int rand = rnd.nextInt(numberOfBlocks);
 			GSObject obj = service.getObject(bucket,
 					fileName + rnd.nextInt(numberOfBlocks) + ".sec");
 			sEn.decrypt(fileName + rand, obj.getDataInputStream());

@@ -93,9 +93,6 @@ public class AmazonBackend implements Backend {
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
-		// write number of blocks
-
-		// encrypt the last block
 
 		secEngine.encrypt(fileName + (currentBlock));
 		// remove the unencryted file
@@ -226,7 +223,7 @@ public class AmazonBackend implements Backend {
 	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
 		Random rnd = new Random();
 		try {
-			int rand = rnd.nextInt(numberOfBlocks) + 1;
+			int rand = rnd.nextInt(numberOfBlocks);
 			@SuppressWarnings("deprecation")
 			S3Object obj = service.getObject(bucket, fileName + rand + ".sec");
 			sEn.decrypt(fileName + rand, obj.getDataInputStream());

@@ -18,7 +18,6 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 	private int depth;
 	private Hashtable<Character, EdgePosition> map;
 	private int numOccurs = -1;
-	private int blockLocation;
 	private Block block;
 
 	public SuffixVector(int loc) {
@@ -97,14 +96,6 @@ public class SuffixVector implements Comparable<SuffixVector>, Serializable {
 
 	public int getNumOccurs() {
 		return numOccurs;
-	}
-
-	public int getBlockLocation() {
-		return blockLocation;
-	}
-
-	public void setBlockLocation(int blockLocation) {
-		this.blockLocation = blockLocation;
 	}
 
 	public Block getBlock() {
