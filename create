@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar -Xss500m -Xms2g -Xmx2g sse.jar -create  -password abc -i `echo -n $1` 
+java -jar -Xss500m -Xms2g -Xmx2g sse.jar -create -v -password abc -i `echo -n $1` 
