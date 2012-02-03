@@ -1,4 +1,4 @@
-package sse.Vectors;
+package sse;
 
 /**
  * Utility class to manage the different representations of the vector and its

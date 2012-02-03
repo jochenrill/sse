@@ -15,9 +15,9 @@ import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.AWSCredentials;
 
+import sse.Constants;
 import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
-import sse.Vectors.Constants;
 
 public class AmazonBackend implements Backend {
 

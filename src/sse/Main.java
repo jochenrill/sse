@@ -2,13 +2,10 @@ package sse;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+
+import java.util.LinkedList;
 import java.util.Scanner;
 
 import org.apache.commons.cli.*;
@@ -17,24 +14,20 @@ import org.ini4j.Ini;
 import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
 import sse.Backend.GoogleBackend;
-import sse.Graph.CDWAG;
+import sse.Graph.DAWG;
+import sse.Graph.Node;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
-import sse.Vectors.Constants;
-import sse.Vectors.EdgePosition;
-import sse.Vectors.InMemoryVG;
-import sse.Vectors.OutOfMemoryVG;
-import sse.Vectors.SuffixVector;
 
 public class Main {
 
 	public static void main(String[] args) {
+
 		Options options = new Options();
 
 		options.addOption("i", true, "Defines the input file.");
 		options.addOption("o", true,
 				"Defines the output file. \"default.vc\" if no file is given.");
-		options.addOption("m", false, "Generates the SuffixVectors in memory");
 		options.addOption("h", false, "Prints help");
 		options.addOption("help", false, "Prints this help message");
 		options.addOption("v", false, "Verbose");
@@ -212,7 +205,7 @@ public class Main {
 
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
-				CDWAG t = new CDWAG(input);
+				DAWG t = new DAWG(input);
 				long textLength = t.text.length();
 				if (Constants.DEBUG) {
 					System.out
@@ -220,95 +213,19 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
-				ArrayList<SuffixVector> list = new ArrayList<SuffixVector>();
+				// this method calculates the number of unique paths from each
+				// node to the sink. This is also the number of occurrences of
+				// each suffix
 
-				ArrayList<EdgePosition> ep = new ArrayList<EdgePosition>();
-				if (cmd.hasOption("m")) {
-					// Generate Vectors in memory. Much faster than out of
-					// memory
-					InMemoryVG generator = new InMemoryVG(t);
-					list = generator.getListOfVectors();
+				t.storeUniquePaths(false);
 
-					for (SuffixVector v : list) {
-						for (EdgePosition e : v.getMap().values()) {
-							ep.add(e);
-						}
-					}
-
-					generator = null;
-					t = null;
-
-				} else {
-					OutOfMemoryVG generator = new OutOfMemoryVG(t);
-					File vectorFile = new File("_vector.tmp");
-					try {
-						generator.printListOfVectors(vectorFile);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					t = null;
-
-					generator = null;
-					System.gc();
-
-					try {
-						ObjectInputStream o = new ObjectInputStream(
-								new FileInputStream("_vector.tmp"));
-						Object obj = null;
-						while (!((obj = o.readObject()) instanceof String)) {
-							list.add((SuffixVector) obj);
-						}
-						o.close();
-						vectorFile.delete();
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-					}
-					for (SuffixVector v : list) {
-						for (EdgePosition e : v.getMap().values()) {
-							ep.add(e);
-						}
-					}
-				}
 				if (Constants.DEBUG) {
 					System.out
-							.println("Excecution time for generating the vectors: "
+							.println("Excecution time for counting the unique paths: "
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
-
-				// Sort position and vector objects for easier merging
-				Collections.sort(list);
-				Collections.sort(ep);
-				if (Constants.DEBUG) {
-					System.out
-							.println("Excecution time for sorting the vectors: "
-									+ ((System.currentTimeMillis() - time) / 1000));
-				}
-				time = System.currentTimeMillis();
-				// Update position of edges
-				Iterator<SuffixVector> iterator = list.iterator();
-				SuffixVector tmp = iterator.next();
-				int offset = 0;
-				for (EdgePosition p : ep) {
-					while (tmp != null && tmp.getLocation() <= p.getPosition()) {
-						offset += tmp.getSize();
-						if (iterator.hasNext()) {
-							tmp = iterator.next();
-						} else {
-							tmp = null;
-						}
-					}
-					p.setMovedPosition(p.getMovedPosition() + offset);
-				}
-				if (Constants.DEBUG) {
-					System.out
-							.println("Excecution time for updating the positions: "
-									+ ((System.currentTimeMillis() - time) / 1000));
-				}
-				time = System.currentTimeMillis();
-
+				LinkedList<Node> nodeList = t.toList();
 				if (cmd.hasOption("amazon")) {
 					if (config.containsKey("amazon")) {
 						char[] password;
@@ -321,12 +238,12 @@ public class Main {
 						}
 						System.out.println("[INFO:] Using Amazon backend.");
 
-						BinaryWriter out = new BinaryWriter(outputFile, input,
+						BinaryWriter out = new BinaryWriter(outputFile,
 								new AmazonBackend(config.get("amazon", "key"),
 										config.get("amazon", "skey"),
 										outputFile, config.get("amazon",
 												"bucket")));
-						out.writeBlocks(list, ep, textLength, password);
+						out.writeBlocks(nodeList, textLength, password);
 					} else {
 						System.out
 								.println("Amazon credentials can't be found. Exiting.");
@@ -343,12 +260,12 @@ public class Main {
 						}
 						System.out.println("[INFO:] Using Google backend.");
 
-						BinaryWriter out = new BinaryWriter(outputFile, input,
+						BinaryWriter out = new BinaryWriter(outputFile,
 								new GoogleBackend(config.get("google", "key"),
 										config.get("google", "skey"),
 										outputFile, config.get("google",
 												"bucket")));
-						out.writeBlocks(list, ep, textLength, password);
+						out.writeBlocks(nodeList, textLength, password);
 					} else {
 						System.out
 								.println("Google credentials can't be found. Exiting.");
@@ -363,9 +280,9 @@ public class Main {
 					}
 					System.out.println("[INFO:] Using filesystem backend.");
 
-					BinaryWriter out = new BinaryWriter(outputFile, input,
+					BinaryWriter out = new BinaryWriter(outputFile,
 							new FileSystemBackend(outputFile));
-					out.writeBlocks(list, ep, textLength, password);
+					out.writeBlocks(nodeList, textLength, password);
 
 				}
 

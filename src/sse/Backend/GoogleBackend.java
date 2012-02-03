@@ -13,9 +13,10 @@ import org.jets3t.service.impl.rest.httpclient.GoogleStorageService;
 import org.jets3t.service.model.GSObject;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.GSCredentials;
+
+import sse.Constants;
 import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
-import sse.Vectors.Constants;
 
 public class GoogleBackend implements Backend {
 

@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
+import sse.Constants;
 import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
-import sse.Vectors.Constants;
 
 public class FileSystemBackend implements Backend {
 
