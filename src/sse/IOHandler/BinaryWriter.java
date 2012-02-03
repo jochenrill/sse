@@ -107,7 +107,7 @@ public class BinaryWriter {
 		 * for the number of states and 3|x|-4 for the number of edges
 		 */
 		long maximumDataSize = (2 * textLength - 1)
-				* (2 + Constants.NUMOCCURS_BYTES)
+				* (1 + Constants.NUMOCCURS_BYTES)
 				+ (3 * textLength - 4)
 				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES);
 
