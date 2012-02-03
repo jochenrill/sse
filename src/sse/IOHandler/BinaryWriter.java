@@ -95,7 +95,7 @@ public class BinaryWriter {
 		long maximumVectorSize = 1
 				+ Constants.ALPHABET_SIZE
 				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES)
-				+ Constants.NUMOCCURS_BYTE;
+				+ Constants.NUMOCCURS_BYTES;
 
 		// the size of the actual data we have to store
 		long actualDataSize = 0;
@@ -107,7 +107,7 @@ public class BinaryWriter {
 		 * for the number of states and 3|x|-4 for the number of edges
 		 */
 		long maximumDataSize = (2 * textLength - 1)
-				* (2 + Constants.NUMOCCURS_BYTE)
+				* (2 + Constants.NUMOCCURS_BYTES)
 				+ (3 * textLength - 4)
 				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES);
 
@@ -163,7 +163,7 @@ public class BinaryWriter {
 	private void printBlock(BinaryOut w, Block b) {
 		for (Node n : b.getNodes()) {
 
-			switch (Constants.NUMOCCURS_BYTE) {
+			switch (Constants.NUMOCCURS_BYTES) {
 
 			case 8:
 				w.write((long) n.getNumOccurs());
@@ -179,7 +179,7 @@ public class BinaryWriter {
 				break;
 			default:
 				throw new UnsupportedOperationException(
-						Constants.NUMOCCURS_BYTE
+						Constants.NUMOCCURS_BYTES
 								+ " is not a valid number for number of occurences");
 			}
 			for (Edge e : n.getEdges()) {

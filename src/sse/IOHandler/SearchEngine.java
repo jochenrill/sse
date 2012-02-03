@@ -66,7 +66,7 @@ public class SearchEngine {
 
 				stop = true;
 				// read numOccurs
-				switch (Constants.NUMOCCURS_BYTE) {
+				switch (Constants.NUMOCCURS_BYTES) {
 				case 8:
 					numOccurs = stream.readLong();
 					break;
@@ -81,7 +81,7 @@ public class SearchEngine {
 					break;
 				default:
 					throw new UnsupportedOperationException(
-							Constants.NUMOCCURS_BYTE
+							Constants.NUMOCCURS_BYTES
 									+ " is not a valid number for number of occurences");
 				}
 				if (word.length() == 0) {

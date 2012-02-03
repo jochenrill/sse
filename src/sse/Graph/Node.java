@@ -113,7 +113,7 @@ public class Node {
 		return 1
 				+ edges.size()
 				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES)
-				+ Constants.NUMOCCURS_BYTE;
+				+ Constants.NUMOCCURS_BYTES;
 	}
 
 	public LinkedHashSet<Integer> getPlaces() {

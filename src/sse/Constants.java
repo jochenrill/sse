@@ -35,15 +35,11 @@ public class Constants {
 	 * Represents the number of bytes used to represent the depth of a vector.
 	 * Must be either 8, 4, 2 or 1.
 	 */
-	public static short VECTOR_DEPTH_BYTES = 4;
-	/**
-	 * Represents the number of bytes used to represent an edge in a vector.
-	 * Must be either 8, 4, 2 or 1.
-	 */
+
 	public static short EDGE_REFERENCE_BYTES = 4;
 	/**
-	 * Represents the number of bytes used to represent a block.
-	 * Must be either 8, 4, 2 or 1.
+	 * Represents the number of bytes used to represent a block. Must be either
+	 * 8, 4, 2 or 1.
 	 */
 	public static short BLOCK_REFERENCE_BYTES = 4;
 	/**
@@ -51,22 +47,7 @@ public class Constants {
 	 * the vector in the text. This is needed to calculate which vectors we have
 	 * to jump over
 	 */
-	public static short ORIGINAL_VECTOR_POSITION_BYTES = 4;
-	/**
-	 * Represents the number of bytes used to describe the original position of
-	 * the edge in the text. This is needed to calculate which vectors we have
-	 * to jump over
-	 */
-	public static short ORIGINAL_EDGE_POSITION_BYTES = 4;
-	/**
-	 * Represents the number of bytes used to describe the endpoint of an edge. This is needed to be able
-	 * to skip over any remaining characters of a edge when the result of the search is already known.
-	 */
-	public static short END_POSITION_BYTES = 4;
-	/**
-	 * Represents the number of times the maximum vector size will be taken to
-	 * get the block size
-	 */
+
 	public static short VECTOR_SIZE_MULTI = 5;
 
 	/**
@@ -74,5 +55,5 @@ public class Constants {
 	 */
 	public static char PADDING_BYTE = (byte) 0;
 
-	public static short NUMOCCURS_BYTE = 4;
+	public static short NUMOCCURS_BYTES = 4;
 }
