@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
 import java.util.Random;
 
 import org.jets3t.service.S3Service;
@@ -13,6 +14,7 @@ import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
 import org.jets3t.service.model.S3Object;
+import org.jets3t.service.multi.SimpleThreadedStorageService;
 import org.jets3t.service.security.AWSCredentials;
 
 import sse.Constants;
@@ -24,7 +26,10 @@ public class AmazonBackend implements Backend {
 	private S3Service service;
 	private String fileName;
 	private S3Bucket bucket;
+	private LinkedList<String> fileNames;
+	private LinkedList<S3Object> listOfObjects;
 	private RandomAccessFile searchStream;
+	private SimpleThreadedStorageService multi;
 
 	public AmazonBackend(String key, String secret, String fileName,
 			String bucket) {
@@ -33,6 +38,9 @@ public class AmazonBackend implements Backend {
 		try {
 			service = new RestS3Service(login);
 			this.bucket = service.getBucket(bucket);
+			fileNames = new LinkedList<String>();
+			multi = new SimpleThreadedStorageService(service);
+			listOfObjects = new LinkedList<S3Object>();
 
 		} catch (S3ServiceException e) {
 			System.out.println("S3 Service Exception: " + e.getMessage());
@@ -53,23 +61,19 @@ public class AmazonBackend implements Backend {
 		// remove the unencryted file
 		new File(fileName + (currentBlock)).delete();
 		try {
-			// upload the encrypted file
+
 			S3Object obj = new S3Object(new File(fileName + (currentBlock)
 					+ ".sec"));
-			service.putObject(bucket, obj);
-			// delete the generated file
-			new File(fileName + (currentBlock) + ".sec").delete();
+			fileNames.add(fileName + (currentBlock) + ".sec");
+			listOfObjects.add(obj);
+
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (S3ServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-
 		try {
 			w = new BinaryOut(fileName + nextBlock);
 		} catch (IOException e) {
@@ -100,12 +104,18 @@ public class AmazonBackend implements Backend {
 
 		// upload encrypted block
 		try {
-			// upload the encrypted file
+
+			// this is the last block
 			S3Object obj = new S3Object(new File(fileName + (currentBlock)
 					+ ".sec"));
-			service.putObject(bucket, obj);
-			// delete the generated file
-			new File(fileName + (currentBlock) + ".sec").delete();
+			listOfObjects.add(obj);
+			fileNames.add(fileName + (currentBlock) + ".sec");
+			multi.putObjects(bucket.getName(),
+					listOfObjects.toArray(new S3Object[0]));
+			for (String s : fileNames) {
+				new File(s).delete();
+			}
+
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -113,6 +123,9 @@ public class AmazonBackend implements Backend {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (S3ServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -202,7 +215,6 @@ public class AmazonBackend implements Backend {
 			S3Object obj = service.getObject(bucket, fileName);
 
 			return obj.getDataInputStream();
-			// if a block starts with a padding byte, it is a padding block =)
 
 		} catch (S3ServiceException e) {
 			// TODO Auto-generated catch block
@@ -228,7 +240,6 @@ public class AmazonBackend implements Backend {
 			S3Object obj = service.getObject(bucket, fileName + rand + ".sec");
 			sEn.decrypt(fileName + rand, obj.getDataInputStream());
 			new File(fileName + rand + ".dec").delete();
-			// if a block starts with a padding byte, it is a padding block =)
 
 		} catch (S3ServiceException e) {
 			// TODO Auto-generated catch block

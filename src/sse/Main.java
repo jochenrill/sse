@@ -72,8 +72,7 @@ public class Main {
 						.get("general", "vector_marker").charAt(0);
 				Constants.VECTOR_SIZE_MULTI = Short.parseShort(config.get(
 						"general", "vector_size_multi"));
-				Constants.EXACT_MATCHING = Boolean.parseBoolean(config.get(
-						"general", "exact_matching"));
+
 			}
 
 			if (cmd.hasOption("v")) {
@@ -202,6 +201,13 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				DAWG t = new DAWG(input);
+
+				/*
+				 * Runtime r = Runtime.getRuntime();
+				 * 
+				 * System.gc(); System.out .println(((r.totalMemory() -
+				 * r.freeMemory()) / (1024 * 1024))); System.exit(0);
+				 */
 				long textLength = t.text.length();
 				if (Constants.DEBUG) {
 					System.out

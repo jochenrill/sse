@@ -12,13 +12,6 @@ public class Constants {
 	}
 
 	/**
-	 * Defines whether exact position matching for vectors should be used.
-	 * Running time for exact matching is at least O(n^2). If this is false, the
-	 * positions will be distributed randomly. This will lead to multiple
-	 * vectors occupying the same location. Might be less secure (or not ..).
-	 */
-	public static boolean EXACT_MATCHING = true;
-	/**
 	 * The size of the maximal alphabet which can be used (95 = printable ascii
 	 * characters)
 	 */
