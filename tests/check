@@ -1,12 +1,11 @@
 #!/bin/bash
-i=`./search "$1"`
+i=`./search "$1"| grep -v INFO`
 occurs=`echo $i | wc -w`
 if [ $occurs -eq 1 ]; then
 	numoccurs=0	
 else 
-	numoccurs=`echo $i | awk '{print $1}'`
+	numoccurs=`echo $i | awk {'print $1'}`
 fi
-
 realnumoccurs=`grep -o "$1" $2 | wc -l`
 if [ $numoccurs == "false"  ];  then
     if [ $realnumoccurs -eq 0 ]; then

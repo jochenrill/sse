@@ -1,41 +1,37 @@
 package sse.Graph;
+
 public class Edge {
-    private int edgeLabelStart;
-    private int edgeLabelEnd;
-    private Node start;
-    private Node end;
+	private char edgeLabel;
 
-    public Edge(int edgeLabelStart, int edgeLabelEnd, Node start, Node end) {
-        this.edgeLabelStart = edgeLabelStart;
-        this.edgeLabelEnd = edgeLabelEnd;
-        this.start = start;
-        this.end = end;
-    }
+	private Node start;
+	private Node end;
+	private boolean primary;
 
-    public Edge(int beginIndex, int endIndex, Node startNode, long id) {
-        this.edgeLabelStart = beginIndex;
-        this.edgeLabelEnd = endIndex;
-        this.start = startNode;
-        this.end = new Node(id);
-    }
+	public Edge(char edgeLabel, Node start, Node end) {
+		this.edgeLabel = edgeLabel;
 
-    public int getEdgeLabelStart() {
-        return edgeLabelStart;
-    }
+		this.start = start;
+		this.end = end;
+		this.primary = true;
+	}
 
-    public int getEdgeLabelEnd() {
-        return edgeLabelEnd;
-    }
+	public char getEdgeLabel() {
+		return edgeLabel;
+	}
 
-    public int getSpan() {
-        return edgeLabelStart - edgeLabelEnd;
-    }
+	public Node getStart() {
+		return start;
+	}
 
-    public Node getStart() {
-        return start;
-    }
+	public Node getEnd() {
+		return end;
+	}
 
-    public Node getEnd() {
-        return end;
-    }
+	public boolean isPrimary() {
+		return primary;
+	}
+
+	public void setPrimary(boolean primary) {
+		this.primary = primary;
+	}
 }

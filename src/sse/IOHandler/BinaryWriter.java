@@ -1,23 +1,23 @@
 package sse.IOHandler;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Random;
 
+import sse.Constants;
 import sse.Backend.Backend;
-import sse.Vectors.Constants;
-import sse.Vectors.EdgePosition;
-import sse.Vectors.SuffixVector;
+import sse.Graph.Edge;
+import sse.Graph.Node;
 
 public class BinaryWriter {
 	private BinaryOut w;
-	private String input;
 	private String fileName;
 	private SecurityEngine secEngine;
 	private Backend backend;
 
-	public BinaryWriter(String fileName, String input, Backend backend) {
-		this.input = input;
+	public BinaryWriter(String fileName, Backend backend) {
+
 		this.fileName = fileName;
 		this.backend = backend;
 	}
@@ -27,144 +27,101 @@ public class BinaryWriter {
 	 * the information in which block the edge can be found.
 	 */
 
-	private void updateBlockPosition(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, long actualDataSize,
-			long maximumBlockSize) {
-		// Start printing the blocks
-		int pos = 0;
-		long bytesInCurrentBlock = 0;
-		// long currentBlock = 1;
-		long padding = 0;
+	private LinkedList<Block> distributeInBlocks(LinkedList<Node> list,
+			int maximumDataSize, int maximumBlockSize, int actualDataSize) {
+		int numberOfBlocks = (2 * maximumDataSize / maximumBlockSize) + 1;
+		LinkedList<Block> blockList = new LinkedList<Block>();
 
-		Iterator<EdgePosition> iterator = ep.iterator();
-		EdgePosition e = iterator.next();
-		for (SuffixVector v : list) {
-			// write sequence before the vector
-			if (v.getLocation() != 0) {
-				for (; pos < v.getLocation(); pos++) {
-
-					if ((bytesInCurrentBlock + 1) > actualDataSize) {
-
-						while (e != null && e.getPosition() < pos) {
-							e.setMovedPosition(e.getMovedPosition() + padding);
-							if (iterator.hasNext()) {
-								e = iterator.next();
-							} else {
-								e = null;
-							}
-						}
-
-						padding += maximumBlockSize - bytesInCurrentBlock;
-						// currentBlock++;
-						bytesInCurrentBlock = 0;
-					}
-					bytesInCurrentBlock++;
-				}
-			}
-			// make sure that the vector fits in the blocksize
-			if ((bytesInCurrentBlock + v.getSize()) > actualDataSize) {
-				while (e != null && e.getPosition() < pos) {
-					e.setMovedPosition(e.getMovedPosition() + padding);
-					if (iterator.hasNext()) {
-						e = iterator.next();
-					} else {
-						e = null;
-					}
-				}
-				padding += maximumBlockSize - bytesInCurrentBlock;
-
-				// currentBlock++;
-				bytesInCurrentBlock = 0;
-			}
-			// write vector itself
-			bytesInCurrentBlock += v.getSize();
-		}
-		// write the rest (from end of last suffix vector to end of string)
-		for (; pos < input.length(); pos++) {
-			if ((bytesInCurrentBlock + 1) > actualDataSize) {
-				while (e != null && e.getPosition() < pos) {
-					e.setMovedPosition(e.getMovedPosition() + padding);
-					if (iterator.hasNext()) {
-						e = iterator.next();
-					} else {
-						e = null;
-					}
-				}
-				padding += actualDataSize - bytesInCurrentBlock;
-
-				// currentBlock++;
-				bytesInCurrentBlock = 0;
-			}
-			bytesInCurrentBlock++;
+		for (int i = 0; i <= numberOfBlocks; i++) {
+			Block newBlock = new Block(maximumBlockSize, i);
+			blockList.add(newBlock);
 		}
 
-		// update the rest
-		while (e != null && e.getPosition() <= pos) {
-			e.setMovedPosition(e.getMovedPosition() + padding);
-			if (iterator.hasNext()) {
-				e = iterator.next();
-			} else {
-				e = null;
+		LinkedList<Node> nodeList = list;
+
+		Collections.shuffle(nodeList, new Random());
+		Collections.shuffle(blockList, new Random());
+
+		// find the root node and root block
+		for (Node n : nodeList) {
+			if (n.getId() == 0) {
+				nodeList.remove(n);
+				nodeList.addFirst(n);
+				break;
 			}
 		}
+
+		for (Block b : blockList) {
+			if (b.getId() == 0) {
+				blockList.remove(b);
+				blockList.addFirst(b);
+				break;
+			}
+		}
+
+		/*
+		 * int minimumFill = maximumBlockSize / 2 - ((maximumDataSize -
+		 * actualDataSize) / numberOfBlocks);
+		 */
+		int minimumFill = maximumBlockSize / 2;
+
+		for (Block newBlock : blockList) {
+			int offset = 0;
+			if (nodeList.isEmpty()) {
+				break;
+			}
+			do {
+				Node n = nodeList.getFirst();
+				nodeList.remove();
+				newBlock.addNode(n);
+				n.setBlock(newBlock.getId());
+				n.setLocation(offset);
+				offset += n.getSize();
+				// TODO: Eventuell muss man prüfen, dass man nicht > blockSize
+				// Daten zuordnet
+			} while (newBlock.getBytesIncluded() < minimumFill
+					&& !list.isEmpty());
+		}
+		return blockList;
+
 	}
 
-	public void writeBlocks(ArrayList<SuffixVector> list,
-			ArrayList<EdgePosition> ep, long textLength, boolean indcpa,
+	public void writeBlocks(LinkedList<Node> list, long textLength,
 			char password[]) {
 
 		secEngine = new SecurityEngine(password);
 
-		// Calculate the size of the alphabet. This is needed to determine the
-		// maximum size for a vector.
-		short alphabetSize = Constants.ALPHABET_SIZE;
+		// maximum node size in bytes. A node can have a most |\Sigma| edges.
+		long maximumVectorSize = 1
+				+ Constants.ALPHABET_SIZE
+				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES)
+				+ Constants.NUMOCCURS_BYTES;
 
-		// maximum vector size in bytes
-		long maximumVectorSize = 2 + alphabetSize + alphabetSize
-				* Constants.EDGE_REFERENCE_BYTES + alphabetSize
-				* Constants.ORIGINAL_EDGE_POSITION_BYTES
-				+ Constants.VECTOR_DEPTH_BYTES
-				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
-		// = 865 in default configuration
 		// the size of the actual data we have to store
-		long actualDataSize = textLength;
-		for (SuffixVector v : list) {
-			actualDataSize += v.getSize();
+		long actualDataSize = 0;
+		for (Node n : list) {
+			actualDataSize += n.getSize();
 		}
-		// Calculate the maximum data size for IND-CPA-Security
-		long maximumDataSize = 2 + 2 + 2 * Constants.EDGE_REFERENCE_BYTES + 2
-				* Constants.ORIGINAL_EDGE_POSITION_BYTES
-				+ Constants.VECTOR_DEPTH_BYTES
-				+ Constants.ORIGINAL_VECTOR_POSITION_BYTES;
-		// = 28 in default configuration
-		maximumDataSize *= textLength;
+		/*
+		 * Calculate the maximum data size for IND-CPA-Security. This is 2|x|-1
+		 * for the number of states and 3|x|-4 for the number of edges
+		 */
+		long maximumDataSize = (2 * textLength - 1)
+				* (1 + Constants.NUMOCCURS_BYTES)
+				+ (3 * textLength - 4)
+				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES);
+
 		if (maximumDataSize > Math.pow(2, Constants.EDGE_REFERENCE_BYTES * 8)) {
 			System.out.println("Warning: EDGE_REFERENCE_BYTES might be to low");
 		}
 
-		// if indcpa security is not needed use the actual data size as maximum
-		// size
-		if (!indcpa) {
-			maximumDataSize = actualDataSize;
-		}
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 
-		// the minimum number of block we have to create
-		long blockNumber = maximumDataSize / blockSize + 1;
+		LinkedList<Block> blockList = distributeInBlocks(list,
+				(int) maximumDataSize, (int) blockSize, (int) actualDataSize);
 
-		// the number of actual data per block
-		long blockDataSize = actualDataSize / (blockNumber - 1);
-
-		// problem: if blockDataSize < maximumVector size we have a problem.
-		// needs to be adjusted
-		if (blockDataSize < maximumVectorSize) {
-			System.out.println("Warning: increase block multiplier!");
-		}
-		updateBlockPosition(list, ep, blockDataSize, blockSize);
 		// Start printing the blocks
-		int pos = 0;
-		long bytesInCurrentBlock = 0;
-		long currentBlock = 1;
+
 		// open writer for meta information file
 		try {
 			w = new BinaryOut(fileName);
@@ -174,199 +131,127 @@ public class BinaryWriter {
 		// write size of actual data contained in a block
 		w.write(blockSize);
 		w.close();
-		// open writer for currentBlock
+
+		// open writer for root block
+
 		try {
-			w = new BinaryOut(fileName + currentBlock);
+			w = new BinaryOut(fileName + "0");
 		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName
-					+ currentBlock);
+			System.out.println("Could not create file " + fileName);
 		}
 
-		for (SuffixVector v : list) {
-			// write sequence before the vector
-			if (v.getLocation() != 0) {
-				for (; pos < v.getLocation(); pos++) {
-					if ((bytesInCurrentBlock + 1) > blockDataSize) {
-						fillWithData(bytesInCurrentBlock, blockSize);
-						w = backend.openNextFile(++currentBlock, w, secEngine);
-						bytesInCurrentBlock = 0;
-					}
-					w.write(input.charAt(pos));
-					bytesInCurrentBlock++;
-				}
-			}
-			// make sure that the vector fits in the blocksize
-			if ((bytesInCurrentBlock + v.getSize()) > blockDataSize) {
-				fillWithData(bytesInCurrentBlock, blockSize);
-				w = backend.openNextFile(++currentBlock, w, secEngine);
-				bytesInCurrentBlock = 0;
-			}
-			// we know the size of the vector and that it fits in the current
-			// block, so lets just add its size to the bytes in the block
-			bytesInCurrentBlock += v.getSize();
-			// write vector itself
-			w.write(Constants.VECTOR_MARKER);
-			switch (Constants.VECTOR_DEPTH_BYTES) {
+		Block currentBlock = blockList.getFirst();
+		Block lastBlock;
+
+		// print root block
+		printBlock(w, currentBlock);
+		fillWithData(w, currentBlock);
+		blockList.remove(currentBlock);
+		lastBlock = currentBlock;
+		for (Block b : blockList) {
+			currentBlock = b;
+			w = backend.openNextFile(lastBlock.getId(), currentBlock.getId(),
+					w, secEngine);
+			printBlock(w, b);
+			fillWithData(w, b);
+			lastBlock = currentBlock;
+		}
+
+		backend.finalize(currentBlock.getId(), w, secEngine);
+	}
+
+	private void printBlock(BinaryOut w, Block b) {
+		for (Node n : b.getNodes()) {
+
+			switch (Constants.NUMOCCURS_BYTES) {
+
 			case 8:
-				w.write((long) v.getDepth());
+				w.write((long) n.getNumOccurs());
 				break;
 			case 4:
-				w.write((int) v.getDepth());
+				w.write((int) n.getNumOccurs());
 				break;
 			case 2:
-				w.write((short) v.getDepth());
+				w.write((short) n.getNumOccurs());
 				break;
 			case 1:
-				w.write((char) v.getDepth());
+				w.write((char) n.getNumOccurs());
 				break;
 			default:
 				throw new UnsupportedOperationException(
-						Constants.VECTOR_DEPTH_BYTES
-								+ " is not a valid number for vector depth");
+						Constants.NUMOCCURS_BYTES
+								+ " is not a valid number for number of occurences");
 			}
-			/*
-			 * switch (Constants.NUMOCCURS_BYTE) { case 8: w.write((long)
-			 * v.getNumOccurs()); break; case 4: w.write((int)
-			 * v.getNumOccurs()); break; case 2: w.write((short)
-			 * v.getNumOccurs()); break; case 1: w.write((char)
-			 * v.getNumOccurs()); break; default: throw new
-			 * UnsupportedOperationException( Constants.NUMOCCURS_BYTE +
-			 * " is not a valid number for number of occurences"); }
-			 */
-			switch (Constants.ORIGINAL_VECTOR_POSITION_BYTES) {
-			case 8:
-				w.write((long) v.getLocation());
-				break;
-			case 4:
-				w.write((int) v.getLocation());
-				break;
-			case 2:
-				w.write((short) v.getLocation());
-				break;
-			case 1:
-				w.write((char) v.getLocation());
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						Constants.ORIGINAL_VECTOR_POSITION_BYTES
-								+ " is not a valid number for original vector position");
-			}
-			for (Character c : v.getMap().keySet()) {
+			for (Edge e : n.getEdges()) {
+				char c = e.getEdgeLabel();
 				// write first char of edge
 				w.write(c);
+
 				/*
-				 * write bytesequence for representing the edge the first bit in
-				 * each edge reference is dedicated to indicate whether the edge
-				 * will lead to the sink or not this allows the search algorithm
-				 * to return the number of occurences without following the
-				 * (possibly very long) edge to the sink
+				 * write bytesequence for representing the edge
 				 */
-				// TODO: Check whether the range of the representation of the
-				// edges is long enough, so that the first bit will never be
-				// used
+
 				switch (Constants.EDGE_REFERENCE_BYTES) {
 				case 8:
-
-					w.write((long) ((v.getMap().get(c).getMovedPosition())));
+					w.write((long) ((e.getEnd().getLocation())));
 					break;
 				case 4:
-					w.write((int) ((v.getMap().get(c).getMovedPosition())));
-
+					w.write((int) ((e.getEnd().getLocation())));
 					break;
 				case 2:
-					w.write((short) ((v.getMap().get(c).getMovedPosition())));
-
+					w.write((short) ((e.getEnd().getLocation())));
 					break;
 				case 1:
-					w.write((char) ((v.getMap().get(c).getMovedPosition())));
-
+					w.write((char) ((e.getEnd().getLocation())));
 					break;
 				default:
 					throw new UnsupportedOperationException(
 							Constants.EDGE_REFERENCE_BYTES
 									+ " is not a valid number for edge reference");
 				}
+
 				// write bytesequence for representing the block the edge is
 				// leading to
-				switch (Constants.ORIGINAL_EDGE_POSITION_BYTES) {
+				switch (Constants.BLOCK_REFERENCE_BYTES) {
 				case 8:
-					w.write((long) v.getMap().get(c).getPosition());
+					w.write((long) e.getEnd().getBlock());
 					break;
 				case 4:
-					w.write((int) v.getMap().get(c).getPosition());
+					w.write((int) e.getEnd().getBlock());
 					break;
 				case 2:
-					w.write((short) v.getMap().get(c).getPosition());
+					w.write((short) e.getEnd().getBlock());
 					break;
 				case 1:
-					w.write((char) v.getMap().get(c).getPosition());
+					w.write((char) e.getEnd().getBlock());
 					break;
 				default:
 					throw new UnsupportedOperationException(
-							Constants.ORIGINAL_EDGE_POSITION_BYTES
+							Constants.BLOCK_REFERENCE_BYTES
 									+ " is not a valid number for edge reference");
 				}
-				// if vector == null then the edge is leading to the sink
-				int tmpOccurs = 1;
-				if (v.getMap().get(c).end.vector != null) {
-					tmpOccurs = v.getMap().get(c).end.vector.getNumOccurs();
-				}
-				switch (Constants.NUMOCCURS_BYTE) {
 
-				case 8:
-					w.write((long) tmpOccurs);
-					break;
-				case 4:
-					w.write((int) tmpOccurs);
-					break;
-				case 2:
-					w.write((short) tmpOccurs);
-					break;
-				case 1:
-					w.write((char) tmpOccurs);
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							Constants.NUMOCCURS_BYTE
-									+ " is not a valid number for number of occurences");
-				}
 			}
+
 			w.write(Constants.VECTOR_MARKER);
 		}
-		// write the rest (from end of last suffix vector to end of string)
-		for (; pos < input.length(); pos++) {
-			if ((bytesInCurrentBlock + 1) > blockDataSize) {
-				fillWithData(bytesInCurrentBlock, blockSize);
-				w = backend.openNextFile(++currentBlock, w, secEngine);
-				bytesInCurrentBlock = 0;
-			}
-			w.write(input.charAt(pos));
-			bytesInCurrentBlock++;
-		}
-		fillWithData(bytesInCurrentBlock, blockSize);
-		// Create a lot of empty blocks for IND-CPA-Security
-
-		if (indcpa) {
-			/*
-			 * while (currentBlock * blockSize < maximumDataSize) { w =
-			 * backend.openNextFile(++currentBlock, w, secEngine);
-			 * fillWithData(0, blockSize); }
-			 */
-			// Sanity check for ind-cpa security
-			if (currentBlock * blockSize < maximumDataSize) {
-				System.out
-						.println("Warning: There might be to few blocks. IND-CPA security can not be guaranteed");
-			}
-		}
-
-		backend.finalize(currentBlock, w, secEngine);
-
 	}
 
-	private void fillWithData(long bytesInBlock, long blockSize) {
-		while (bytesInBlock < blockSize) {
+	private void fillWithData(BinaryOut w, Block b) {
+		int missing = b.getSize() - b.getBytesIncluded();
+		while (missing > 0) {
 			w.write((byte) Constants.PADDING_BYTE);
-			bytesInBlock++;
+			missing--;
 		}
+
+		/*
+		 * might not be needed anymore ... switch
+		 * (Constants.BLOCK_REFERENCE_BYTES) { case 8: w.write((long)
+		 * nextBlock.getId()); break; case 4: w.write((int) nextBlock.getId());
+		 * break; case 2: w.write((short) nextBlock.getId()); break; case 1:
+		 * w.write((char) nextBlock.getId()); break; default: throw new
+		 * UnsupportedOperationException( Constants.BLOCK_REFERENCE_BYTES +
+		 * " is not a valid number for edge reference"); }
+		 */
 	}
 }

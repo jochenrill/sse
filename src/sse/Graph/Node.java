@@ -1,49 +1,18 @@
 package sse.Graph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 
-import sse.Vectors.SuffixVector;
+import sse.Constants;
 
 public class Node {
-	private Hashtable<Character, Edge> edges;
+	private LinkedList<Edge> edges;
 	private Node suffixLink;
-	private int length;
 	private long id;
-	private int location = -1;
-	public boolean visited = false;
-	private boolean hasVector = false;
-	public boolean usedInMatching = false;
-
-	public SuffixVector vector;
-	
 	private int numOccurs = 1;
-	private ArrayList<Integer> places;
-
-	public int getLocation() {
-		return this.location;
-	}
-
-	public void setVector(boolean value) {
-		hasVector = value;
-	}
-
-	public boolean hasVector() {
-		return hasVector;
-	}
-
-	public void setLocation(int loc) {
-		this.location = loc;
-	}
-
-	public int getLength() {
-		return length;
-	}
-
-	public void setLength(int length) {
-		this.length = length;
-	}
+	private int location;
+	private int block;
+	private LinkedHashSet<Integer> places;
 
 	public Node getSuffixLink() {
 		return suffixLink;
@@ -55,34 +24,40 @@ public class Node {
 
 	public Node(long id) {
 		this.id = id;
-		edges = new Hashtable<Character, Edge>();
-		// locations = new LinkedList<Integer>();
+		edges = new LinkedList<Edge>();
+		places = new LinkedHashSet<Integer>();
+
 	}
 
-	@SuppressWarnings("unchecked")
-	public Node duplicateLazy(long nodeCount) {
-		Node d = new Node(nodeCount);
-		d.edges = (Hashtable<Character, Edge>) this.edges.clone();
-		d.suffixLink = this.suffixLink;
-		d.length = this.length;
-		// d.locations = (LinkedList<Integer>) this.locations.clone();
-		return d;
-	}
-
-	public Collection<Edge> getEdges() {
-		return edges.values();
+	public LinkedList<Edge> getEdges() {
+		return edges;
 	}
 
 	public Edge getEdge(char c) {
-		return edges.get(c);
+		for (Edge e : edges) {
+			if (e.getEdgeLabel() == c) {
+				return e;
+			}
+		}
+		return null;
 	}
 
-	public boolean addEdge(char c, Edge e) {
-		return (edges.put(c, e) == null);
+	public Edge getEdge(Node n) {
+		for (Edge e : edges) {
+			if (e.getEnd() == n) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	public boolean addEdge(Edge e) {
+		return (edges.add(e));
 	}
 
 	public boolean removeEdge(Edge e) {
-		return (edges.values().remove(e));
+
+		return (edges.remove(e));
 	}
 
 	@Override
@@ -102,14 +77,6 @@ public class Node {
 		return numOccurs;
 	}
 
-	public void setPlaces(ArrayList<Integer> places) {
-		this.places = places;
-	}
-
-	public ArrayList<Integer> getPlaces() {
-		return places;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Node) {
@@ -119,4 +86,41 @@ public class Node {
 		}
 	}
 
+	public int getLocation() {
+		return location;
+	}
+
+	public void setLocation(int location) {
+		this.location = location;
+	}
+
+	public int getBlock() {
+		return block;
+	}
+
+	public void setBlock(int block) {
+		this.block = block;
+	}
+
+	public int getSize() {
+
+		/*
+		 * 2 bytes for start and end marker, then every edge has to contain its
+		 * lable (one character) the block number and the position in the block
+		 * it is leading to aswell as the number of occurences that specific
+		 * suffix has
+		 */
+		return 1
+				+ edges.size()
+				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES)
+				+ Constants.NUMOCCURS_BYTES;
+	}
+
+	public LinkedHashSet<Integer> getPlaces() {
+		return places;
+	}
+
+	public void addPlace(Integer place) {
+		this.places.add(place);
+	}
 }
