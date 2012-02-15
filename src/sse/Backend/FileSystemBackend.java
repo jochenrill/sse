@@ -1,13 +1,14 @@
 package sse.Backend;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 
 import sse.Constants;
-import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
 
 public class FileSystemBackend implements Backend {
@@ -23,9 +24,14 @@ public class FileSystemBackend implements Backend {
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public BinaryOut openNextFile(int currentBlock, int nextBlock, BinaryOut w,
-			SecurityEngine secEngine) {
-		w.close();
+	public DataOutputStream openNextFile(int currentBlock, int nextBlock,
+			DataOutputStream w, SecurityEngine secEngine) {
+		try {
+			w.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		// Encrypt the last block if needed
 
@@ -34,7 +40,8 @@ public class FileSystemBackend implements Backend {
 		new File(fileName + (currentBlock)).delete();
 
 		try {
-			w = new BinaryOut(fileName + nextBlock);
+			w = new DataOutputStream(new FileOutputStream(new File(fileName
+					+ nextBlock)));
 
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName + nextBlock);
@@ -46,12 +53,12 @@ public class FileSystemBackend implements Backend {
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public void finalize(long currentBlock, BinaryOut w,
-			SecurityEngine secEngine) {
+	public void finalize(long currentBlock, DataOutputStream w,
+			SecurityEngine secEngine) throws IOException {
 		w.close();
 		// open writer for meta information file
 		try {
-			w = new BinaryOut(fileName, true);
+			w = new DataOutputStream(new FileOutputStream(new File(fileName)));
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
@@ -62,8 +69,7 @@ public class FileSystemBackend implements Backend {
 		secEngine.encrypt(fileName + (currentBlock));
 		// remove the unencryted file
 		new File(fileName + (currentBlock)).delete();
-
-		w.write(currentBlock);
+		w.writeLong(currentBlock);
 		w.close();
 		secEngine.printKey(fileName);
 	}

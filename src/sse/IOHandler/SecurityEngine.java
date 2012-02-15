@@ -1,6 +1,8 @@
 package sse.IOHandler;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,9 +61,10 @@ public class SecurityEngine {
 	}
 
 	public void printKey(String fileName) {
-		BinaryOut keyStream;
+		DataOutputStream keyStream;
 		try {
-			keyStream = new BinaryOut(fileName, true);
+			keyStream = new DataOutputStream(new FileOutputStream(new File(
+					fileName), true));
 			/*
 			 * byte[] key = secureKey.getEncoded(); for (int i = 0; i <
 			 * key.length; i++) { keyStream.write(key[i]); } keyStream.close();
@@ -83,15 +86,11 @@ public class SecurityEngine {
 	public void readKey(InputStream key) {
 		DataInputStream keyStream;
 		try {
-			/*
-			 * keyStream = new DataInputStream(new DataInputStream( new
-			 * FileInputStream(new File(fileName)))); byte[] key = new byte[16];
-			 * keyStream.read(key, 0, 16); keyStream.close();
-			 */
-			// secureKey = new SecretKeySpec(key, "AES");
+
 			keyStream = new DataInputStream(new DataInputStream(key));
-			// Jump over the irrelevant information
-			keyStream.readLong();
+			// Jump over the irrelevant information (which is the number of
+			// blocks!)
+
 			keyStream.readLong();
 
 			// read IV and Key

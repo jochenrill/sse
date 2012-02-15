@@ -1,5 +1,7 @@
 package sse.IOHandler;
 
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -11,7 +13,7 @@ import sse.Graph.Edge;
 import sse.Graph.Node;
 
 public class BinaryWriter {
-	private BinaryOut w;
+	private DataOutputStream w;
 	private String fileName;
 	private SecurityEngine secEngine;
 	private Backend backend;
@@ -20,6 +22,7 @@ public class BinaryWriter {
 
 		this.fileName = fileName;
 		this.backend = backend;
+
 	}
 
 	/*
@@ -87,7 +90,7 @@ public class BinaryWriter {
 	}
 
 	public void writeBlocks(LinkedList<Node> list, long textLength,
-			char password[]) {
+			char password[]) throws IOException {
 
 		secEngine = new SecurityEngine(password);
 
@@ -122,20 +125,10 @@ public class BinaryWriter {
 
 		// Start printing the blocks
 
-		// open writer for meta information file
-		try {
-			w = new BinaryOut(fileName);
-		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName);
-		}
-		// write size of actual data contained in a block
-		w.write(blockSize);
-		w.close();
-
 		// open writer for root block
 
 		try {
-			w = new BinaryOut(fileName + "0");
+			w = new DataOutputStream(new FileOutputStream(fileName + "0"));
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
@@ -160,28 +153,12 @@ public class BinaryWriter {
 		backend.finalize(currentBlock.getId(), w, secEngine);
 	}
 
-	private void printBlock(BinaryOut w, Block b) {
+	private void printBlock(DataOutputStream w, Block b) throws IOException {
 		for (Node n : b.getNodes()) {
 
-			switch (Constants.NUMOCCURS_BYTES) {
+			w.write(toByteArray((long) n.getNumOccurs(),
+					Constants.NUMOCCURS_BYTES));
 
-			case 8:
-				w.write((long) n.getNumOccurs());
-				break;
-			case 4:
-				w.write((int) n.getNumOccurs());
-				break;
-			case 2:
-				w.write((short) n.getNumOccurs());
-				break;
-			case 1:
-				w.write((char) n.getNumOccurs());
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						Constants.NUMOCCURS_BYTES
-								+ " is not a valid number for number of occurences");
-			}
 			for (Edge e : n.getEdges()) {
 				char c = e.getEdgeLabel();
 				// write first char of edge
@@ -191,45 +168,13 @@ public class BinaryWriter {
 				 * write bytesequence for representing the edge
 				 */
 
-				switch (Constants.EDGE_REFERENCE_BYTES) {
-				case 8:
-					w.write((long) ((e.getEnd().getLocation())));
-					break;
-				case 4:
-					w.write((int) ((e.getEnd().getLocation())));
-					break;
-				case 2:
-					w.write((short) ((e.getEnd().getLocation())));
-					break;
-				case 1:
-					w.write((char) ((e.getEnd().getLocation())));
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							Constants.EDGE_REFERENCE_BYTES
-									+ " is not a valid number for edge reference");
-				}
+				w.write(toByteArray((long) (e.getEnd()).getLocation(),
+						Constants.EDGE_REFERENCE_BYTES));
 
 				// write bytesequence for representing the block the edge is
 				// leading to
-				switch (Constants.BLOCK_REFERENCE_BYTES) {
-				case 8:
-					w.write((long) e.getEnd().getBlock());
-					break;
-				case 4:
-					w.write((int) e.getEnd().getBlock());
-					break;
-				case 2:
-					w.write((short) e.getEnd().getBlock());
-					break;
-				case 1:
-					w.write((char) e.getEnd().getBlock());
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							Constants.BLOCK_REFERENCE_BYTES
-									+ " is not a valid number for edge reference");
-				}
+				w.write(toByteArray((long) e.getEnd().getBlock(),
+						Constants.BLOCK_REFERENCE_BYTES));
 
 			}
 
@@ -237,21 +182,23 @@ public class BinaryWriter {
 		}
 	}
 
-	private void fillWithData(BinaryOut w, Block b) {
+	private void fillWithData(DataOutputStream w, Block b) throws IOException {
 		int missing = b.getSize() - b.getBytesIncluded();
 		while (missing > 0) {
 			w.write((byte) Constants.PADDING_BYTE);
 			missing--;
 		}
 
-		/*
-		 * might not be needed anymore ... switch
-		 * (Constants.BLOCK_REFERENCE_BYTES) { case 8: w.write((long)
-		 * nextBlock.getId()); break; case 4: w.write((int) nextBlock.getId());
-		 * break; case 2: w.write((short) nextBlock.getId()); break; case 1:
-		 * w.write((char) nextBlock.getId()); break; default: throw new
-		 * UnsupportedOperationException( Constants.BLOCK_REFERENCE_BYTES +
-		 * " is not a valid number for edge reference"); }
-		 */
+	}
+
+	private byte[] toByteArray(long number, int bytes) {
+
+		// TODO: do a check whether the given number fits in the given bytes
+		byte[] b = new byte[bytes];
+		for (int i = 0; i < bytes; i++) {
+			b[(bytes - 1) - i] = (byte) (number >>> (i * 8));
+		}
+
+		return b;
 	}
 }

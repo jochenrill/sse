@@ -6,6 +6,7 @@ public class Edge {
 	private Node start;
 	private Node end;
 	private boolean primary;
+	private boolean natural;
 
 	public Edge(char edgeLabel, Node start, Node end) {
 		this.edgeLabel = edgeLabel;
@@ -33,5 +34,13 @@ public class Edge {
 
 	public void setPrimary(boolean primary) {
 		this.primary = primary;
+	}
+
+	public boolean isNatural() {
+		return natural;
+	}
+
+	public void setNatural(boolean natural) {
+		this.natural = natural;
 	}
 }

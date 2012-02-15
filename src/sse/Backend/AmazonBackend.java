@@ -1,6 +1,8 @@
 package sse.Backend;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -18,7 +20,6 @@ import org.jets3t.service.multi.SimpleThreadedStorageService;
 import org.jets3t.service.security.AWSCredentials;
 
 import sse.Constants;
-import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
 
 public class AmazonBackend implements Backend {
@@ -50,10 +51,12 @@ public class AmazonBackend implements Backend {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * @throws IOException
 	 */
 	@Override
-	public BinaryOut openNextFile(int currentBlock, int nextBlock, BinaryOut w,
-			SecurityEngine secEngine) {
+	public DataOutputStream openNextFile(int currentBlock, int nextBlock,
+			DataOutputStream w, SecurityEngine secEngine) throws IOException {
 		w.close();
 		// Encrypt the last block if needed
 
@@ -75,7 +78,8 @@ public class AmazonBackend implements Backend {
 			e.printStackTrace();
 		}
 		try {
-			w = new BinaryOut(fileName + nextBlock);
+			w = new DataOutputStream(new FileOutputStream(new File(fileName
+					+ nextBlock)));
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName
 					+ currentBlock);
@@ -86,14 +90,16 @@ public class AmazonBackend implements Backend {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * @throws IOException
 	 */
 	@Override
-	public void finalize(long currentBlock, BinaryOut w,
-			SecurityEngine secEngine) {
+	public void finalize(long currentBlock, DataOutputStream w,
+			SecurityEngine secEngine) throws IOException {
 		w.close();
 		// open writer for meta information file
 		try {
-			w = new BinaryOut(fileName, true);
+			w = new DataOutputStream(new FileOutputStream(new File(fileName)));
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
@@ -130,7 +136,7 @@ public class AmazonBackend implements Backend {
 			e.printStackTrace();
 		}
 
-		w.write(currentBlock);
+		w.writeLong(currentBlock);
 		w.close();
 
 		// print Key writes the IV and salt to the meta information file

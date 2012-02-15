@@ -89,7 +89,7 @@ public class DAWG implements Iterable<Node> {
 				writer.write(string);
 
 				writer.write("[" + "label=\"" + e.getEdgeLabel() + "["
-						+ e.getEdgeLabel() + "]" + "\"];\n");
+						+ (e.isNatural() ? "*" :"") + "]" + "\"];\n");
 
 				if (!visited.contains(e.getEnd())) {
 					printDot(e.getEnd(), writer, visited);
@@ -109,6 +109,9 @@ public class DAWG implements Iterable<Node> {
 
 			Edge primEdge = new Edge(c, sink, newSink);
 			sink.addEdge(primEdge);
+			
+			// mark the natural edge. this is needed for decryption later on
+			primEdge.setNatural(true);
 
 			for (Integer z : sink.getPlaces()) {
 				if ((z + 1) < text.length() && text.charAt(z + 1) == c) {

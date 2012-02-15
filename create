@@ -1,2 +1,2 @@
 #!/bin/bash
-java  -jar -Xss200m -Xms4g -Xmx4g sse.jar -create -v -amazon -password abc -i `echo -n $1` -o files/default.vc
+java  -jar -Xss200m -Xms4g -Xmx4g sse.jar -create -v  -password abc -i `echo -n $1` -o files/default.vc

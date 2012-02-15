@@ -28,6 +28,7 @@ public class SearchEngine {
 		this.currentBlock = 0;
 		this.backend = backend;
 		this.startFile = startFile;
+
 	}
 
 	public int getTransferedFilesCount() {
@@ -35,8 +36,6 @@ public class SearchEngine {
 	}
 
 	public long find(String word) {
-		@SuppressWarnings("unused")
-		long blockSize = 0;
 		long numberOfBlocks = 0;
 
 		searchLength = word.length();
@@ -44,7 +43,6 @@ public class SearchEngine {
 				backend.loadStartBlock());
 
 		try {
-			blockSize = firstStream.readLong();
 			numberOfBlocks = firstStream.readLong();
 			firstStream.close();
 		} catch (IOException e1) {
@@ -66,24 +64,10 @@ public class SearchEngine {
 
 				stop = true;
 				// read numOccurs
-				switch (Constants.NUMOCCURS_BYTES) {
-				case 8:
-					numOccurs = stream.readLong();
-					break;
-				case 4:
-					numOccurs = (long) stream.readInt();
-					break;
-				case 2:
-					numOccurs = (long) stream.readShort();
-					break;
-				case 1:
-					numOccurs = (long) stream.readChar();
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							Constants.NUMOCCURS_BYTES
-									+ " is not a valid number for number of occurences");
-				}
+				byte[] buffer = new byte[Constants.NUMOCCURS_BYTES];
+				stream.read(buffer);
+				numOccurs = fromByteArray(buffer, Constants.NUMOCCURS_BYTES);
+
 				if (word.length() == 0) {
 					break;
 				}
@@ -95,43 +79,15 @@ public class SearchEngine {
 
 					// read block reference and edge reference
 					long block, edge;
+					buffer = new byte[Constants.EDGE_REFERENCE_BYTES];
+					stream.read(buffer);
+					edge = fromByteArray(buffer, Constants.EDGE_REFERENCE_BYTES);
 
-					switch (Constants.EDGE_REFERENCE_BYTES) {
-					case 8:
-						edge = stream.readLong();
-						break;
-					case 4:
-						edge = (long) stream.readInt();
-						break;
-					case 2:
-						edge = (long) stream.readShort();
-						break;
-					case 1:
-						edge = (long) stream.readChar();
-						break;
-					default:
-						throw new UnsupportedOperationException(
-								Constants.EDGE_REFERENCE_BYTES
-										+ " is not a valid number for edge reference");
-					}
-					switch (Constants.BLOCK_REFERENCE_BYTES) {
-					case 8:
-						block = stream.readLong();
-						break;
-					case 4:
-						block = (long) stream.readInt();
-						break;
-					case 2:
-						block = (long) stream.readShort();
-						break;
-					case 1:
-						block = (long) stream.readChar();
-						break;
-					default:
-						throw new UnsupportedOperationException(
-								Constants.BLOCK_REFERENCE_BYTES
-										+ " is not a valid number for block reference");
-					}
+					buffer = new byte[Constants.BLOCK_REFERENCE_BYTES];
+					stream.read(buffer);
+					block = fromByteArray(buffer,
+							Constants.BLOCK_REFERENCE_BYTES);
+
 					if (c == word.charAt(0)) {
 						word = word.substring(1);
 
@@ -149,7 +105,8 @@ public class SearchEngine {
 
 			}
 		} catch (IOException e) {
-			System.out.println("Error while parsing block " + currentBlock);
+			System.out.println("Error while parsing block " + currentBlock
+					+ "\n" + e.getMessage());
 		}
 		// Make sure to delete the last opened block
 		File delete = new File(startFile + currentBlock + ".dec");
@@ -170,6 +127,19 @@ public class SearchEngine {
 		} else {
 			return 0;
 		}
+	}
+
+	private long fromByteArray(byte[] b, int bytes) {
+
+		long result = 0;
+
+		for (int i = 0; i < bytes; i++) {
+
+			result += (b[(bytes - 1) - i] & 0xFF) << (i * 8);
+
+		}
+
+		return result;
 	}
 
 }

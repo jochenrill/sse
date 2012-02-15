@@ -1,10 +1,9 @@
 package sse.Backend;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-
-import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
 
 public interface Backend {
@@ -20,9 +19,10 @@ public interface Backend {
 	 * @param secEngine
 	 *            the current encryption engine
 	 * @return the new output stream
+	 * @throws IOException if something file related goes wrong
 	 */
-	public BinaryOut openNextFile(int currentBlock,int nextBlock, BinaryOut w,
-			SecurityEngine secEngine);
+	public DataOutputStream openNextFile(int currentBlock, int nextBlock,
+			DataOutputStream w, SecurityEngine secEngine) throws IOException;
 
 	/**
 	 * This method deletes any unneeded files and closes all streams.
@@ -33,9 +33,10 @@ public interface Backend {
 	 *            : the current output stream
 	 * @param secEngine
 	 *            : the current security engine
+	 * @throws: IOException if something goes wrong
 	 */
-	public void finalize(long currentBlock, BinaryOut w,
-			SecurityEngine secEngine);
+	public void finalize(long currentBlock, DataOutputStream w,
+			SecurityEngine secEngine) throws IOException;
 
 	/**
 	 * This method opens the next file for searching and returns whether we have
