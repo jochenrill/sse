@@ -1,7 +1,6 @@
 package sse.IOHandler;
 
 import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,14 +13,13 @@ import sse.Graph.Node;
 
 public class BinaryWriter {
 	private DataOutputStream w;
-	private String fileName;
-	private SecurityEngine secEngine;
+
 	private Backend backend;
 
-	public BinaryWriter(String fileName, Backend backend) {
+	public BinaryWriter(Backend backend, char[] password) {
 
-		this.fileName = fileName;
 		this.backend = backend;
+		backend.setSecurityEngine(new SecurityEngine(password));
 
 	}
 
@@ -89,10 +87,8 @@ public class BinaryWriter {
 
 	}
 
-	public void writeBlocks(LinkedList<Node> list, long textLength,
-			char password[]) throws IOException {
-
-		secEngine = new SecurityEngine(password);
+	public void writeBlocks(LinkedList<Node> list, long textLength)
+			throws IOException {
 
 		// maximum node size in bytes. A node can have a most |\Sigma| edges.
 		long maximumVectorSize = 1
@@ -127,30 +123,22 @@ public class BinaryWriter {
 
 		// open writer for root block
 
-		try {
-			w = new DataOutputStream(new FileOutputStream(fileName + "0"));
-		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName);
-		}
+		w = backend.openBlock(0);
 
 		Block currentBlock = blockList.getFirst();
-		Block lastBlock;
 
 		// print root block
 		printBlock(w, currentBlock);
 		fillWithData(w, currentBlock);
 		blockList.remove(currentBlock);
-		lastBlock = currentBlock;
 		for (Block b : blockList) {
 			currentBlock = b;
-			w = backend.openNextFile(lastBlock.getId(), currentBlock.getId(),
-					w, secEngine);
+			w = backend.openBlock(currentBlock.getId());
 			printBlock(w, b);
 			fillWithData(w, b);
-			lastBlock = currentBlock;
 		}
 
-		backend.finalize(currentBlock.getId(), w, secEngine);
+		backend.finalizeWriting();
 	}
 
 	private void printBlock(DataOutputStream w, Block b) throws IOException {

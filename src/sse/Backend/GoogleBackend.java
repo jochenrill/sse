@@ -1,10 +1,10 @@
 package sse.Backend;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -16,7 +16,6 @@ import org.jets3t.service.model.GSObject;
 import org.jets3t.service.model.S3Object;
 import org.jets3t.service.security.GSCredentials;
 
-import sse.Constants;
 import sse.IOHandler.SecurityEngine;
 
 public class GoogleBackend implements Backend {
@@ -24,7 +23,10 @@ public class GoogleBackend implements Backend {
 	private GoogleStorageService service;
 	private String fileName;
 	private String bucket;
-	private RandomAccessFile searchStream;
+	private RandomAccessFile stream;
+	private long currentBlock;
+	private DataOutputStream w;
+	private SecurityEngine secEngine;
 
 	public GoogleBackend(String key, String secret, String fileName,
 			String bucket) {
@@ -46,9 +48,13 @@ public class GoogleBackend implements Backend {
 	 * @throws IOException
 	 */
 	@Override
-	public DataOutputStream openNextFile(int currentBlock, int nextBlock,
-			DataOutputStream w, SecurityEngine secEngine) throws IOException {
-		w.close();
+	public DataOutputStream openBlock(int block) {
+		try {
+			w.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// Encrypt the last block if needed
 
 		secEngine.encrypt(fileName + (currentBlock));
@@ -74,7 +80,8 @@ public class GoogleBackend implements Backend {
 
 		try {
 			w = new DataOutputStream(new FileOutputStream(new File(fileName
-					+ nextBlock)));
+					+ block)));
+			currentBlock = block;
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName
 					+ currentBlock);
@@ -89,13 +96,19 @@ public class GoogleBackend implements Backend {
 	 * @throws IOException
 	 */
 	@Override
-	public void finalize(long currentBlock, DataOutputStream w,
-			SecurityEngine secEngine) throws IOException {
-		w.close();
+	public void finalizeWriting() {
+		try {
+			w.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// open writer for meta information file
 		try {
 			w = new DataOutputStream(new FileOutputStream(new File(fileName),
 					true));
+			w.writeLong(currentBlock);
+			w.close();
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
@@ -126,9 +139,6 @@ public class GoogleBackend implements Backend {
 			e.printStackTrace();
 		}
 
-		w.writeLong(currentBlock);
-		w.close();
-
 		// print Key writes the IV and salt to the meta information file
 		secEngine.printKey(fileName);
 		// upload meta block
@@ -157,36 +167,40 @@ public class GoogleBackend implements Backend {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean searchNext(long block, String fileName, long position,
-			long oldBlock, RandomAccessFile stream, SecurityEngine sEn)
-			throws IOException {
-		boolean reachedEnd = false;
+	public RandomAccessFile searchNext(long block, long position) {
+
 		if (stream != null) {
-			stream.close();
+			try {
+				stream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			File delete = new File(fileName + currentBlock + ".dec");
+			if (delete.exists()) {
+				delete.delete();
+			}
 		}
-		File delete = new File(fileName + oldBlock + ".dec");
-		if (delete.exists()) {
-			delete.delete();
-		}
+
 		try {
 			GSObject obj = service.getObject(bucket, fileName + block + ".sec");
 
-			sEn.decrypt(fileName + block, obj.getDataInputStream());
+			secEngine.decrypt(fileName + block, obj.getDataInputStream());
 			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
 					"r");
-			// if a block starts with a padding byte, it is a padding block =)
-			if (stream.readByte() == Constants.PADDING_BYTE) {
-				reachedEnd = true;
-			}
+
 			stream.seek(position);
-			searchStream = stream;
+			currentBlock = block;
 
 		} catch (ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		return reachedEnd;
+		return stream;
 
 	}
 
@@ -194,20 +208,12 @@ public class GoogleBackend implements Backend {
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public RandomAccessFile getStream() {
-		return searchStream;
-	}
-
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public InputStream loadStartBlock() {
+	public DataInputStream loadStartBlock() {
 
 		try {
 			GSObject obj = service.getObject(bucket, fileName);
 
-			return obj.getDataInputStream();
+			return new DataInputStream(obj.getDataInputStream());
 			// if a block starts with a padding byte, it is a padding block =)
 
 		} catch (S3ServiceException e) {
@@ -226,13 +232,13 @@ public class GoogleBackend implements Backend {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
+	public void loadRandomBlock(int numberOfBlocks) {
 		Random rnd = new Random();
 		try {
 			int rand = rnd.nextInt(numberOfBlocks);
 			GSObject obj = service.getObject(bucket,
 					fileName + rnd.nextInt(numberOfBlocks) + ".sec");
-			sEn.decrypt(fileName + rand, obj.getDataInputStream());
+			secEngine.decrypt(fileName + rand, obj.getDataInputStream());
 			new File(fileName + rand + ".dec").delete();
 			// if a block starts with a padding byte, it is a padding block =)
 
@@ -243,6 +249,27 @@ public class GoogleBackend implements Backend {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+	}
+
+	@Override
+	public void finalizeSearch() {
+		try {
+			stream.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		File delete = new File(fileName + currentBlock + ".dec");
+		if (delete.exists()) {
+			delete.delete();
+		}
+
+	}
+
+	@Override
+	public void setSecurityEngine(SecurityEngine secEngine) {
+		this.secEngine = secEngine;
 
 	}
 

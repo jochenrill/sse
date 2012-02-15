@@ -1,7 +1,5 @@
 package sse.IOHandler;
 
-import java.io.File;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -11,23 +9,19 @@ import sse.Backend.Backend;
 
 public class SearchEngine {
 	private RandomAccessFile stream;
-	private long currentBlock;
-	private SecurityEngine sEn;
 
 	private long numOccurs;
 	private int files = 0;
 	private boolean stop = false;
 	private Backend backend;
-	private String startFile;
 	private int searchLength;
 
-	public SearchEngine(Backend backend, String startFile, char password[]) {
-		this.sEn = new SecurityEngine(password);
-		this.sEn.readKey(backend.loadStartBlock());
+	public SearchEngine(Backend backend, char password[]) {
+		SecurityEngine sEn = new SecurityEngine(password);
+		sEn.readKey(backend.loadStartBlock());
+		backend.setSecurityEngine(sEn);
 
-		this.currentBlock = 0;
 		this.backend = backend;
-		this.startFile = startFile;
 
 	}
 
@@ -37,10 +31,9 @@ public class SearchEngine {
 
 	public long find(String word) {
 		long numberOfBlocks = 0;
-
+		int currentBlock = 0;
 		searchLength = word.length();
-		DataInputStream firstStream = new DataInputStream(
-				backend.loadStartBlock());
+		DataInputStream firstStream = backend.loadStartBlock();
 
 		try {
 			numberOfBlocks = firstStream.readLong();
@@ -51,13 +44,9 @@ public class SearchEngine {
 		}
 
 		try {
-			long toDelete = currentBlock;
-			// open the first block
+
 			files++;
-			backend.searchNext(currentBlock, startFile, 0, toDelete, stream,
-					sEn);
-			stream = backend.getStream();
-			long currentBlock = 0;
+			stream = backend.searchNext(currentBlock, 0);
 
 			// parse a node
 			while (!stop) {
@@ -92,9 +81,8 @@ public class SearchEngine {
 						word = word.substring(1);
 
 						// follow that edge
-						backend.searchNext(block, startFile, edge,
-								currentBlock, stream, sEn);
-						stream = backend.getStream();
+						stream = backend.searchNext(block, edge);
+
 						stop = false;
 						break;
 
@@ -109,15 +97,12 @@ public class SearchEngine {
 					+ "\n" + e.getMessage());
 		}
 		// Make sure to delete the last opened block
-		File delete = new File(startFile + currentBlock + ".dec");
-		if (delete.exists()) {
-			delete.delete();
-		}
+		backend.finalizeSearch();
 
 		// request random blocks to make sure the amount of transfered blocks is
 		// always word.length+1
 		while (files < searchLength + 1) {
-			backend.loadRandomBlock((int) numberOfBlocks, sEn);
+			backend.loadRandomBlock((int) numberOfBlocks);
 			files++;
 		}
 

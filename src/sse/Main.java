@@ -103,8 +103,7 @@ public class Main {
 								new AmazonBackend(config.get("amazon", "key"),
 										config.get("amazon", "skey"),
 										cmd.getOptionValue("i"), config.get(
-												"amazon", "bucket")),
-										cmd.getOptionValue("i"), password);
+												"amazon", "bucket")), password);
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
 								System.out.println("Files opened:"
@@ -131,8 +130,7 @@ public class Main {
 								new GoogleBackend(config.get("google", "key"),
 										config.get("google", "skey"),
 										cmd.getOptionValue("i"), config.get(
-												"google", "bucket")),
-										cmd.getOptionValue("i"), password);
+												"google", "bucket")), password);
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
 								System.out.println("Files opened:"
@@ -156,7 +154,7 @@ public class Main {
 							SearchEngine sEn = new SearchEngine(
 
 							new FileSystemBackend(cmd.getOptionValue("i")),
-									cmd.getOptionValue("i"), password);
+									password);
 							System.out.println(sEn.find(cmd
 									.getOptionValue("text")));
 							System.out.println("Files opened: "
@@ -240,12 +238,11 @@ public class Main {
 						}
 						System.out.println("[INFO:] Using Amazon backend.");
 
-						BinaryWriter out = new BinaryWriter(outputFile,
-								new AmazonBackend(config.get("amazon", "key"),
-										config.get("amazon", "skey"),
-										outputFile, config.get("amazon",
-												"bucket")));
-						out.writeBlocks(nodeList, textLength, password);
+						BinaryWriter out = new BinaryWriter(new AmazonBackend(
+								config.get("amazon", "key"), config.get(
+										"amazon", "skey"), outputFile,
+								config.get("amazon", "bucket")), password);
+						out.writeBlocks(nodeList, textLength);
 					} else {
 						System.out
 								.println("Amazon credentials can't be found. Exiting.");
@@ -262,12 +259,11 @@ public class Main {
 						}
 						System.out.println("[INFO:] Using Google backend.");
 
-						BinaryWriter out = new BinaryWriter(outputFile,
-								new GoogleBackend(config.get("google", "key"),
-										config.get("google", "skey"),
-										outputFile, config.get("google",
-												"bucket")));
-						out.writeBlocks(nodeList, textLength, password);
+						BinaryWriter out = new BinaryWriter(new GoogleBackend(
+								config.get("google", "key"), config.get(
+										"google", "skey"), outputFile,
+								config.get("google", "bucket")), password);
+						out.writeBlocks(nodeList, textLength);
 					} else {
 						System.out
 								.println("Google credentials can't be found. Exiting.");
@@ -282,9 +278,10 @@ public class Main {
 					}
 					System.out.println("[INFO:] Using filesystem backend.");
 
-					BinaryWriter out = new BinaryWriter(outputFile,
-							new FileSystemBackend(outputFile));
-					out.writeBlocks(nodeList, textLength, password);
+					BinaryWriter out = new BinaryWriter(new FileSystemBackend(
+							outputFile), password);
+
+					out.writeBlocks(nodeList, textLength);
 
 				}
 
