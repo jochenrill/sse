@@ -20,6 +20,13 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * This class manages en/decryption of blocks. The algorithm used is AES-CBC
+ * with 128 bits key length.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class SecurityEngine {
 	private Key secureKey;
 	private byte[] iv;

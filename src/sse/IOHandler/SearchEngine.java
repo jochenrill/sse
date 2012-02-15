@@ -7,6 +7,13 @@ import java.io.RandomAccessFile;
 import sse.Constants;
 import sse.Backend.Backend;
 
+/**
+ * This class implements a search engine on the encrypted data. For correct
+ * work, it needs a correctly implemented backend.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class SearchEngine {
 	private RandomAccessFile stream;
 

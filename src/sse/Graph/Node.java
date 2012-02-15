@@ -5,6 +5,12 @@ import java.util.LinkedList;
 
 import sse.Constants;
 
+/**
+ * This class provides an node representation for the creation of the DAWG.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class Node {
 	private LinkedList<Edge> edges;
 	private Node suffixLink;

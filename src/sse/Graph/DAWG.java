@@ -10,8 +10,10 @@ import java.util.LinkedList;
 
 /**
  * This class represents and constructs the DWAG (also called
- * "compact suffix automaton") for a given text. The algorithm used runs in
- * O(n).
+ * "compact suffix automaton") for a given text. The algorithm used runs in O(n)
+ * and uses the algorithm by Blumer et. al. In addition the different
+ * equivalence sets are calculated on the fly, as well as the natural edge
+ * labeling.
  * 
  * @author Jochen Rill
  * 
@@ -89,7 +91,7 @@ public class DAWG implements Iterable<Node> {
 				writer.write(string);
 
 				writer.write("[" + "label=\"" + e.getEdgeLabel() + "["
-						+ (e.isNatural() ? "*" :"") + "]" + "\"];\n");
+						+ (e.isNatural() ? "*" : "") + "]" + "\"];\n");
 
 				if (!visited.contains(e.getEnd())) {
 					printDot(e.getEnd(), writer, visited);
@@ -109,7 +111,7 @@ public class DAWG implements Iterable<Node> {
 
 			Edge primEdge = new Edge(c, sink, newSink);
 			sink.addEdge(primEdge);
-			
+
 			// mark the natural edge. this is needed for decryption later on
 			primEdge.setNatural(true);
 

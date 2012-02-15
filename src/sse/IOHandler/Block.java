@@ -4,6 +4,13 @@ import java.util.LinkedList;
 
 import sse.Graph.Node;
 
+/**
+ * This class represents a block used for allocation of nodes to blocks in the
+ * BinaryWriter class.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class Block {
 
 	private int size;
@@ -39,7 +46,6 @@ public class Block {
 		bytesIncluded += n.getSize();
 		return nodes.add(n);
 	}
-	
 
 	public LinkedList<Node> getNodes() {
 		return nodes;

@@ -5,6 +5,13 @@ import java.io.DataOutputStream;
 import java.io.RandomAccessFile;
 import sse.IOHandler.SecurityEngine;
 
+/**
+ * This interface specifies how a backend should be implemented so that
+ * SearchEngine and BinaryWriter can use it.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public interface Backend {
 
 	/**

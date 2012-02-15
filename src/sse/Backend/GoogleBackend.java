@@ -18,6 +18,13 @@ import org.jets3t.service.security.GSCredentials;
 
 import sse.IOHandler.SecurityEngine;
 
+/**
+ * This is an implementation of a backend for the Google Cloud, using the
+ * jets3t-library.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class GoogleBackend implements Backend {
 
 	private GoogleStorageService service;

@@ -10,6 +10,12 @@ import java.io.RandomAccessFile;
 
 import sse.IOHandler.SecurityEngine;
 
+/**
+ * This is an implementation of a simple backend for the local file system.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class FileSystemBackend implements Backend {
 
 	private String fileName;

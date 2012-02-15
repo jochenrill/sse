@@ -21,6 +21,13 @@ import org.jets3t.service.security.AWSCredentials;
 
 import sse.IOHandler.SecurityEngine;
 
+/**
+ * This is a implementation of a backend for Amazon S3. It uses threaded uploads
+ * provided by the jets3t-library.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class AmazonBackend implements Backend {
 
 	private S3Service service;

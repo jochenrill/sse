@@ -1,5 +1,11 @@
 package sse.Graph;
 
+/**
+ * This class provides an edge representation for the creation of the DAWG.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class Edge {
 	private char edgeLabel;
 

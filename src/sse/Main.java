@@ -19,6 +19,13 @@ import sse.Graph.Node;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
 
+/**
+ * This is the main class of the program. It manages the different input options
+ * and reads the config file.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class Main {
 
 	public static void main(String[] args) {

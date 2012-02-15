@@ -11,6 +11,14 @@ import sse.Backend.Backend;
 import sse.Graph.Edge;
 import sse.Graph.Node;
 
+/**
+ * This class provides the algorithms used for writing out the encrypted data.
+ * It manages block allocation, as well as representation of the information in
+ * each blocks. For it to work, it needs a correctly implemented backend.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class BinaryWriter {
 	private DataOutputStream w;
 
