@@ -14,6 +14,7 @@ import org.ini4j.Ini;
 import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
 import sse.Backend.GoogleBackend;
+import sse.Backend.SmartdriveBackend;
 import sse.Graph.DAWG;
 import sse.Graph.Node;
 import sse.IOHandler.BinaryWriter;
@@ -40,6 +41,8 @@ public class Main {
 		options.addOption("v", false, "Verbose");
 		options.addOption("amazon", false,
 				"Uploads to Amazon S3. Credentials must be specified in sse.config.");
+		options.addOption("smartdrive", false,
+				"Uploads to 1&1 Smartdrive. Credentials must be specified in sse.config.");
 		options.addOption(
 				"google",
 				false,
@@ -145,6 +148,34 @@ public class Main {
 							} else {
 								System.out
 										.println("No Google Credentials found. Search can't be performed.");
+							}
+						} else if (cmd.hasOption("smartdrive")) {
+							if (config.containsKey("smartdrive")) {
+								char[] password;
+								if (cmd.hasOption("password")) {
+									password = cmd.getOptionValue("password")
+											.toCharArray();
+								} else {
+									password = System.console().readPassword(
+											"[%s]:", "Password");
+								}
+								System.out
+										.println("[INFO:] Using Smartdrive backend.");
+
+								SearchEngine sEn = new SearchEngine(
+
+								new SmartdriveBackend(config.get("smartdrive",
+										"url"),
+										config.get("smartdrive", "user"),
+										config.get("smartdrive", "password"),
+										cmd.getOptionValue("i")), password);
+								System.out.println(sEn.find(cmd
+										.getOptionValue("text")));
+								System.out.println("Files opened:"
+										+ sEn.getTransferedFilesCount());
+							} else {
+								System.out
+										.println("No Smartdrive Credentials found. Search can't be performed.");
 							}
 						} else {
 							char[] password;
@@ -274,6 +305,28 @@ public class Main {
 					} else {
 						System.out
 								.println("Google credentials can't be found. Exiting.");
+					}
+				} else if (cmd.hasOption("smartdrive")) {
+					if (config.containsKey("smartdrive")) {
+						char[] password;
+						if (cmd.hasOption("smartdrive")) {
+							password = cmd.getOptionValue("password")
+									.toCharArray();
+						} else {
+							password = System.console().readPassword("[%s]:",
+									"Password");
+						}
+						System.out.println("[INFO:] Using Smartdrive backend.");
+
+						BinaryWriter out = new BinaryWriter(new SmartdriveBackend(
+								config.get("smartdrive", "url"), config.get(
+										"smartdrive", "user"), config.get(
+										"smartdrive", "password"), outputFile),
+								password);
+						out.writeBlocks(nodeList, textLength);
+					} else {
+						System.out
+								.println("Smartdrive credentials can't be found. Exiting.");
 					}
 				} else {
 					char[] password;
