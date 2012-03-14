@@ -1,5 +1,6 @@
 package sse.Graph;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
@@ -12,7 +13,7 @@ import sse.Constants;
  * 
  */
 public class Node {
-	private LinkedList<Edge> edges;
+	private HashMap<Character, Edge> edges;
 	private Node suffixLink;
 	private long id;
 	private int numOccurs = 1;
@@ -30,40 +31,27 @@ public class Node {
 
 	public Node(long id) {
 		this.id = id;
-		edges = new LinkedList<Edge>();
+		edges = new HashMap<Character, Edge>();
 		places = new LinkedHashSet<Integer>();
 
 	}
 
 	public LinkedList<Edge> getEdges() {
-		return edges;
+		return new LinkedList<Edge>(edges.values());
 	}
 
 	public Edge getEdge(char c) {
-		for (Edge e : edges) {
-			if (e.getEdgeLabel() == c) {
-				return e;
-			}
-		}
-		return null;
-	}
-
-	public Edge getEdge(Node n) {
-		for (Edge e : edges) {
-			if (e.getEnd() == n) {
-				return e;
-			}
-		}
-		return null;
+		return edges.get(c);
 	}
 
 	public boolean addEdge(Edge e) {
-		return (edges.add(e));
+		return edges.put(e.getEdgeLabel(), e) != null;
+
 	}
 
 	public boolean removeEdge(Edge e) {
 
-		return (edges.remove(e));
+		return edges.remove(e.getEdgeLabel()) != null;
 	}
 
 	@Override

@@ -237,7 +237,6 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				DAWG t = new DAWG(input);
-
 				/*
 				 * Runtime r = Runtime.getRuntime();
 				 * 
@@ -251,6 +250,7 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
+				
 				// this method calculates the number of unique paths from each
 				// node to the sink. This is also the number of occurrences of
 				// each suffix
@@ -318,11 +318,12 @@ public class Main {
 						}
 						System.out.println("[INFO:] Using Smartdrive backend.");
 
-						BinaryWriter out = new BinaryWriter(new SmartdriveBackend(
-								config.get("smartdrive", "url"), config.get(
-										"smartdrive", "user"), config.get(
-										"smartdrive", "password"), outputFile),
-								password);
+						BinaryWriter out = new BinaryWriter(
+								new SmartdriveBackend(config.get("smartdrive",
+										"url"),
+										config.get("smartdrive", "user"),
+										config.get("smartdrive", "password"),
+										outputFile), password);
 						out.writeBlocks(nodeList, textLength);
 					} else {
 						System.out

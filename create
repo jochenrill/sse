@@ -1,2 +1,2 @@
 #!/bin/bash
-java  -jar -Xss200m -Xms2g -Xmx2g sse.jar -create -v -smartdrive -password abc -i `echo -n $1` -o files/default.vc
+java -ea -jar -Xss200m -Xms2g -Xmx2g sse.jar -create -v -password abc -i `echo -n $1` -o files/default.vc

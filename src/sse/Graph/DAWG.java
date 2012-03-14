@@ -121,6 +121,7 @@ public class DAWG implements Iterable<Node> {
 				}
 
 			}
+
 			Node w = sink.getSuffixLink();
 
 			while (w != null && w.getEdge(c) == null) {
@@ -140,7 +141,7 @@ public class DAWG implements Iterable<Node> {
 
 			if (w == null) {
 				newSink.setSuffixLink(source);
-			} else if (w.getEdge(v) != null && w.getEdge(v).isPrimary()) {
+			} else if (w.getEdge(c) != null && w.getEdge(c).isPrimary()) {
 				newSink.setSuffixLink(v);
 			} else {
 				Node newNode = new Node(nodeCount++);
@@ -154,10 +155,10 @@ public class DAWG implements Iterable<Node> {
 						newNode.addEdge(secEdge);
 					}
 				}
-				Edge tmpEdge = w.getEdge(v);
+				Edge tmpEdge = w.getEdge(c);
 				Edge primEdge2 = new Edge(tmpEdge.getEdgeLabel(), w, newNode);
-				w.addEdge(primEdge2);
 				w.removeEdge(tmpEdge);
+				w.addEdge(primEdge2);
 
 				for (Integer z : w.getPlaces()) {
 					if ((z + 1) < text.length()
@@ -178,9 +179,11 @@ public class DAWG implements Iterable<Node> {
 					Edge tEdge = w.getEdge(c);
 					Edge nEdge = new Edge(tEdge.getEdgeLabel(),
 							tEdge.getStart(), newNode);
-					nEdge.getStart().addEdge(nEdge);
-					nEdge.setPrimary(false);
 					nEdge.getStart().removeEdge(tEdge);
+
+					nEdge.getStart().addEdge(nEdge);
+
+					nEdge.setPrimary(false);
 					w = w.getSuffixLink();
 
 				}
