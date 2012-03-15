@@ -1,6 +1,9 @@
 package sse.Graph;
 
+import java.util.BitSet;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
@@ -19,7 +22,7 @@ public class Node {
 	private int numOccurs = 1;
 	private int location;
 	private int block;
-	private LinkedHashSet<Integer> places;
+	private HashSet<Integer> places;
 
 	public Node getSuffixLink() {
 		return suffixLink;
@@ -32,11 +35,15 @@ public class Node {
 	public Node(long id) {
 		this.id = id;
 		edges = new HashMap<Character, Edge>();
-		places = new LinkedHashSet<Integer>();
-
+		places = new HashSet<Integer>();
+		
 	}
 
-	public LinkedList<Edge> getEdges() {
+	public Collection<Edge> getEdges() {
+		return edges.values();
+	}
+
+	public LinkedList<Edge> getEdgesList() {
 		return new LinkedList<Edge>(edges.values());
 	}
 
@@ -110,7 +117,7 @@ public class Node {
 				+ Constants.NUMOCCURS_BYTES;
 	}
 
-	public LinkedHashSet<Integer> getPlaces() {
+	public HashSet<Integer> getPlaces() {
 		return places;
 	}
 

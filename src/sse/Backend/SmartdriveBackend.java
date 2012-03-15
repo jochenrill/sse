@@ -52,7 +52,6 @@ public class SmartdriveBackend implements Backend {
 		if (delete.exists()) {
 			delete.delete();
 		}
-
 	}
 
 	@Override

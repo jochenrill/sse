@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.Scanner;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.ini4j.Ini;
 
 import sse.Backend.AmazonBackend;
@@ -208,21 +209,12 @@ public class Main {
 
 			} else if (cmd.hasOption("create")) {
 
-				String input = "";
+				String input = null;
 				String outputFile = null;
 				if (cmd.hasOption("i")) {
 					File inputFile = new File(cmd.getOptionValue("i"));
 
-					BufferedReader r = new BufferedReader(new FileReader(
-							inputFile));
-					Scanner scanner = new Scanner(r);
-
-					while (scanner.hasNextLine()) {
-
-						input += "\n" + scanner.nextLine();
-					}
-					scanner.close();
-					r.close();
+					input = FileUtils.readFileToString(inputFile);
 
 				} else {
 					throw new MissingOptionException(
@@ -250,7 +242,9 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
-				
+				//System.exit(0);
+
+
 				// this method calculates the number of unique paths from each
 				// node to the sink. This is also the number of occurrences of
 				// each suffix

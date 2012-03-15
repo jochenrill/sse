@@ -34,6 +34,7 @@ public class DAWG implements Iterable<Node> {
 	public long nodeCount = 0;
 	public Node sink;
 
+	private int length;
 	private LinkedList<Node> nodeList;
 
 	/**
@@ -47,6 +48,7 @@ public class DAWG implements Iterable<Node> {
 	 */
 	public DAWG(String text) {
 		this.text = text;
+		this.length = text.length();
 		this.nodeList = new LinkedList<Node>();
 		// creates three start node the algorithm has to work with
 		this.source = new Node(nodeCount++);
@@ -56,6 +58,7 @@ public class DAWG implements Iterable<Node> {
 		nodeList.add(source);
 		sink = source;
 		update();
+
 	}
 
 	/**
@@ -115,12 +118,13 @@ public class DAWG implements Iterable<Node> {
 			// mark the natural edge. this is needed for decryption later on
 			primEdge.setNatural(true);
 
-			for (Integer z : sink.getPlaces()) {
-				if ((z + 1) < text.length() && text.charAt(z + 1) == c) {
-					newSink.addPlace(z + 1);
-				}
-
-			}
+			/*
+			 * for (Integer z : sink.getPlaces()) { if ((z + 1) < length &&
+			 * text.charAt(z + 1) == c) { newSink.addPlace(z + 1); }
+			 * 
+			 * }
+			 */
+			updatePlaces(sink, newSink, c);
 
 			Node w = sink.getSuffixLink();
 
@@ -160,13 +164,14 @@ public class DAWG implements Iterable<Node> {
 				w.removeEdge(tmpEdge);
 				w.addEdge(primEdge2);
 
-				for (Integer z : w.getPlaces()) {
-					if ((z + 1) < text.length()
-							&& text.charAt(z + 1) == primEdge2.getEdgeLabel()) {
-						newNode.addPlace(z + 1);
-					}
-
-				}
+				/*
+				 * for (Integer z : w.getPlaces()) { if ((z + 1) < length &&
+				 * text.charAt(z + 1) == primEdge2.getEdgeLabel()) {
+				 * newNode.addPlace(z + 1); }
+				 * 
+				 * }
+				 */
+				updatePlaces(w, newNode, primEdge2.getEdgeLabel());
 
 				newSink.setSuffixLink(newNode);
 				newNode.setSuffixLink(v.getSuffixLink());
@@ -191,6 +196,15 @@ public class DAWG implements Iterable<Node> {
 			}
 
 			sink = newSink;
+		}
+	}
+
+	private void updatePlaces(Node w, Node newNode, char c) {
+		for (Integer z : w.getPlaces()) {
+			if ((z + 1) < length && text.charAt(z + 1) == c) {
+				newNode.addPlace(z + 1);
+			}
+
 		}
 	}
 
@@ -238,7 +252,7 @@ public class DAWG implements Iterable<Node> {
 		for (Edge e : n.getEdges()) {
 
 			while (e.getEnd().getEdges().size() == 1) {
-				e = e.getEnd().getEdges().getFirst();
+				e = e.getEnd().getEdgesList().getFirst();
 			}
 			if (e.getEnd() == sink) {
 				places.add(1);
