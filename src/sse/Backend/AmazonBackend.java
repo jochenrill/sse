@@ -77,21 +77,22 @@ public class AmazonBackend implements Backend {
 			secEngine.encrypt(fileName + (currentBlock));
 			// remove the unencryted file
 			new File(fileName + (currentBlock)).delete();
+			S3Object obj;
+			try {
+				obj = new S3Object(new File(fileName + (currentBlock)
+						+ ".sec"));
+				fileNames.add(fileName + (currentBlock) + ".sec");
+				listOfObjects.add(obj);
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
-		try {
-
-			S3Object obj = new S3Object(new File(fileName + (currentBlock)
-					+ ".sec"));
-			fileNames.add(fileName + (currentBlock) + ".sec");
-			listOfObjects.add(obj);
-
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
 		try {
 			w = new DataOutputStream(new FileOutputStream(new File(fileName
 					+ block)));
