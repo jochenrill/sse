@@ -1,12 +1,9 @@
 package sse;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 
 import java.util.LinkedList;
-import java.util.Scanner;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
@@ -242,8 +239,7 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
-				//	System.exit(0);
-
+				// System.exit(0);
 
 				// this method calculates the number of unique paths from each
 				// node to the sink. This is also the number of occurrences of

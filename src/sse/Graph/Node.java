@@ -1,10 +1,8 @@
 package sse.Graph;
 
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 import sse.Constants;
@@ -36,7 +34,7 @@ public class Node {
 		this.id = id;
 		edges = new HashMap<Character, Edge>();
 		places = new HashSet<Integer>();
-		
+
 	}
 
 	public Collection<Edge> getEdges() {

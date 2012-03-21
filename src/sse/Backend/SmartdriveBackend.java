@@ -4,19 +4,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
-import org.jets3t.service.S3ServiceException;
-import org.jets3t.service.ServiceException;
-import org.jets3t.service.model.S3Object;
 
 import com.googlecode.sardine.Sardine;
 import com.googlecode.sardine.SardineFactory;
@@ -36,6 +30,7 @@ public class SmartdriveBackend implements Backend {
 	public SmartdriveBackend(String url, String user, String password,
 			String fileName) {
 		this.sardine = SardineFactory.begin(user, password);
+
 		this.fileName = fileName;
 		this.url = url;
 	}
@@ -62,6 +57,7 @@ public class SmartdriveBackend implements Backend {
 
 	@Override
 	public DataOutputStream openBlock(int block) {
+
 		if (w != null) {
 			try {
 				w.close();
@@ -79,7 +75,8 @@ public class SmartdriveBackend implements Backend {
 
 				byte[] data = FileUtils.readFileToByteArray(new File(fileName
 						+ currentBlock + ".sec"));
-				sardine.put(url, data);
+				sardine.put(url + fileName + currentBlock + ".sec", data);
+
 				new File(fileName + (currentBlock) + ".sec").delete();
 
 			} catch (IOException e) {
@@ -127,7 +124,7 @@ public class SmartdriveBackend implements Backend {
 		try {
 			InputStream fis = new FileInputStream(new File(fileName
 					+ currentBlock + ".sec"));
-			sardine.put(url, fis);
+			sardine.put(url + fileName + currentBlock + ".sec", fis);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -141,7 +138,7 @@ public class SmartdriveBackend implements Backend {
 		try {
 			// upload the encrypted file
 			InputStream fis = new FileInputStream(new File(fileName));
-			sardine.put(url, fis);
+			sardine.put(url + fileName, fis);
 			// delete the generated file
 			new File(fileName).delete();
 
