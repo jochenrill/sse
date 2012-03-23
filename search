@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar sse.jar -search  -i files/default.vc -password abc -text "$@"
+java -jar sse.jar -search -v -amazon -i default.vc -password abc -text "$@"

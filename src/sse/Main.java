@@ -104,6 +104,9 @@ public class Main {
 									password = System.console().readPassword(
 											"[%s]:", "Password");
 								}
+								double time = System.currentTimeMillis();
+								
+								
 								System.out
 										.println("[INFO:] Using Amazon backend.");
 								SearchEngine sEn = new SearchEngine(
@@ -116,6 +119,11 @@ public class Main {
 										.getOptionValue("text")));
 								System.out.println("Files opened:"
 										+ sEn.getTransferedFilesCount());
+								if (Constants.DEBUG) {
+									System.out
+											.println("Search time: "
+													+ ((System.currentTimeMillis() - time) / 1000));
+								}
 							} else {
 								System.out
 										.println("No Amazon Credentials found. Search can't be performed.");
