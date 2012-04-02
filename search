@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar sse.jar -search -v -smartdrive -i sse/default.vc -password abc -text "$@"
+java -jar sse.jar -search -v -i sse/default.vc -password abc -text "$@"
