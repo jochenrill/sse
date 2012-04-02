@@ -191,7 +191,7 @@ public class SmartdriveBackend implements Backend {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return (DataInputStream) s;
+		return new DataInputStream(s);
 	}
 
 	@Override
@@ -199,7 +199,7 @@ public class SmartdriveBackend implements Backend {
 		Random rnd = new Random();
 		try {
 			int rand = rnd.nextInt(numberOfBlocks);
-			sardine.get(url + fileName + rand + ".sec");
+
 			secEngine.decrypt(fileName + rand,
 					sardine.get(url + fileName + rand + ".sec"));
 			new File(fileName + rand + ".dec").delete();

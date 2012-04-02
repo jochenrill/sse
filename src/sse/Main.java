@@ -90,7 +90,6 @@ public class Main {
 			if (cmd.hasOption("search")) {
 				// We need a key file, a search text and an input text for
 				// searching
-
 				if (cmd.hasOption("i")) {
 					if (cmd.hasOption("text")) {
 
@@ -105,8 +104,7 @@ public class Main {
 											"[%s]:", "Password");
 								}
 								double time = System.currentTimeMillis();
-								
-								
+
 								System.out
 										.println("[INFO:] Using Amazon backend.");
 								SearchEngine sEn = new SearchEngine(
@@ -122,7 +120,8 @@ public class Main {
 								if (Constants.DEBUG) {
 									System.out
 											.println("Search time: "
-													+ ((System.currentTimeMillis() - time) / 1000));
+													+ ((System
+															.currentTimeMillis() - time) / 1000));
 								}
 							} else {
 								System.out
@@ -164,7 +163,10 @@ public class Main {
 								} else {
 									password = System.console().readPassword(
 											"[%s]:", "Password");
+
 								}
+								double time = System.currentTimeMillis();
+
 								System.out
 										.println("[INFO:] Using Smartdrive backend.");
 
@@ -179,6 +181,12 @@ public class Main {
 										.getOptionValue("text")));
 								System.out.println("Files opened:"
 										+ sEn.getTransferedFilesCount());
+								if (Constants.DEBUG) {
+									System.out
+											.println("Search time: "
+													+ ((System
+															.currentTimeMillis() - time) / 1000));
+								}
 							} else {
 								System.out
 										.println("No Smartdrive Credentials found. Search can't be performed.");

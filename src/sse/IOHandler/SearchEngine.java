@@ -1,6 +1,6 @@
 package sse.IOHandler;
 
-import java.io.DataInputStream;
+import java.io.DataInputStream;	
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
