@@ -13,6 +13,7 @@ import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
 import sse.Backend.GoogleBackend;
 import sse.Backend.SmartdriveBackend;
+import sse.Backend.WebhostingBackend;
 import sse.Graph.DAWG;
 import sse.Graph.Node;
 import sse.IOHandler.BinaryWriter;
@@ -172,7 +173,7 @@ public class Main {
 
 								SearchEngine sEn = new SearchEngine(
 
-								new SmartdriveBackend(config.get("smartdrive",
+								new WebhostingBackend(config.get("smartdrive",
 										"url"),
 										config.get("smartdrive", "user"),
 										config.get("smartdrive", "password"),
@@ -332,7 +333,7 @@ public class Main {
 						System.out.println("[INFO:] Using Smartdrive backend.");
 
 						BinaryWriter out = new BinaryWriter(
-								new SmartdriveBackend(config.get("smartdrive",
+								new WebhostingBackend(config.get("smartdrive",
 										"url"),
 										config.get("smartdrive", "user"),
 										config.get("smartdrive", "password"),
