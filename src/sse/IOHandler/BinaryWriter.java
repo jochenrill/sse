@@ -45,7 +45,7 @@ public class BinaryWriter {
 			Block newBlock = new Block(maximumBlockSize, i);
 			blockList.add(newBlock);
 		}
-
+		assert (!blockList.isEmpty()) : "blockList empty";
 		LinkedList<Node> nodeList = list;
 
 		Collections.shuffle(nodeList, new Random());
@@ -124,8 +124,8 @@ public class BinaryWriter {
 
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 
-		LinkedList<Block> blockList = distributeInBlocks(list,
-				(int) maximumDataSize, (int) blockSize, (int) actualDataSize);
+		LinkedList<Block> blockList = distributeInBlocks(list, maximumDataSize,
+				blockSize, actualDataSize);
 
 		// Start printing the blocks
 
