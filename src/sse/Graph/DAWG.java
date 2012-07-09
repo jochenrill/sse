@@ -34,7 +34,7 @@ public class DAWG implements Iterable<Node> {
 	public long nodeCount = 0;
 	public Node sink;
 
-	private int length;
+	private long length;
 	private LinkedList<Node> nodeList;
 
 	/**

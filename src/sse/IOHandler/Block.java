@@ -13,12 +13,12 @@ import sse.Graph.Node;
  */
 public class Block {
 
-	private int size;
-	private int bytesIncluded;
+	private long size;
+	private long bytesIncluded;
 	private LinkedList<Node> nodes;
 	private int id;
 
-	public Block(int size, int id) {
+	public Block(long size, int id) {
 		this.setSize(size);
 		this.setBytesIncluded(0);
 		nodes = new LinkedList<Node>();
@@ -26,19 +26,19 @@ public class Block {
 
 	}
 
-	public int getSize() {
+	public long getSize() {
 		return size;
 	}
 
-	public void setSize(int size) {
+	public void setSize(long size) {
 		this.size = size;
 	}
 
-	public int getBytesIncluded() {
+	public long getBytesIncluded() {
 		return bytesIncluded;
 	}
 
-	public void setBytesIncluded(int bytesIncluded) {
+	public void setBytesIncluded(long bytesIncluded) {
 		this.bytesIncluded = bytesIncluded;
 	}
 

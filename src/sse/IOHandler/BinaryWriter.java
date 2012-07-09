@@ -37,8 +37,8 @@ public class BinaryWriter {
 	 */
 
 	private LinkedList<Block> distributeInBlocks(LinkedList<Node> list,
-			int maximumDataSize, int maximumBlockSize, int actualDataSize) {
-		int numberOfBlocks = (2 * maximumDataSize / maximumBlockSize) + 1;
+			long maximumDataSize, long maximumBlockSize, long actualDataSize) {
+		long numberOfBlocks = (2 * maximumDataSize / maximumBlockSize) + 1;
 		LinkedList<Block> blockList = new LinkedList<Block>();
 
 		for (int i = 0; i <= numberOfBlocks; i++) {
@@ -72,7 +72,7 @@ public class BinaryWriter {
 		 * int minimumFill = maximumBlockSize / 2 - ((maximumDataSize -
 		 * actualDataSize) / numberOfBlocks);
 		 */
-		int minimumFill = maximumBlockSize / 2;
+		long minimumFill = maximumBlockSize / 2;
 
 		for (Block newBlock : blockList) {
 			int offset = 0;
@@ -179,7 +179,7 @@ public class BinaryWriter {
 	}
 
 	private void fillWithData(DataOutputStream w, Block b) throws IOException {
-		int missing = b.getSize() - b.getBytesIncluded();
+		long missing = b.getSize() - b.getBytesIncluded();
 		while (missing > 0) {
 			w.write((byte) Constants.PADDING_BYTE);
 			missing--;
