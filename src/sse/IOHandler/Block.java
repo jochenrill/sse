@@ -16,9 +16,9 @@ public class Block {
 	private long size;
 	private long bytesIncluded;
 	private LinkedList<Node> nodes;
-	private int id;
+	private long id;
 
-	public Block(long size, int id) {
+	public Block(long size, long id) {
 		this.setSize(size);
 		this.setBytesIncluded(0);
 		nodes = new LinkedList<Node>();
@@ -51,11 +51,11 @@ public class Block {
 		return nodes;
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 }

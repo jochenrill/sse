@@ -97,6 +97,7 @@ public class BinaryWriter {
 
 	public void writeBlocks(LinkedList<Node> list, long textLength)
 			throws IOException {
+		assert(!list.isEmpty()):"nodeList empty";
 
 		// maximum node size in bytes. A node can have a most |\Sigma| edges.
 		long maximumVectorSize = 1
@@ -124,6 +125,9 @@ public class BinaryWriter {
 
 		long blockSize = maximumVectorSize * Constants.VECTOR_SIZE_MULTI;
 
+		System.out.println(maximumDataSize);
+		System.out.println(blockSize);
+		System.out.println(actualDataSize);
 		LinkedList<Block> blockList = distributeInBlocks(list, maximumDataSize,
 				blockSize, actualDataSize);
 

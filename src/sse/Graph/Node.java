@@ -19,7 +19,7 @@ public class Node {
 	private long id;
 	private int numOccurs = 1;
 	private int location;
-	private int block;
+	private long block;
 	private HashSet<Integer> places;
 
 	public Node getSuffixLink() {
@@ -93,11 +93,11 @@ public class Node {
 		this.location = location;
 	}
 
-	public int getBlock() {
+	public long getBlock() {
 		return block;
 	}
 
-	public void setBlock(int block) {
+	public void setBlock(long block) {
 		this.block = block;
 	}
 

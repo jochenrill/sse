@@ -33,7 +33,7 @@ public class FileSystemBackend implements Backend {
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public DataOutputStream openBlock(int block) {
+	public DataOutputStream openBlock(long block) {
 
 		if (w != null) {
 			try {

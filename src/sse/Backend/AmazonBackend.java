@@ -64,7 +64,7 @@ public class AmazonBackend implements Backend {
 	 * @throws IOException
 	 */
 	@Override
-	public DataOutputStream openBlock(int block) {
+	public DataOutputStream openBlock(long block) {
 		if (w != null) {
 			try {
 				w.close();

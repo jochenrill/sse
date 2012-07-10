@@ -39,7 +39,7 @@ public interface Backend {
 	 * @return the new output stream
 	 * 
 	 */
-	public DataOutputStream openBlock(int block);
+	public DataOutputStream openBlock(long block);
 
 	/**
 	 * This method deletes any unneeded files and closes all streams created
