@@ -41,7 +41,7 @@ public class BinaryWriter {
 		long numberOfBlocks = (2 * maximumDataSize / maximumBlockSize) + 1;
 		LinkedList<Block> blockList = new LinkedList<Block>();
 
-		for (int i = 0; i <= numberOfBlocks; i++) {
+		for (long i = 0; i <= numberOfBlocks; i++) {
 			Block newBlock = new Block(maximumBlockSize, i);
 			blockList.add(newBlock);
 		}
