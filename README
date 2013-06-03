@@ -1,5 +1,14 @@
+This is an implementation of the SEDAWG-scheme, presented at SECRYPT 2013. The code is fully functional when using the File-system or Amazon-backend.
+However, due to the rough and unoptimized design, it is only suited for relatively small text sizes (i.e. a few MB).
+This is a limitation which must be improved upon, but remember that 1 MB of ASCII consists of 1 million characters!
+Because the input is assumed to be ASCII, please make sure it really is.
+
+The config file "sse.config" allows for easy modification of different parameters.
+
 Usage:
 
 ./prepare text : Will prepare a given text for usage with the program. During preparation all occurences of "$" and "#" will be removed and the text will be concluded with a "$"
 ./create text : Will encrypt a given text according to the SSE protocol. Default blocksize multiplier is 5, ind-cpa security is on. Edit "create" to change the values.
 ./search word: Searches files created with "create" for a given word and prints out the number of times it is found.
+
+Decryption is not supported at the moment.
