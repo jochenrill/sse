@@ -35,10 +35,10 @@ import sse.gui.EncryptionWizard;
 public class Main {
 
 	public static void main(String[] args) {
+		
+		
 
-		WizardDialog d = new WizardDialog(new Shell(), new EncryptionWizard());
-		d.open();
-		System.exit(0);
+		
 		Options options = new Options();
 
 		options.addOption("i", true, "Defines the input file.");

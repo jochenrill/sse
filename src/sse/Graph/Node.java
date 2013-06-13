@@ -115,9 +115,9 @@ public class Node {
 	public int getSize() {
 
 		/*
-		 * 2 bytes for start and end marker, then every edge has to contain its
-		 * lable (one character) the block number and the position in the block
-		 * it is leading to aswell as the number of occurences that specific
+		 * 1 bytes for end marker, then every edge has to contain its
+		 * label (one character) the block number and the position in the block
+		 * it is leading to as well as the number of occurrences that specific
 		 * suffix has
 		 */
 		return 1
