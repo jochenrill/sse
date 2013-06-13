@@ -10,28 +10,35 @@
  ******************************************************************************/
 package sse;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 
 import java.util.LinkedList;
-import java.util.Scanner;
 
 import org.apache.commons.cli.*;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.apache.commons.io.FileUtils;
 import org.ini4j.Ini;
 
 import sse.Backend.AmazonBackend;
 import sse.Backend.FileSystemBackend;
 import sse.Backend.GoogleBackend;
+import sse.Backend.SmartdriveBackend;
+import sse.Backend.WebhostingBackend;
 import sse.Graph.DAWG;
 import sse.Graph.Node;
 import sse.IOHandler.BinaryWriter;
 import sse.IOHandler.SearchEngine;
 import sse.gui.EncryptionWizard;
 
+/**
+ * This is the main class of the program. It manages the different input options
+ * and reads the config file.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class Main {
 
 	public static void main(String[] args) {
@@ -49,6 +56,8 @@ public class Main {
 		options.addOption("v", false, "Verbose");
 		options.addOption("amazon", false,
 				"Uploads to Amazon S3. Credentials must be specified in sse.config.");
+		options.addOption("smartdrive", false,
+				"Uploads to 1&1 Smartdrive. Credentials must be specified in sse.config.");
 		options.addOption(
 				"google",
 				false,
@@ -98,7 +107,6 @@ public class Main {
 			if (cmd.hasOption("search")) {
 				// We need a key file, a search text and an input text for
 				// searching
-
 				if (cmd.hasOption("i")) {
 					if (cmd.hasOption("text")) {
 
@@ -112,6 +120,8 @@ public class Main {
 									password = System.console().readPassword(
 											"[%s]:", "Password");
 								}
+								double time = System.currentTimeMillis();
+
 								System.out
 										.println("[INFO:] Using Amazon backend.");
 								SearchEngine sEn = new SearchEngine(
@@ -119,12 +129,17 @@ public class Main {
 								new AmazonBackend(config.get("amazon", "key"),
 										config.get("amazon", "skey"),
 										cmd.getOptionValue("i"), config.get(
-												"amazon", "bucket")),
-										cmd.getOptionValue("i"), password);
+												"amazon", "bucket")), password);
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
 								System.out.println("Files opened:"
 										+ sEn.getTransferedFilesCount());
+								if (Constants.DEBUG) {
+									System.out
+											.println("Search time: "
+													+ ((System
+															.currentTimeMillis() - time) / 1000));
+								}
 							} else {
 								System.out
 										.println("No Amazon Credentials found. Search can't be performed.");
@@ -147,8 +162,7 @@ public class Main {
 								new GoogleBackend(config.get("google", "key"),
 										config.get("google", "skey"),
 										cmd.getOptionValue("i"), config.get(
-												"google", "bucket")),
-										cmd.getOptionValue("i"), password);
+												"google", "bucket")), password);
 								System.out.println(sEn.find(cmd
 										.getOptionValue("text")));
 								System.out.println("Files opened:"
@@ -156,6 +170,43 @@ public class Main {
 							} else {
 								System.out
 										.println("No Google Credentials found. Search can't be performed.");
+							}
+						} else if (cmd.hasOption("smartdrive")) {
+							if (config.containsKey("smartdrive")) {
+								char[] password;
+								if (cmd.hasOption("password")) {
+									password = cmd.getOptionValue("password")
+											.toCharArray();
+								} else {
+									password = System.console().readPassword(
+											"[%s]:", "Password");
+
+								}
+								double time = System.currentTimeMillis();
+
+								System.out
+										.println("[INFO:] Using Smartdrive backend.");
+
+								SearchEngine sEn = new SearchEngine(
+
+								new WebhostingBackend(config.get("smartdrive",
+										"url"),
+										config.get("smartdrive", "user"),
+										config.get("smartdrive", "password"),
+										cmd.getOptionValue("i")), password);
+								System.out.println(sEn.find(cmd
+										.getOptionValue("text")));
+								System.out.println("Files opened:"
+										+ sEn.getTransferedFilesCount());
+								if (Constants.DEBUG) {
+									System.out
+											.println("Search time: "
+													+ ((System
+															.currentTimeMillis() - time) / 1000));
+								}
+							} else {
+								System.out
+										.println("No Smartdrive Credentials found. Search can't be performed.");
 							}
 						} else {
 							char[] password;
@@ -166,17 +217,24 @@ public class Main {
 								password = System.console().readPassword(
 										"[%s]:", "Password");
 							}
+							double time = System.currentTimeMillis();
+
 							System.out
 									.println("[INFO:] Using Filesystem backend.");
 
 							SearchEngine sEn = new SearchEngine(
 
 							new FileSystemBackend(cmd.getOptionValue("i")),
-									cmd.getOptionValue("i"), password);
+									password);
 							System.out.println(sEn.find(cmd
 									.getOptionValue("text")));
 							System.out.println("Files opened: "
 									+ sEn.getTransferedFilesCount());
+							if (Constants.DEBUG) {
+								System.out
+										.println("Search time: "
+												+ ((System.currentTimeMillis() - time) / 1000));
+							}
 						}
 
 					} else {
@@ -188,21 +246,12 @@ public class Main {
 
 			} else if (cmd.hasOption("create")) {
 
-				String input = "";
+				String input = null;
 				String outputFile = null;
 				if (cmd.hasOption("i")) {
 					File inputFile = new File(cmd.getOptionValue("i"));
 
-					BufferedReader r = new BufferedReader(new FileReader(
-							inputFile));
-					Scanner scanner = new Scanner(r);
-
-					while (scanner.hasNextLine()) {
-
-						input += "\n" + scanner.nextLine();
-					}
-					scanner.close();
-					r.close();
+					input = FileUtils.readFileToString(inputFile);
 
 				} else {
 					throw new MissingOptionException(
@@ -217,7 +266,6 @@ public class Main {
 				double generalTime = System.currentTimeMillis();
 				double time = System.currentTimeMillis();
 				DAWG t = new DAWG(input);
-
 				/*
 				 * Runtime r = Runtime.getRuntime();
 				 * 
@@ -231,6 +279,8 @@ public class Main {
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
+				// System.exit(0);
+
 				// this method calculates the number of unique paths from each
 				// node to the sink. This is also the number of occurrences of
 				// each suffix
@@ -256,12 +306,11 @@ public class Main {
 						}
 						System.out.println("[INFO:] Using Amazon backend.");
 
-						BinaryWriter out = new BinaryWriter(outputFile,
-								new AmazonBackend(config.get("amazon", "key"),
-										config.get("amazon", "skey"),
-										outputFile, config.get("amazon",
-												"bucket")));
-						out.writeBlocks(nodeList, textLength, password);
+						BinaryWriter out = new BinaryWriter(new AmazonBackend(
+								config.get("amazon", "key"), config.get(
+										"amazon", "skey"), outputFile,
+								config.get("amazon", "bucket")), password);
+						out.writeBlocks(nodeList, textLength);
 					} else {
 						System.out
 								.println("Amazon credentials can't be found. Exiting.");
@@ -278,15 +327,37 @@ public class Main {
 						}
 						System.out.println("[INFO:] Using Google backend.");
 
-						BinaryWriter out = new BinaryWriter(outputFile,
-								new GoogleBackend(config.get("google", "key"),
-										config.get("google", "skey"),
-										outputFile, config.get("google",
-												"bucket")));
-						out.writeBlocks(nodeList, textLength, password);
+						BinaryWriter out = new BinaryWriter(new GoogleBackend(
+								config.get("google", "key"), config.get(
+										"google", "skey"), outputFile,
+								config.get("google", "bucket")), password);
+						out.writeBlocks(nodeList, textLength);
 					} else {
 						System.out
 								.println("Google credentials can't be found. Exiting.");
+					}
+				} else if (cmd.hasOption("smartdrive")) {
+					if (config.containsKey("smartdrive")) {
+						char[] password;
+						if (cmd.hasOption("smartdrive")) {
+							password = cmd.getOptionValue("password")
+									.toCharArray();
+						} else {
+							password = System.console().readPassword("[%s]:",
+									"Password");
+						}
+						System.out.println("[INFO:] Using Smartdrive backend.");
+
+						BinaryWriter out = new BinaryWriter(
+								new WebhostingBackend(config.get("smartdrive",
+										"url"),
+										config.get("smartdrive", "user"),
+										config.get("smartdrive", "password"),
+										outputFile), password);
+						out.writeBlocks(nodeList, textLength);
+					} else {
+						System.out
+								.println("Smartdrive credentials can't be found. Exiting.");
 					}
 				} else {
 					char[] password;
@@ -298,9 +369,10 @@ public class Main {
 					}
 					System.out.println("[INFO:] Using filesystem backend.");
 
-					BinaryWriter out = new BinaryWriter(outputFile,
-							new FileSystemBackend(outputFile));
-					out.writeBlocks(nodeList, textLength, password);
+					BinaryWriter out = new BinaryWriter(new FileSystemBackend(
+							outputFile), password);
+
+					out.writeBlocks(nodeList, textLength);
 
 				}
 

@@ -20,8 +20,10 @@ import java.util.LinkedList;
 
 /**
  * This class represents and constructs the DWAG (also called
- * "compact suffix automaton") for a given text. The algorithm used runs in
- * O(n).
+ * "compact suffix automaton") for a given text. The algorithm used runs in O(n)
+ * and uses the algorithm by Blumer et. al. In addition the different
+ * equivalence sets are calculated on the fly, as well as the natural edge
+ * labeling.
  * 
  * @author Jochen Rill
  * 
@@ -42,6 +44,7 @@ public class DAWG implements Iterable<Node> {
 	public long nodeCount = 0;
 	public Node sink;
 
+	private long length;
 	private LinkedList<Node> nodeList;
 
 	/**
@@ -55,6 +58,7 @@ public class DAWG implements Iterable<Node> {
 	 */
 	public DAWG(String text) {
 		this.text = text;
+		this.length = text.length();
 		this.nodeList = new LinkedList<Node>();
 		// creates three start node the algorithm has to work with
 		this.source = new Node(nodeCount++);
@@ -64,6 +68,7 @@ public class DAWG implements Iterable<Node> {
 		nodeList.add(source);
 		sink = source;
 		update();
+
 	}
 
 	/**
@@ -99,7 +104,7 @@ public class DAWG implements Iterable<Node> {
 				writer.write(string);
 
 				writer.write("[" + "label=\"" + e.getEdgeLabel() + "["
-						+ e.getEdgeLabel() + "]" + "\"];\n");
+						+ (e.isNatural() ? "*" : "") + "]" + "\"];\n");
 
 				if (!visited.contains(e.getEnd())) {
 					printDot(e.getEnd(), writer, visited);
@@ -120,12 +125,17 @@ public class DAWG implements Iterable<Node> {
 			Edge primEdge = new Edge(c, sink, newSink);
 			sink.addEdge(primEdge);
 
-			for (Integer z : sink.getPlaces()) {
-				if ((z + 1) < text.length() && text.charAt(z + 1) == c) {
-					newSink.addPlace(z + 1);
-				}
+			// mark the natural edge. this is needed for decryption later on
+			primEdge.setNatural(true);
 
-			}
+			/*
+			 * for (Integer z : sink.getPlaces()) { if ((z + 1) < length &&
+			 * text.charAt(z + 1) == c) { newSink.addPlace(z + 1); }
+			 * 
+			 * }
+			 */
+			updatePlaces(sink, newSink, c);
+
 			Node w = sink.getSuffixLink();
 
 			while (w != null && w.getEdge(c) == null) {
@@ -145,7 +155,7 @@ public class DAWG implements Iterable<Node> {
 
 			if (w == null) {
 				newSink.setSuffixLink(source);
-			} else if (w.getEdge(v) != null && w.getEdge(v).isPrimary()) {
+			} else if (w.getEdge(c) != null && w.getEdge(c).isPrimary()) {
 				newSink.setSuffixLink(v);
 			} else {
 				Node newNode = new Node(nodeCount++);
@@ -159,18 +169,19 @@ public class DAWG implements Iterable<Node> {
 						newNode.addEdge(secEdge);
 					}
 				}
-				Edge tmpEdge = w.getEdge(v);
+				Edge tmpEdge = w.getEdge(c);
 				Edge primEdge2 = new Edge(tmpEdge.getEdgeLabel(), w, newNode);
-				w.addEdge(primEdge2);
 				w.removeEdge(tmpEdge);
+				w.addEdge(primEdge2);
 
-				for (Integer z : w.getPlaces()) {
-					if ((z + 1) < text.length()
-							&& text.charAt(z + 1) == primEdge2.getEdgeLabel()) {
-						newNode.addPlace(z + 1);
-					}
-
-				}
+				/*
+				 * for (Integer z : w.getPlaces()) { if ((z + 1) < length &&
+				 * text.charAt(z + 1) == primEdge2.getEdgeLabel()) {
+				 * newNode.addPlace(z + 1); }
+				 * 
+				 * }
+				 */
+				updatePlaces(w, newNode, primEdge2.getEdgeLabel());
 
 				newSink.setSuffixLink(newNode);
 				newNode.setSuffixLink(v.getSuffixLink());
@@ -183,9 +194,11 @@ public class DAWG implements Iterable<Node> {
 					Edge tEdge = w.getEdge(c);
 					Edge nEdge = new Edge(tEdge.getEdgeLabel(),
 							tEdge.getStart(), newNode);
-					nEdge.getStart().addEdge(nEdge);
-					nEdge.setPrimary(false);
 					nEdge.getStart().removeEdge(tEdge);
+
+					nEdge.getStart().addEdge(nEdge);
+
+					nEdge.setPrimary(false);
 					w = w.getSuffixLink();
 
 				}
@@ -193,6 +206,15 @@ public class DAWG implements Iterable<Node> {
 			}
 
 			sink = newSink;
+		}
+	}
+
+	private void updatePlaces(Node w, Node newNode, char c) {
+		for (Integer z : w.getPlaces()) {
+			if ((z + 1) < length && text.charAt(z + 1) == c) {
+				newNode.addPlace(z + 1);
+			}
+
 		}
 	}
 
@@ -240,7 +262,7 @@ public class DAWG implements Iterable<Node> {
 		for (Edge e : n.getEdges()) {
 
 			while (e.getEnd().getEdges().size() == 1) {
-				e = e.getEnd().getEdges().getFirst();
+				e = e.getEnd().getEdgesList().getFirst();
 			}
 			if (e.getEnd() == sink) {
 				places.add(1);

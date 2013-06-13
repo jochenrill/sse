@@ -10,44 +10,60 @@
  ******************************************************************************/
 package sse.Backend;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 
-import sse.Constants;
-import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
 
+/**
+ * This is an implementation of a simple backend for the local file system.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class FileSystemBackend implements Backend {
 
 	private String fileName;
-	private RandomAccessFile searchStream;
+	private RandomAccessFile stream;
+	private DataOutputStream w;
+	private SecurityEngine secEngine;
+	private long currentBlock;
 
 	public FileSystemBackend(String fileName) {
 		this.fileName = fileName;
+
 	}
 
 	@Override
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public BinaryOut openNextFile(int currentBlock, int nextBlock, BinaryOut w,
-			SecurityEngine secEngine) {
-		w.close();
+	public DataOutputStream openBlock(long block) {
 
-		// Encrypt the last block if needed
-
-		secEngine.encrypt(fileName + (currentBlock));
-		// remove the unencryted file
-		new File(fileName + (currentBlock)).delete();
+		if (w != null) {
+			try {
+				w.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// Encrypt the last block if needed
+			secEngine.encrypt(fileName + (currentBlock));
+			// remove the unencryted file
+			new File(fileName + (currentBlock)).delete();
+		}
 
 		try {
-			w = new BinaryOut(fileName + nextBlock);
-
+			w = new DataOutputStream(new FileOutputStream(new File(fileName
+					+ block)));
+			currentBlock = block;
 		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName + nextBlock);
+			System.out.println("Could not create file " + fileName + block);
 		}
 		return w;
 	}
@@ -56,12 +72,12 @@ public class FileSystemBackend implements Backend {
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public void finalize(long currentBlock, BinaryOut w,
-			SecurityEngine secEngine) {
-		w.close();
+	public void finalizeWriting() {
+
 		// open writer for meta information file
 		try {
-			w = new BinaryOut(fileName, true);
+			w.close();
+			w = new DataOutputStream(new FileOutputStream(new File(fileName)));
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
@@ -72,55 +88,58 @@ public class FileSystemBackend implements Backend {
 		secEngine.encrypt(fileName + (currentBlock));
 		// remove the unencryted file
 		new File(fileName + (currentBlock)).delete();
-
-		w.write(currentBlock);
-		w.close();
-		secEngine.printKey(fileName);
-	}
-
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public boolean searchNext(long block, String fileName, long position,
-			long oldBlock, RandomAccessFile stream, SecurityEngine sEn)
-			throws IOException {
-		boolean reachedEnd = false;
-		if (stream != null) {
-			stream.close();
-		}
-		File delete = new File(fileName + oldBlock + ".dec");
-		if (delete.exists()) {
-			delete.delete();
-		}
-		sEn.decrypt(fileName + block);
-		stream = new RandomAccessFile(new File(fileName + block + ".dec"), "r");
-		// if a block starts with a padding byte, it is a padding block =)
-		// TODO: not needed anymore?
-		if (stream.readByte() == Constants.PADDING_BYTE) {
-			reachedEnd = true;
-		}
-		stream.seek(position);
-		searchStream = stream;
-		return reachedEnd;
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public RandomAccessFile getStream() {
-		return searchStream;
-	}
-
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public InputStream loadStartBlock() {
 		try {
-			return new FileInputStream(new File(fileName));
+			w.writeLong(currentBlock);
+			w.close();
+			secEngine.printKey(fileName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	/**
+	 * 	{@inheritDoc}
+	 */
+	public RandomAccessFile searchNext(long block, long position) {
+
+		if (stream != null) {
+			try {
+				stream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			File delete = new File(fileName + currentBlock + ".dec");
+			if (delete.exists()) {
+				delete.delete();
+			}
+		}
+
+		secEngine.decrypt(fileName + block);
+		try {
+			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
+					"r");
+			currentBlock = block;
+			stream.seek(position);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return stream;
+
+	}
+
+	@Override
+	/**
+	 * 	{@inheritDoc}
+	 */
+	public DataInputStream loadStartBlock() {
+		try {
+			return new DataInputStream(new FileInputStream(new File(fileName)));
 
 		} catch (IOException e) {
 			System.out.println("Root block not found");
@@ -132,8 +151,29 @@ public class FileSystemBackend implements Backend {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
+	public void loadRandomBlock(int numberOfBlocks) {
 		// nothing to do if using file system backend
+
+	}
+
+	@Override
+	public void setSecurityEngine(SecurityEngine secEngine) {
+		this.secEngine = secEngine;
+
+	}
+
+	@Override
+	public void finalizeSearch() {
+		try {
+			stream.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		File delete = new File(fileName + currentBlock + ".dec");
+		if (delete.exists()) {
+			delete.delete();
+		}
 
 	}
 

@@ -10,19 +10,27 @@
  ******************************************************************************/
 package sse.Graph;
 
-import java.util.LinkedHashSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import sse.Constants;
 
+/**
+ * This class provides an node representation for the creation of the DAWG.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class Node {
-	private LinkedList<Edge> edges;
+	private HashMap<Character, Edge> edges;
 	private Node suffixLink;
 	private long id;
 	private int numOccurs = 1;
 	private int location;
-	private int block;
-	private LinkedHashSet<Integer> places;
+	private long block;
+	private HashSet<Integer> places;
 
 	public Node getSuffixLink() {
 		return suffixLink;
@@ -34,40 +42,31 @@ public class Node {
 
 	public Node(long id) {
 		this.id = id;
-		edges = new LinkedList<Edge>();
-		places = new LinkedHashSet<Integer>();
+		edges = new HashMap<Character, Edge>();
+		places = new HashSet<Integer>();
 
 	}
 
-	public LinkedList<Edge> getEdges() {
-		return edges;
+	public Collection<Edge> getEdges() {
+		return edges.values();
+	}
+
+	public LinkedList<Edge> getEdgesList() {
+		return new LinkedList<Edge>(edges.values());
 	}
 
 	public Edge getEdge(char c) {
-		for (Edge e : edges) {
-			if (e.getEdgeLabel() == c) {
-				return e;
-			}
-		}
-		return null;
-	}
-
-	public Edge getEdge(Node n) {
-		for (Edge e : edges) {
-			if (e.getEnd() == n) {
-				return e;
-			}
-		}
-		return null;
+		return edges.get(c);
 	}
 
 	public boolean addEdge(Edge e) {
-		return (edges.add(e));
+		return edges.put(e.getEdgeLabel(), e) != null;
+
 	}
 
 	public boolean removeEdge(Edge e) {
 
-		return (edges.remove(e));
+		return edges.remove(e.getEdgeLabel()) != null;
 	}
 
 	@Override
@@ -104,11 +103,11 @@ public class Node {
 		this.location = location;
 	}
 
-	public int getBlock() {
+	public long getBlock() {
 		return block;
 	}
 
-	public void setBlock(int block) {
+	public void setBlock(long block) {
 		this.block = block;
 	}
 
@@ -126,7 +125,7 @@ public class Node {
 				+ Constants.NUMOCCURS_BYTES;
 	}
 
-	public LinkedHashSet<Integer> getPlaces() {
+	public HashSet<Integer> getPlaces() {
 		return places;
 	}
 

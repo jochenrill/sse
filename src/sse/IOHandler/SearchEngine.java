@@ -10,34 +10,36 @@
  ******************************************************************************/
 package sse.IOHandler;
 
-import java.io.File;
-
-import java.io.DataInputStream;
+import java.io.DataInputStream;	
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import sse.Constants;
 import sse.Backend.Backend;
 
+/**
+ * This class implements a search engine on the encrypted data. For correct
+ * work, it needs a correctly implemented backend.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class SearchEngine {
 	private RandomAccessFile stream;
-	private long currentBlock;
-	private SecurityEngine sEn;
 
 	private long numOccurs;
 	private int files = 0;
 	private boolean stop = false;
 	private Backend backend;
-	private String startFile;
 	private int searchLength;
 
-	public SearchEngine(Backend backend, String startFile, char password[]) {
-		this.sEn = new SecurityEngine(password);
-		this.sEn.readKey(backend.loadStartBlock());
+	public SearchEngine(Backend backend, char password[]) {
+		SecurityEngine sEn = new SecurityEngine(password);
+		sEn.readKey(backend.loadStartBlock());
+		backend.setSecurityEngine(sEn);
 
-		this.currentBlock = 0;
 		this.backend = backend;
-		this.startFile = startFile;
+
 	}
 
 	public int getTransferedFilesCount() {
@@ -45,16 +47,12 @@ public class SearchEngine {
 	}
 
 	public long find(String word) {
-		@SuppressWarnings("unused")
-		long blockSize = 0;
 		long numberOfBlocks = 0;
-
+		int currentBlock = 0;
 		searchLength = word.length();
-		DataInputStream firstStream = new DataInputStream(
-				backend.loadStartBlock());
+		DataInputStream firstStream = backend.loadStartBlock();
 
 		try {
-			blockSize = firstStream.readLong();
 			numberOfBlocks = firstStream.readLong();
 			firstStream.close();
 		} catch (IOException e1) {
@@ -63,37 +61,19 @@ public class SearchEngine {
 		}
 
 		try {
-			long toDelete = currentBlock;
-			// open the first block
+
 			files++;
-			backend.searchNext(currentBlock, startFile, 0, toDelete, stream,
-					sEn);
-			stream = backend.getStream();
-			long currentBlock = 0;
+			stream = backend.searchNext(currentBlock, 0);
 
 			// parse a node
 			while (!stop) {
 
 				stop = true;
 				// read numOccurs
-				switch (Constants.NUMOCCURS_BYTES) {
-				case 8:
-					numOccurs = stream.readLong();
-					break;
-				case 4:
-					numOccurs = (long) stream.readInt();
-					break;
-				case 2:
-					numOccurs = (long) stream.readShort();
-					break;
-				case 1:
-					numOccurs = (long) stream.readChar();
-					break;
-				default:
-					throw new UnsupportedOperationException(
-							Constants.NUMOCCURS_BYTES
-									+ " is not a valid number for number of occurences");
-				}
+				byte[] buffer = new byte[Constants.NUMOCCURS_BYTES];
+				stream.read(buffer);
+				numOccurs = fromByteArray(buffer, Constants.NUMOCCURS_BYTES);
+
 				if (word.length() == 0) {
 					break;
 				}
@@ -105,50 +85,21 @@ public class SearchEngine {
 
 					// read block reference and edge reference
 					long block, edge;
+					buffer = new byte[Constants.EDGE_REFERENCE_BYTES];
+					stream.read(buffer);
+					edge = fromByteArray(buffer, Constants.EDGE_REFERENCE_BYTES);
 
-					switch (Constants.EDGE_REFERENCE_BYTES) {
-					case 8:
-						edge = stream.readLong();
-						break;
-					case 4:
-						edge = (long) stream.readInt();
-						break;
-					case 2:
-						edge = (long) stream.readShort();
-						break;
-					case 1:
-						edge = (long) stream.readChar();
-						break;
-					default:
-						throw new UnsupportedOperationException(
-								Constants.EDGE_REFERENCE_BYTES
-										+ " is not a valid number for edge reference");
-					}
-					switch (Constants.BLOCK_REFERENCE_BYTES) {
-					case 8:
-						block = stream.readLong();
-						break;
-					case 4:
-						block = (long) stream.readInt();
-						break;
-					case 2:
-						block = (long) stream.readShort();
-						break;
-					case 1:
-						block = (long) stream.readChar();
-						break;
-					default:
-						throw new UnsupportedOperationException(
-								Constants.BLOCK_REFERENCE_BYTES
-										+ " is not a valid number for block reference");
-					}
+					buffer = new byte[Constants.BLOCK_REFERENCE_BYTES];
+					stream.read(buffer);
+					block = fromByteArray(buffer,
+							Constants.BLOCK_REFERENCE_BYTES);
+
 					if (c == word.charAt(0)) {
 						word = word.substring(1);
 
 						// follow that edge
-						backend.searchNext(block, startFile, edge,
-								currentBlock, stream, sEn);
-						stream = backend.getStream();
+						stream = backend.searchNext(block, edge);
+
 						stop = false;
 						break;
 
@@ -159,18 +110,16 @@ public class SearchEngine {
 
 			}
 		} catch (IOException e) {
-			System.out.println("Error while parsing block " + currentBlock);
+			System.out.println("Error while parsing block " + currentBlock
+					+ "\n" + e.getMessage());
 		}
 		// Make sure to delete the last opened block
-		File delete = new File(startFile + currentBlock + ".dec");
-		if (delete.exists()) {
-			delete.delete();
-		}
+		backend.finalizeSearch();
 
 		// request random blocks to make sure the amount of transfered blocks is
 		// always word.length+1
 		while (files < searchLength + 1) {
-			backend.loadRandomBlock((int) numberOfBlocks, sEn);
+			backend.loadRandomBlock((int) numberOfBlocks);
 			files++;
 		}
 
@@ -180,6 +129,19 @@ public class SearchEngine {
 		} else {
 			return 0;
 		}
+	}
+
+	private long fromByteArray(byte[] b, int bytes) {
+
+		long result = 0;
+
+		for (int i = 0; i < bytes; i++) {
+
+			result += (b[(bytes - 1) - i] & 0xFF) << (i * 8);
+
+		}
+
+		return result;
 	}
 
 }

@@ -10,9 +10,11 @@
  ******************************************************************************/
 package sse.Backend;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
@@ -27,10 +29,15 @@ import org.jets3t.service.model.S3Object;
 import org.jets3t.service.multi.SimpleThreadedStorageService;
 import org.jets3t.service.security.AWSCredentials;
 
-import sse.Constants;
-import sse.IOHandler.BinaryOut;
 import sse.IOHandler.SecurityEngine;
 
+/**
+ * This is a implementation of a backend for Amazon S3. It uses threaded uploads
+ * provided by the jets3t-library.
+ * 
+ * @author Jochen Rill
+ * 
+ */
 public class AmazonBackend implements Backend {
 
 	private S3Service service;
@@ -38,8 +45,11 @@ public class AmazonBackend implements Backend {
 	private S3Bucket bucket;
 	private LinkedList<String> fileNames;
 	private LinkedList<S3Object> listOfObjects;
-	private RandomAccessFile searchStream;
+	private RandomAccessFile stream;
+	private SecurityEngine secEngine;
 	private SimpleThreadedStorageService multi;
+	private DataOutputStream w;
+	private long currentBlock;
 
 	public AmazonBackend(String key, String secret, String fileName,
 			String bucket) {
@@ -60,32 +70,43 @@ public class AmazonBackend implements Backend {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * @throws IOException
 	 */
 	@Override
-	public BinaryOut openNextFile(int currentBlock, int nextBlock, BinaryOut w,
-			SecurityEngine secEngine) {
-		w.close();
-		// Encrypt the last block if needed
+	public DataOutputStream openBlock(long block) {
+		if (w != null) {
+			try {
+				w.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// Encrypt the last block if needed
 
-		secEngine.encrypt(fileName + (currentBlock));
-		// remove the unencryted file
-		new File(fileName + (currentBlock)).delete();
-		try {
-
-			S3Object obj = new S3Object(new File(fileName + (currentBlock)
-					+ ".sec"));
-			fileNames.add(fileName + (currentBlock) + ".sec");
-			listOfObjects.add(obj);
-
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			secEngine.encrypt(fileName + (currentBlock));
+			// remove the unencryted file
+			new File(fileName + (currentBlock)).delete();
+			S3Object obj;
+			try {
+				obj = new S3Object(new File(fileName + (currentBlock)
+						+ ".sec"));
+				fileNames.add(fileName + (currentBlock) + ".sec");
+				listOfObjects.add(obj);
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
+	
 		try {
-			w = new BinaryOut(fileName + nextBlock);
+			w = new DataOutputStream(new FileOutputStream(new File(fileName
+					+ block)));
+			currentBlock = block;
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName
 					+ currentBlock);
@@ -96,14 +117,22 @@ public class AmazonBackend implements Backend {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * @throws IOException
 	 */
 	@Override
-	public void finalize(long currentBlock, BinaryOut w,
-			SecurityEngine secEngine) {
-		w.close();
+	public void finalizeWriting() {
+		try {
+			w.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// open writer for meta information file
 		try {
-			w = new BinaryOut(fileName, true);
+			w = new DataOutputStream(new FileOutputStream(new File(fileName)));
+			w.writeLong(currentBlock);
+			w.close();
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName);
 		}
@@ -140,9 +169,6 @@ public class AmazonBackend implements Backend {
 			e.printStackTrace();
 		}
 
-		w.write(currentBlock);
-		w.close();
-
 		// print Key writes the IV and salt to the meta information file
 		secEngine.printKey(fileName);
 		// upload meta block
@@ -171,38 +197,43 @@ public class AmazonBackend implements Backend {
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean searchNext(long block, String fileName, long position,
-			long oldBlock, RandomAccessFile stream, SecurityEngine sEn)
-			throws IOException {
-		boolean reachedEnd = false;
+	public RandomAccessFile searchNext(long block, long position) {
+
 		if (stream != null) {
-			stream.close();
+			try {
+				stream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			File delete = new File(fileName + currentBlock + ".dec");
+			if (delete.exists()) {
+				delete.delete();
+			}
 		}
-		File delete = new File(fileName + oldBlock + ".dec");
-		if (delete.exists()) {
-			delete.delete();
-		}
+
 		try {
 			S3Object obj = service.getObject(bucket, fileName + block + ".sec");
-
-			sEn.decrypt(fileName + block, obj.getDataInputStream());
+			secEngine.decrypt(fileName + block, obj.getDataInputStream());
 			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
 					"r");
 			// if a block starts with a padding byte, it is a padding block =)
-			if (stream.readByte() == Constants.PADDING_BYTE) {
-				reachedEnd = true;
-			}
+			currentBlock = block;
 			stream.seek(position);
-			searchStream = stream;
+
 		} catch (S3ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		return reachedEnd;
+		return stream;
 
 	}
 
@@ -210,21 +241,13 @@ public class AmazonBackend implements Backend {
 	/**
 	 * 	{@inheritDoc}
 	 */
-	public RandomAccessFile getStream() {
-		return searchStream;
-	}
-
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public InputStream loadStartBlock() {
+	public DataInputStream loadStartBlock() {
 
 		try {
 			@SuppressWarnings("deprecation")
 			S3Object obj = service.getObject(bucket, fileName);
 
-			return obj.getDataInputStream();
+			return new DataInputStream(obj.getDataInputStream());
 
 		} catch (S3ServiceException e) {
 			// TODO Auto-generated catch block
@@ -242,13 +265,13 @@ public class AmazonBackend implements Backend {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void loadRandomBlock(int numberOfBlocks, SecurityEngine sEn) {
+	public void loadRandomBlock(int numberOfBlocks) {
 		Random rnd = new Random();
 		try {
 			int rand = rnd.nextInt(numberOfBlocks);
 			@SuppressWarnings("deprecation")
 			S3Object obj = service.getObject(bucket, fileName + rand + ".sec");
-			sEn.decrypt(fileName + rand, obj.getDataInputStream());
+			secEngine.decrypt(fileName + rand, obj.getDataInputStream());
 			new File(fileName + rand + ".dec").delete();
 
 		} catch (S3ServiceException e) {
@@ -258,6 +281,27 @@ public class AmazonBackend implements Backend {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+	}
+
+	@Override
+	public void finalizeSearch() {
+		try {
+			stream.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		File delete = new File(fileName + currentBlock + ".dec");
+		if (delete.exists()) {
+			delete.delete();
+		}
+
+	}
+
+	@Override
+	public void setSecurityEngine(SecurityEngine secEngine) {
+		this.secEngine = secEngine;
 
 	}
 

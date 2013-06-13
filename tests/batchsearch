@@ -1,0 +1,8 @@
+#!/bin/bash
+while read line;
+    do
+        output=`./search "$line"`;
+        searchtime=`echo "$output" | grep Search | awk '{print $3}'`
+        echo "`echo -n $line | wc -c` $searchtime" >> results/searchtime_harddisk
+       echo "$output"
+    done < samples/cantrbry/wordlist
