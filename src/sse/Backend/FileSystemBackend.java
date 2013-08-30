@@ -14,11 +14,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import sse.IOHandler.SecurityEngine;
+import sse.IOHandler.OutputFormat.Block;
 
 /**
  * This is an implementation of a simple backend for the local file system.
@@ -29,69 +35,36 @@ import sse.IOHandler.SecurityEngine;
 public class FileSystemBackend implements Backend {
 
 	private String fileName;
-	private RandomAccessFile stream;
-	private DataOutputStream w;
 	private SecurityEngine secEngine;
-	private long currentBlock;
 
-	public FileSystemBackend(String fileName) {
+	public FileSystemBackend(String fileName, char[] password, String ivFile) {
 		this.fileName = fileName;
+		try {
 
-	}
+			if (!(new File(ivFile).exists())) {
+				// generate and write new IV
+				secEngine = new SecurityEngine(password);
+				writeIV(ivFile);
+			} else {
+				DataInputStream s = new DataInputStream(new FileInputStream(
+						new File(ivFile)));
+				byte[] salt = new byte[8];
+				byte[] iv = new byte[16];
 
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public DataOutputStream openBlock(long block) {
+				for (int i = 0; i < 8; i++) {
+					salt[i] = s.readByte();
+				}
 
-		if (w != null) {
-			try {
-				w.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				for (int i = 0; i < 16; i++) {
+					iv[i] = s.readByte();
+				}
+				secEngine = new SecurityEngine(password, salt, iv);
+				s.close();
 			}
-			// Encrypt the last block if needed
-			secEngine.encrypt(fileName + (currentBlock));
-			// remove the unencryted file
-			new File(fileName + (currentBlock)).delete();
-		}
 
-		try {
-			w = new DataOutputStream(new FileOutputStream(new File(fileName
-					+ block)));
-			currentBlock = block;
-		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName + block);
-		}
-		return w;
-	}
-
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public void finalizeWriting() {
-
-		// open writer for meta information file
-		try {
-			w.close();
-			w = new DataOutputStream(new FileOutputStream(new File(fileName)));
-		} catch (IOException e) {
-			System.out.println("Could not create file " + fileName);
-		}
-		// write number of blocks
-
-		// encrypt the last block
-
-		secEngine.encrypt(fileName + (currentBlock));
-		// remove the unencryted file
-		new File(fileName + (currentBlock)).delete();
-		try {
-			w.writeLong(currentBlock);
-			w.close();
-			secEngine.printKey(fileName);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -99,55 +72,45 @@ public class FileSystemBackend implements Backend {
 
 	}
 
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public RandomAccessFile searchNext(long block, long position) {
-
-		if (stream != null) {
-			try {
-				stream.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			File delete = new File(fileName + currentBlock + ".dec");
-			if (delete.exists()) {
-				delete.delete();
-			}
-		}
-
-		secEngine.decrypt(fileName + block);
+	private void writeIV(String ivFile) {
 		try {
-			stream = new RandomAccessFile(new File(fileName + block + ".dec"),
-					"r");
-			currentBlock = block;
-			stream.seek(position);
+			DataOutputStream s = new DataOutputStream(new FileOutputStream(
+					new File(ivFile)));
+
+			s.write(secEngine.getSalt());
+			s.write(secEngine.getIV());
+			s.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		return stream;
-
 	}
 
-	@Override
-	/**
-	 * 	{@inheritDoc}
-	 */
-	public DataInputStream loadStartBlock() {
-		try {
-			return new DataInputStream(new FileInputStream(new File(fileName)));
+	public Block openBlock(int blockId, int index) {
 
+		try {
+			ObjectInputStream os = new ObjectInputStream(new GZIPInputStream(
+					secEngine.decrypt(new FileInputStream(new File(fileName
+							+ blockId)))));
+			Object o = os.readObject();
+			os.close();
+			if (o instanceof Block[]) {
+				Block[] b = (Block[]) o;
+				return b[index];
+			}
 		} catch (IOException e) {
-			System.out.println("Root block not found");
+			System.out.println("Error while reading file " + fileName + blockId);
+			System.out.println(e.getMessage());
+		} catch (ClassNotFoundException e) {
+			System.out.println("Class not found: " + e.getMessage());
 		}
 		return null;
+
 	}
 
-	@Override
 	/**
 	 * {@inheritDoc}
 	 */
@@ -157,22 +120,27 @@ public class FileSystemBackend implements Backend {
 	}
 
 	@Override
-	public void setSecurityEngine(SecurityEngine secEngine) {
-		this.secEngine = secEngine;
-
+	public void writeBlock(Block b, int blockId) {
+		ArrayList<Block> list = new ArrayList<Block>();
+		list.add(b);
+		writeBlockArray(list, blockId);
 	}
 
 	@Override
-	public void finalizeSearch() {
+	public void writeBlockArray(ArrayList<Block> b, int blockId) {
 		try {
-			stream.close();
+
+			ObjectOutputStream os = new ObjectOutputStream(
+					new GZIPOutputStream(
+							secEngine.encrypt(new FileOutputStream(new File(
+									fileName + blockId)))));
+
+			// convert ArrayList into Array to reduce overhead
+			os.writeObject(b.toArray(new Block[0]));
+			os.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		File delete = new File(fileName + currentBlock + ".dec");
-		if (delete.exists()) {
-			delete.delete();
+			System.out.println("Could not create file " + fileName + blockId);
+			System.out.println(e.getMessage());
 		}
 
 	}

@@ -1,3 +1,5 @@
+package sse.Graph;
+
 /*******************************************************************************
  * Copyright (c) 2011-2013 Jochen Rill.
  * All rights reserved. This program and the accompanying materials
@@ -8,14 +10,11 @@
  * Contributors:
  *     Jochen Rill - initial API and implementation
  ******************************************************************************/
-package sse.Graph;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 
-import sse.Constants;
+import gnu.trove.list.array.TCharArrayList;
+import gnu.trove.map.hash.TCharObjectHashMap;
 
 /**
  * This class provides an node representation for the creation of the DAWG.
@@ -24,13 +23,14 @@ import sse.Constants;
  * 
  */
 public class Node {
-	private HashMap<Character, Edge> edges;
+	// private TCharObjectHashMap<Node> edges;
+	private HashMap<Character, Node> edges;
+	private TCharArrayList primary;
 	private Node suffixLink;
-	private long id;
-	private int numOccurs = 1;
-	private int location;
-	private long block;
-	private HashSet<Integer> places;
+	private int id;
+	private int numOccurs = 0;
+	private int block;
+	private int index;
 
 	public Node getSuffixLink() {
 		return suffixLink;
@@ -40,33 +40,47 @@ public class Node {
 		this.suffixLink = suffix;
 	}
 
-	public Node(long id) {
+	public Node(int id) {
 		this.id = id;
-		edges = new HashMap<Character, Edge>();
-		places = new HashSet<Integer>();
+		// edges = new TCharObjectHashMap<Node>();+
+		edges = new HashMap<Character, Node>();
+		// places = new TIntLinkedList();
+
+		primary = new TCharArrayList();
 
 	}
 
-	public Collection<Edge> getEdges() {
-		return edges.values();
+	public HashMap<Character,Node> getEdges() {
+		return edges;
 	}
 
-	public LinkedList<Edge> getEdgesList() {
-		return new LinkedList<Edge>(edges.values());
-	}
-
-	public Edge getEdge(char c) {
+	public Node getEdge(char c) {
 		return edges.get(c);
 	}
 
-	public boolean addEdge(Edge e) {
-		return edges.put(e.getEdgeLabel(), e) != null;
+	public boolean addEdge(char c, Node n, boolean primary) {
+		if (primary) {
+			this.primary.add(c);
+		}
+		return edges.put(c, n) != null;
 
 	}
 
-	public boolean removeEdge(Edge e) {
+	public void setEdgePrimary(char c, boolean flag) {
+		if (flag) {
+			primary.add(c);
+		} else {
+			primary.remove(c);
+		}
+	}
 
-		return edges.remove(e.getEdgeLabel()) != null;
+	public boolean isEdgePrimary(char c) {
+		return primary.contains(c);
+	}
+
+	public boolean removeEdge(char c) {
+
+		return edges.remove(c) != null;
 	}
 
 	@Override
@@ -74,7 +88,7 @@ public class Node {
 		return Long.toString(this.id);
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
@@ -86,6 +100,10 @@ public class Node {
 		return numOccurs;
 	}
 
+	public boolean hasEdges() {
+		return edges.size() != 0;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Node) {
@@ -95,41 +113,19 @@ public class Node {
 		}
 	}
 
-	public int getLocation() {
-		return location;
-	}
-
-	public void setLocation(int location) {
-		this.location = location;
-	}
-
-	public long getBlock() {
+	public int getBlock() {
 		return block;
 	}
 
-	public void setBlock(long block) {
+	public void setBlock(int block) {
 		this.block = block;
 	}
 
-	public int getSize() {
-
-		/*
-		 * 1 bytes for end marker, then every edge has to contain its
-		 * label (one character) the block number and the position in the block
-		 * it is leading to as well as the number of occurrences that specific
-		 * suffix has
-		 */
-		return 1
-				+ edges.size()
-				* (1 + Constants.BLOCK_REFERENCE_BYTES + Constants.EDGE_REFERENCE_BYTES)
-				+ Constants.NUMOCCURS_BYTES;
+	public int getIndex() {
+		return index;
 	}
 
-	public HashSet<Integer> getPlaces() {
-		return places;
-	}
-
-	public void addPlace(Integer place) {
-		this.places.add(place);
+	public void setIndex(int index) {
+		this.index = index;
 	}
 }

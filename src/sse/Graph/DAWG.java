@@ -1,3 +1,5 @@
+package sse.Graph;
+
 /*******************************************************************************
  * Copyright (c) 2011-2013 Jochen Rill.
  * All rights reserved. This program and the accompanying materials
@@ -8,12 +10,11 @@
  * Contributors:
  *     Jochen Rill - initial API and implementation
  ******************************************************************************/
-package sse.Graph;
 
 import java.io.BufferedWriter;
-
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -41,11 +42,8 @@ public class DAWG implements Iterable<Node> {
 	 * Contains the final node.
 	 */
 	public Node bottom;
-	public long nodeCount = 0;
+	private int nodeCount = 0;
 	public Node sink;
-
-	private long length;
-	private LinkedList<Node> nodeList;
 
 	/**
 	 * Initializes and constructs the graph for a given text.
@@ -58,17 +56,28 @@ public class DAWG implements Iterable<Node> {
 	 */
 	public DAWG(String text) {
 		this.text = text;
-		this.length = text.length();
-		this.nodeList = new LinkedList<Node>();
+
 		// creates three start node the algorithm has to work with
 		this.source = new Node(nodeCount++);
-		for (int i = -1; i < text.length(); i++) {
-			source.addPlace(i);
-		}
-		nodeList.add(source);
 		sink = source;
 		update();
 
+		setNumOccurs();
+
+	}
+
+	private void setNumOccurs() {
+		// set number of occurrences by traversing the graph post-order
+		for (Node n : this) {
+			if (n.hasEdges()) {
+				for (char c : n.getEdges().keySet()) {
+					n.setNumOccurs(n.getNumOccurs()
+							+ n.getEdge(c).getNumOccurs());
+				}
+			} else {
+				n.setNumOccurs(1);
+			}
+		}
 	}
 
 	/**
@@ -99,17 +108,22 @@ public class DAWG implements Iterable<Node> {
 	private void printDot(Node root, BufferedWriter writer,
 			LinkedList<Node> visited) throws IOException {
 		if (root.getEdges() != null) {
-			for (Edge e : root.getEdges()) {
-				String string = root.getId() + "->" + e.getEnd().getId() + "\n";
+			for (char c : root.getEdges().keySet()) {
+				writer.write(root.getId() + "[label=\"" + root.getId() + " ("
+						+ root.getNumOccurs() + ")\"];\n");
+				writer.write(root.getEdge(c) + "[label=\""
+						+ root.getEdge(c).getId() + " ("
+						+ root.getEdge(c).getNumOccurs() + ")\"];\n");
+				String string = root.getId() + "->" + root.getEdge(c).getId()
+						+ "\n";
 				writer.write(string);
 
-				writer.write("[" + "label=\"" + e.getEdgeLabel() + "["
-						+ (e.isNatural() ? "*" : "") + "]" + "\"];\n");
+				writer.write("[" + "label=\"" + c + "\"];\n");
 
-				if (!visited.contains(e.getEnd())) {
-					printDot(e.getEnd(), writer, visited);
+				if (!visited.contains(root.getEdge(c))) {
+					printDot(root.getEdge(c), writer, visited);
 				}
-				visited.add(e.getEnd());
+				visited.add(root.getEdge(c));
 			}
 		}
 	}
@@ -120,85 +134,54 @@ public class DAWG implements Iterable<Node> {
 			char c = text.charAt(i);
 
 			Node newSink = new Node(nodeCount++);
-			nodeList.add(newSink);
 
-			Edge primEdge = new Edge(c, sink, newSink);
-			sink.addEdge(primEdge);
+			sink.addEdge(c, newSink, true);
 
 			// mark the natural edge. this is needed for decryption later on
-			primEdge.setNatural(true);
-
-			/*
-			 * for (Integer z : sink.getPlaces()) { if ((z + 1) < length &&
-			 * text.charAt(z + 1) == c) { newSink.addPlace(z + 1); }
-			 * 
-			 * }
-			 */
-			updatePlaces(sink, newSink, c);
+			// primEdge.setNatural(true);
 
 			Node w = sink.getSuffixLink();
 
 			while (w != null && w.getEdge(c) == null) {
-				Edge secEdge = new Edge(c, w, newSink);
-				secEdge.setPrimary(false);
-				w.addEdge(secEdge);
+				w.addEdge(c, newSink, false);
 				w = w.getSuffixLink();
 			}
 
 			Node v = null;
 			if (w != null) {
-				Edge tmpE = w.getEdge(c);
+				Node tmpE = w.getEdge(c);
 				if (tmpE != null) {
-					v = tmpE.getEnd();
+					v = tmpE;
 				}
 			}
 
 			if (w == null) {
 				newSink.setSuffixLink(source);
-			} else if (w.getEdge(c) != null && w.getEdge(c).isPrimary()) {
+			} else if (w.getEdge(c) != null && w.isEdgePrimary(c)) {
 				newSink.setSuffixLink(v);
 			} else {
 				Node newNode = new Node(nodeCount++);
 
-				nodeList.add(newNode);
 				if (v != null) {
-					for (Edge e : v.getEdges()) {
-						Edge secEdge = new Edge(e.getEdgeLabel(), newNode,
-								e.getEnd());
-						secEdge.setPrimary(false);
-						newNode.addEdge(secEdge);
+					for (char cr : v.getEdges().keySet()) {
+						newNode.addEdge(cr, v.getEdge(cr), false);
 					}
-				}
-				Edge tmpEdge = w.getEdge(c);
-				Edge primEdge2 = new Edge(tmpEdge.getEdgeLabel(), w, newNode);
-				w.removeEdge(tmpEdge);
-				w.addEdge(primEdge2);
 
-				/*
-				 * for (Integer z : w.getPlaces()) { if ((z + 1) < length &&
-				 * text.charAt(z + 1) == primEdge2.getEdgeLabel()) {
-				 * newNode.addPlace(z + 1); }
-				 * 
-				 * }
-				 */
-				updatePlaces(w, newNode, primEdge2.getEdgeLabel());
+				}
+
+				w.removeEdge(c);
+				w.addEdge(c, newNode, true);
 
 				newSink.setSuffixLink(newNode);
 				newNode.setSuffixLink(v.getSuffixLink());
 				v.setSuffixLink(newNode);
 				w = w.getSuffixLink();
 
-				while (w != null && w.getEdge(c) != null
-						&& w.getEdge(c).getEnd() == v
-						&& !w.getEdge(c).isPrimary()) {
-					Edge tEdge = w.getEdge(c);
-					Edge nEdge = new Edge(tEdge.getEdgeLabel(),
-							tEdge.getStart(), newNode);
-					nEdge.getStart().removeEdge(tEdge);
+				while (w != null && w.getEdge(c) != null && w.getEdge(c) == v
+						&& !w.isEdgePrimary(c)) {
 
-					nEdge.getStart().addEdge(nEdge);
-
-					nEdge.setPrimary(false);
+					w.removeEdge(c);
+					w.addEdge(c, newNode, false);
 					w = w.getSuffixLink();
 
 				}
@@ -209,78 +192,17 @@ public class DAWG implements Iterable<Node> {
 		}
 	}
 
-	private void updatePlaces(Node w, Node newNode, char c) {
-		for (Integer z : w.getPlaces()) {
-			if ((z + 1) < length && text.charAt(z + 1) == c) {
-				newNode.addPlace(z + 1);
-			}
-
-		}
-	}
-
-	public void storeUniquePaths(boolean paths) {
-
-		/*
-		 * It seems to be a bad idea to count every path in the DAWG because the
-		 * graph is much bigger than the CDAWG. Fortunately we have an
-		 * alternative method of updating the equivalence classes while creating
-		 * the graph
-		 */
-		if (paths) {
-			for (Node n : nodeList) {
-				if (n != sink && n != source) {
-					n.setNumOccurs((findPlace(n)));
-				}
-			}
-		} else {
-
-			for (Node n : nodeList) {
-				if (n == source) {
-					n.setNumOccurs(0);
-				} else if (n == sink) {
-					n.setNumOccurs(1);
-				} else {
-					n.setNumOccurs(n.getPlaces().size());
-				}
-			}
-		}
-	}
-
-	private int findPlace(Node n) {
-		ArrayList<Integer> places = new ArrayList<Integer>();
-		findPlace(n, places);
-
-		if (places.size() == 0) {
-			throw new IllegalStateException("No place found for Node " + n);
-		}
-
-		return places.size();
-
-	}
-
-	private void findPlace(Node n, ArrayList<Integer> places) {
-		for (Edge e : n.getEdges()) {
-
-			while (e.getEnd().getEdges().size() == 1) {
-				e = e.getEnd().getEdgesList().getFirst();
-			}
-			if (e.getEnd() == sink) {
-				places.add(1);
-			} else {
-				findPlace(e.getEnd(), places);
-			}
-
-		}
+	public Iterator<Node> getDepthFirstIterator() {
+		return new DepthFirstIterator(this);
 	}
 
 	@Override
 	public Iterator<Node> iterator() {
-		return toList().iterator();
+		return getDepthFirstIterator();
 	}
 
-	@SuppressWarnings("unchecked")
-	public LinkedList<Node> toList() {
-		return (LinkedList<Node>) nodeList.clone();
+	public int size() {
+		return nodeCount;
 	}
 
 }
