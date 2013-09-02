@@ -78,7 +78,7 @@ public class EncryptionEngine {
 				Block b = new Block(n.getNumOccurs());
 				n.setBlock(block);
 				n.setIndex(nodesInBlock);
-				for (char c : n.getEdges().keySet()) {
+				for (char c : n.getEdges()) {
 					int targetBlock = n.getEdge(c).getBlock();
 					int targetIndex = n.getEdge(c).getIndex();
 					b.addEdge(new Edge(c, targetBlock, targetIndex));
@@ -98,7 +98,7 @@ public class EncryptionEngine {
 
 		// write source node to block 0
 		Block b = new Block(0);
-		for (char c : graph.source.getEdges().keySet()) {
+		for (char c : graph.source.getEdges()) {
 			b.addEdge(new Edge(c, graph.source.getEdge(c).getBlock(),
 					graph.source.getEdge(c).getIndex()));
 		}

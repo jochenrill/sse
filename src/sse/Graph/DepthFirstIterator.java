@@ -32,7 +32,7 @@ public class DepthFirstIterator implements Iterator<Node> {
 
 	private void expand(Node n, boolean visited[]) {
 		visited[n.getId()] = true;
-		for (char c : n.getEdges().keySet()) {
+		for (char c : n.getEdges()) {
 			if (!visited[n.getEdge(c).getId()]) {
 				expand(n.getEdge(c), visited);
 			}

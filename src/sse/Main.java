@@ -94,19 +94,20 @@ public class Main {
 				double time = System.currentTimeMillis();
 				DAWG t = new DAWG(input);
 
-				Runtime r = Runtime.getRuntime();
-
-				System.gc();
-				System.out
-						.println(((r.totalMemory() - r.freeMemory()) / (1024 * 1024)));
-				System.exit(0);
-
 				if (Constants.DEBUG) {
 					System.out
 							.println("Excecution time for generating the graph: "
 									+ ((System.currentTimeMillis() - time) / 1000));
 				}
 				time = System.currentTimeMillis();
+
+				Runtime r = Runtime.getRuntime();
+
+			//	t.printToFile("graph");
+			//	System.gc();
+			//	System.out
+			//			.println(((r.totalMemory() - r.freeMemory()) / (1024 * 1024)));
+			//	System.exit(0);
 
 				Backend b;
 				if (chosenBackend.equals("amazon")) {

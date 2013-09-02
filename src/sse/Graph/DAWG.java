@@ -68,9 +68,11 @@ public class DAWG implements Iterable<Node> {
 
 	private void setNumOccurs() {
 		// set number of occurrences by traversing the graph post-order
+		long edgeCount = 0;
 		for (Node n : this) {
 			if (n.hasEdges()) {
-				for (char c : n.getEdges().keySet()) {
+				for (char c : n.getEdges()) {
+					edgeCount++;
 					n.setNumOccurs(n.getNumOccurs()
 							+ n.getEdge(c).getNumOccurs());
 				}
@@ -78,6 +80,7 @@ public class DAWG implements Iterable<Node> {
 				n.setNumOccurs(1);
 			}
 		}
+		System.out.println((double) edgeCount / (double) this.nodeCount);
 	}
 
 	/**
@@ -108,7 +111,7 @@ public class DAWG implements Iterable<Node> {
 	private void printDot(Node root, BufferedWriter writer,
 			LinkedList<Node> visited) throws IOException {
 		if (root.getEdges() != null) {
-			for (char c : root.getEdges().keySet()) {
+			for (char c : root.getEdges()) {
 				writer.write(root.getId() + "[label=\"" + root.getId() + " ("
 						+ root.getNumOccurs() + ")\"];\n");
 				writer.write(root.getEdge(c) + "[label=\""
@@ -163,7 +166,7 @@ public class DAWG implements Iterable<Node> {
 				Node newNode = new Node(nodeCount++);
 
 				if (v != null) {
-					for (char cr : v.getEdges().keySet()) {
+					for (char cr : v.getEdges()) {
 						newNode.addEdge(cr, v.getEdge(cr), false);
 					}
 

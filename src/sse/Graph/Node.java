@@ -11,10 +11,9 @@ package sse.Graph;
  *     Jochen Rill - initial API and implementation
  ******************************************************************************/
 
-import java.util.HashMap;
-
-import gnu.trove.list.array.TCharArrayList;
-import gnu.trove.map.hash.TCharObjectHashMap;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.LinkedList;
 
 /**
  * This class provides an node representation for the creation of the DAWG.
@@ -23,9 +22,11 @@ import gnu.trove.map.hash.TCharObjectHashMap;
  * 
  */
 public class Node {
-	// private TCharObjectHashMap<Node> edges;
-	private HashMap<Character, Node> edges;
-	private TCharArrayList primary;
+
+	private BitSet edgeVector;
+	private BitSet primaryVector;
+	private NodeList nodeArray;
+
 	private Node suffixLink;
 	private int id;
 	private int numOccurs = 0;
@@ -42,45 +43,59 @@ public class Node {
 
 	public Node(int id) {
 		this.id = id;
-		// edges = new TCharObjectHashMap<Node>();+
-		edges = new HashMap<Character, Node>();
-		// places = new TIntLinkedList();
 
-		primary = new TCharArrayList();
+		nodeArray = new NodeList();
+		edgeVector = new BitSet();
+		primaryVector = new BitSet();
 
 	}
 
-	public HashMap<Character,Node> getEdges() {
-		return edges;
+	public LinkedList<Character> getEdges() {
+		LinkedList<Character> edgeList = new LinkedList<Character>();
+		for (char i = 0; i <= 255; i++) {
+			if (edgeVector.get(i)) {
+				edgeList.add(i);
+			}
+		}
+		return edgeList;
+
 	}
 
 	public Node getEdge(char c) {
-		return edges.get(c);
+		if (edgeVector.get(c)) {
+			return nodeArray.get(getPosition(c) - 1);
+		} else {
+			return null;
+		}
 	}
 
-	public boolean addEdge(char c, Node n, boolean primary) {
+	public void addEdge(char c, Node n, boolean primary) {
 		if (primary) {
-			this.primary.add(c);
+			setEdgePrimary(c, true);
 		}
-		return edges.put(c, n) != null;
+
+		edgeVector.set(c);
+
+		nodeArray.add(getPosition(c) - 1, n);
 
 	}
 
 	public void setEdgePrimary(char c, boolean flag) {
-		if (flag) {
-			primary.add(c);
-		} else {
-			primary.remove(c);
-		}
+		primaryVector.set(c, flag);
 	}
 
 	public boolean isEdgePrimary(char c) {
-		return primary.contains(c);
+
+		return primaryVector.get(c);
 	}
 
-	public boolean removeEdge(char c) {
+	public void removeEdge(char c) {
 
-		return edges.remove(c) != null;
+		if (edgeVector.get(c)) {
+			nodeArray.remove(getPosition(c) - 1);
+			edgeVector.set(c, false);
+		}
+
 	}
 
 	@Override
@@ -101,7 +116,7 @@ public class Node {
 	}
 
 	public boolean hasEdges() {
-		return edges.size() != 0;
+		return !edgeVector.isEmpty();
 	}
 
 	@Override
@@ -127,5 +142,13 @@ public class Node {
 
 	public void setIndex(int index) {
 		this.index = index;
+	}
+
+	private int getPosition(char c) {
+		BitSet mask = new BitSet(c);
+		mask.set(0, c, true);
+		BitSet result = (BitSet) edgeVector.clone();
+		result.andNot(mask);
+		return result.cardinality();
 	}
 }
