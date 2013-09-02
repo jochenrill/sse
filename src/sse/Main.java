@@ -101,13 +101,15 @@ public class Main {
 				}
 				time = System.currentTimeMillis();
 
-				Runtime r = Runtime.getRuntime();
+				// Runtime r = Runtime.getRuntime();
 
-			//	t.printToFile("graph");
-			//	System.gc();
-			//	System.out
-			//			.println(((r.totalMemory() - r.freeMemory()) / (1024 * 1024)));
-			//	System.exit(0);
+				// t.printToFile("graph");
+				// System.gc();
+				// System.gc();
+				// System.out
+				// .println(((r.totalMemory() - r.freeMemory()) / (1024 *
+				// 1024)));
+				// System.exit(0);
 
 				Backend b;
 				if (chosenBackend.equals("amazon")) {

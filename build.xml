@@ -3,13 +3,12 @@
               Any modifications will be overwritten.
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="sse">
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="sse">
     <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../../../usr/lib64/eclipse"/>
+    <property name="ECLIPSE_HOME" value="../../Downloads/eclipse"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
     <path id="sse.classpath">
         <pathelement location="build"/>
         <pathelement location="lib/commons-cli-1.2.jar"/>
@@ -19,17 +18,25 @@
         <pathelement location="lib/commons-logging-1.1.1.jar"/>
         <pathelement location="lib/java-xmlbuilder-0.4.jar"/>
         <pathelement location="lib/ini4j-0.5.2.jar"/>
+        <pathelement location="lib/swt.jar"/>
+        <pathelement location="lib/org.eclipse.jface_3.8.102.v20130123-162658.jar"/>
+        <pathelement location="lib/org.eclipse.jface.databinding_1.6.0.v20120912-132807.jar"/>
+        <pathelement location="lib/org.eclipse.jface.text_3.8.2.v20121126-164145.jar"/>
+        <pathelement location="lib/org.eclipse.core.runtime_3.8.0.v20120912-155025.jar"/>
+        <pathelement location="lib/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar"/>
+        <pathelement location="lib/org.eclipse.core.commands_3.6.2.v20130123-162658.jar"/>
         <pathelement location="lib/commons-codec-1.4.jar"/>
         <pathelement location="lib/httpclient-4.1.2.jar"/>
         <pathelement location="lib/httpcore-4.1.3.jar"/>
         <pathelement location="lib/sardine.jar"/>
-        <pathelement location="lib/slf4j-api-1.6.2.jar.jar"/>
+        <pathelement location="lib/slf4j-api-1.6.2.jar"/>
         <pathelement location="lib/commons-io-2.1.jar"/>
     </path>
     <target name="init">
         <mkdir dir="build"/>
         <copy includeemptydirs="false" todir="build">
             <fileset dir="src">
+                <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
@@ -42,7 +49,7 @@
     <target name="build-subprojects"/>
     <target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac includeantruntime="false" debug="true" debuglevel="${debuglevel}" destdir="build" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="build" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
             <classpath refid="sse.classpath"/>
         </javac>
@@ -61,9 +68,16 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="Main">
+    <target name="DAWG Search">
         <java classname="sse.Main" failonerror="true" fork="yes">
-            <arg line="-search -key key -i default.vc -text poo"/>
+            <arg line="-search a -i output/block -password abc -iv output/iv -v"/>
+            <classpath refid="sse.classpath"/>
+        </java>
+    </target>
+    <target name="DAWG Create">
+        <java classname="sse.Main" failonerror="true" fork="yes">
+            <jvmarg line="-Xss500m -Xms2500m -XX:+UseCompressedOops"/>
+            <arg line="-password abc -create -i samples/bible -o output/block -iv output/iv -v"/>
             <classpath refid="sse.classpath"/>
         </java>
     </target>

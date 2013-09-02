@@ -11,7 +11,6 @@ package sse.Graph;
  *     Jochen Rill - initial API and implementation
  ******************************************************************************/
 
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
 
