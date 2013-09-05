@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import sse.IOHandler.BlockInputStream;
+import sse.IOHandler.BlockOutputStream;
 import sse.IOHandler.SecurityEngine;
 import sse.IOHandler.OutputFormat.Block;
 
@@ -92,20 +94,23 @@ public class FileSystemBackend implements Backend {
 	public Block openBlock(int blockId, int index) {
 
 		try {
-			ObjectInputStream os = new ObjectInputStream(new GZIPInputStream(
-					secEngine.decrypt(new FileInputStream(new File(fileName
-							+ blockId)))));
-			Object o = os.readObject();
+			BlockInputStream os = new BlockInputStream(new ObjectInputStream(
+					new GZIPInputStream(secEngine.decrypt(new FileInputStream(
+							new File(fileName + blockId))))));
+			// Object o = os.readObject();
+			// os.close();
+			// if (o instanceof Block[]) {
+			// Block[] b = (Block[]) o;
+			// return b[index];
+			// }
+			Block[] result = os.readBlocks();
 			os.close();
-			if (o instanceof Block[]) {
-				Block[] b = (Block[]) o;
-				return b[index];
-			}
+			return result[index];
+
 		} catch (IOException e) {
-			System.out.println("Error while reading file " + fileName + blockId);
+			System.out
+					.println("Error while reading file " + fileName + blockId);
 			System.out.println(e.getMessage());
-		} catch (ClassNotFoundException e) {
-			System.out.println("Class not found: " + e.getMessage());
 		}
 		return null;
 
@@ -130,13 +135,14 @@ public class FileSystemBackend implements Backend {
 	public void writeBlockArray(ArrayList<Block> b, int blockId) {
 		try {
 
-			ObjectOutputStream os = new ObjectOutputStream(
-					new GZIPOutputStream(
+			BlockOutputStream os = new BlockOutputStream(
+					new ObjectOutputStream(new GZIPOutputStream(
 							secEngine.encrypt(new FileOutputStream(new File(
-									fileName + blockId)))));
+									fileName + blockId))))));
 
 			// convert ArrayList into Array to reduce overhead
-			os.writeObject(b.toArray(new Block[0]));
+
+			os.writeBlocks(b.toArray(new Block[0]));
 			os.close();
 		} catch (IOException e) {
 			System.out.println("Could not create file " + fileName + blockId);

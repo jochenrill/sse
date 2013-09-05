@@ -15,7 +15,7 @@ import java.util.BitSet;
 import java.util.LinkedList;
 
 /**
- * This class provides an node representation for the creation of the DAWG.
+ * This class provides a node representation for the creation of the DAWG.
  * 
  * @author Jochen Rill
  * 

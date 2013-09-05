@@ -42,12 +42,18 @@ public class EncryptionEngine {
 
 	public void writeBlocks(DAWG graph) throws IOException {
 
-		// generate only 100 blocks max
-		int threshhold = (graph.size() / 100) + 1;
+		// use heuristic to estimate number of blocks
+		// estimated overhead of 15 and 25KB / block target size
+		int blockNumber = graph.text.length() / 1000 * 15 / 25;
+
+		if (blockNumber < 100) {
+			blockNumber = 100;
+		}
+
+		int threshhold = (graph.size() / blockNumber) + 1;
 
 		LinkedList<Integer> blockNumbers = new LinkedList<Integer>();
 
-		int blockNumber = (100 < graph.size()) ? 100 : graph.size();
 		for (int i = 1; i <= blockNumber; i++) {
 			blockNumbers.add(i);
 		}
