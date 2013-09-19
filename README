@@ -1,13 +1,13 @@
-This is an implementation of the SEDAWG-scheme, presented at SECRYPT 2013. The code is fully functional when using the File-system or Amazon-backend.
-However, due to the rough and unoptimized design, it is only suited for relatively small text sizes (i.e. a few MB).
-This is a limitation which must be improved upon, but remember that 1 MB of ASCII consists of 1 million characters!
-Because the input is assumed to be ASCII, please make sure it really is.
+This is an implementation of the SEDAWG-scheme, presented at SECRYPT 2013. The code is fully functional when using the File-System-Backend. The Amazon-Backend is broken at the moment and will be fixed later.
 
-The config file "sse.config" allows for easy modification of different parameters.
+This is a new implementation using a more optimized algorithm for graph creation resulting in less memory usage.
+Encrypted files generated with the old version can not be used with the new version any longer.
+
+Per MB of input text roughly 300MB of RAM will be needed. The encryption size is roughly 15 MB per MB of input.
 
 Usage:
 
-./prepare text : Will prepare a given text for usage with the program. During preparation all occurences of "$" and "#" will be removed and the text will be concluded with a "$"
+./prepare text : Will prepare a given text for usage with the program. During preparation all occurences of "$" will be removed and the text will be concluded with a "$".
 ./create text : Will encrypt a given text according to the SSE protocol. Default blocksize multiplier is 5, ind-cpa security is on. Edit "create" to change the values.
 ./search word: Searches files created with "create" for a given word and prints out the number of times it is found.
 
